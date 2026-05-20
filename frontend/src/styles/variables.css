@@ -1,0 +1,36 @@
+:root {
+  /* Colors */
+  --primary-gold: #D4AF37;
+  --secondary-gold: #FFD700;
+  --dark-slate: #1A1A1A;
+  --light-gray: #F5F5F5;
+  --white: #FFFFFF;
+  --text-main: #333333;
+  --text-muted: #666666;
+  
+  /* Gradients */
+  --gold-gradient: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
+  --dark-gradient: linear-gradient(135deg, #1A1A1A 0%, #333333 100%);
+
+  /* Shadows */
+  --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.15);
+  --shadow-lg: 0 10px 25px rgba(0,0,0,0.2);
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  /* Transitions */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+}

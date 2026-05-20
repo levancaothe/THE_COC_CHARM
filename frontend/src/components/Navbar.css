@@ -1,0 +1,136 @@
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  padding: 0.8rem 0;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+}
+
+.nav-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.navbar-logo {
+  height: 50px;
+  width: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--accent);
+  transition: transform 0.3s ease;
+}
+
+.logo-container:hover .navbar-logo {
+  transform: rotate(10deg) scale(1.1);
+}
+
+.logo-text {
+  font-family: var(--heading);
+  font-weight: 800;
+  font-size: 1.4rem;
+  color: var(--text-h);
+  letter-spacing: -0.5px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 2.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-links a {
+  font-weight: 600;
+  color: var(--text);
+  text-decoration: none;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--accent);
+  transition: width 0.3s ease;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+  color: var(--accent) !important;
+  font-weight: 700;
+}
+
+.nav-links a:hover::after,
+.nav-links a.active::after {
+  width: 100%;
+}
+
+@media (max-width: 992px) {
+  .nav-links {
+    display: none;
+  }
+  .logo-text {
+    display: none;
+  }
+}
+
+/* Cart Icon Button Styles */
+.cart-icon-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  color: var(--text-h);
+  transition: all 0.3s ease;
+  border-radius: 50%;
+}
+
+.cart-icon-btn:hover {
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.cart-svg {
+  width: 28px;
+  height: 28px;
+}
+
+.cart-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: var(--accent);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  box-shadow: 0 2px 5px rgba(255, 158, 158, 0.4);
+  border: 2px solid var(--bg);
+}

@@ -11,9 +11,21 @@ import { CartProvider } from './context/CartContext';
 
 function App() {
   return (
-   <>
-   
-   </>
+    <CartProvider>
+      <Router>
+        <Layout>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/charms" element={<CharmListPage />} />
+            <Route path="/designer" element={<DesignerPage />} />
+            <Route path="/my-designs" element={<MyDesignsPage />} />
+            <Route path="/orders" element={<OrdersPage />} />
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/about" element={<div className="container" style={{ padding: '100px 0', textAlign: 'center' }}>Về chúng tôi (Đang cập nhật)</div>} />
+          </Routes>
+        </Layout>
+      </Router>
+    </CartProvider>
   );
 }
 
