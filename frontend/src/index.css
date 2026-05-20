@@ -1,0 +1,117 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+
+:root {
+  --text: #4a3f35;
+  --text-h: #2d241e;
+  --bg: #fffdf5;
+  --border: #e8e4d9;
+  --code-bg: #f4f3ec;
+  --accent: #ff9e9e;
+  --accent-bg: rgba(255, 158, 158, 0.1);
+  --accent-border: rgba(255, 158, 158, 0.5);
+  --secondary: #8ba888;
+  --primary-gold: #d4af37;
+  --social-bg: rgba(244, 243, 236, 0.5);
+  --shadow: rgba(74, 63, 53, 0.1) 0 10px 15px -3px, rgba(74, 63, 53, 0.05) 0 4px 6px -2px;
+  --glass-bg: rgba(255, 253, 245, 0.8);
+
+  --sans: 'Outfit', system-ui, -apple-system, sans-serif;
+  --heading: 'Outfit', sans-serif;
+  --serif: 'Playfair Display', serif;
+  --mono: ui-monospace, Consolas, monospace;
+
+  font: 18px/145% var(--sans);
+  letter-spacing: 0.18px;
+  color-scheme: light;
+  color: var(--text);
+  background: var(--bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  @media (max-width: 1024px) {
+    font-size: 16px;
+  }
+}
+
+/* Force light mode for this aesthetic */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #4a3f35;
+    --text-h: #2d241e;
+    --bg: #fffdf5;
+    --border: #e8e4d9;
+    --accent: #ff9e9e;
+  }
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg);
+}
+
+#root {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  text-align: center;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  background-color: var(--bg);
+}
+
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--heading);
+  font-weight: 700;
+  color: var(--text-h);
+}
+
+h1 {
+  font-size: 4rem;
+  letter-spacing: -0.02em;
+  margin: 2rem 0;
+  font-family: var(--serif);
+  @media (max-width: 1024px) {
+    font-size: 2.5rem;
+  }
+}
+
+h2 {
+  font-size: 2rem;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+  @media (max-width: 1024px) {
+    font-size: 1.5rem;
+  }
+}
+
+.btn-premium {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 50px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(255, 158, 158, 0.3);
+}
+
+.btn-premium:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 158, 158, 0.4);
+  background: #ff8a8a;
+}
+
