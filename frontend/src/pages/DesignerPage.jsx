@@ -40,13 +40,13 @@ const DesignerPage = () => {
   }, []);
 
   const fillWithDefaultCharms = (cap, mat) => {
-    let defaultCharm = availableCharms.find(c => 
-      c.name.toLowerCase().includes(mat.toLowerCase()) && 
+    let defaultCharm = availableCharms.find(c =>
+      c.name.toLowerCase().includes(mat.toLowerCase()) &&
       (c.name.toLowerCase().includes('cơ bản') || c.name.toLowerCase().includes('mặc định'))
     );
-    
+
     if (!defaultCharm) {
-      defaultCharm = availableCharms.find(c => 
+      defaultCharm = availableCharms.find(c =>
         c.name.toLowerCase().includes('cơ bản') || c.name.toLowerCase().includes('mặc định')
       );
     }
@@ -85,12 +85,12 @@ const DesignerPage = () => {
         instanceId: Math.random().toString(36).substr(2, 9),
       };
 
-      const defaultCharmIndex = prevCharms.findIndex(c => 
-        c.isDefault || 
-        c.name.toLowerCase().includes('cơ bản') || 
+      const defaultCharmIndex = prevCharms.findIndex(c =>
+        c.isDefault ||
+        c.name.toLowerCase().includes('cơ bản') ||
         c.name.toLowerCase().includes('mặc định')
       );
-      
+
       if (defaultCharmIndex !== -1) {
         const newCharms = [...prevCharms];
         newCharms[defaultCharmIndex] = newCharmInstance;
@@ -118,15 +118,15 @@ const DesignerPage = () => {
   const removeCharm = (index) => {
     setSelectedCharms((prevCharms) => {
       const newCharms = [...prevCharms];
-      
+
       // Hoàn trả lại hạt mặc định khi xóa hạt sự kiện
-      let defaultCharm = availableCharms.find(c => 
-        c.name.toLowerCase().includes(material.toLowerCase()) && 
+      let defaultCharm = availableCharms.find(c =>
+        c.name.toLowerCase().includes(material.toLowerCase()) &&
         (c.name.toLowerCase().includes('cơ bản') || c.name.toLowerCase().includes('mặc định'))
       );
 
       if (!defaultCharm) {
-        defaultCharm = availableCharms.find(c => 
+        defaultCharm = availableCharms.find(c =>
           c.name.toLowerCase().includes('cơ bản') || c.name.toLowerCase().includes('mặc định')
         );
       }
@@ -140,7 +140,7 @@ const DesignerPage = () => {
       } else {
         newCharms.splice(index, 1);
       }
-      
+
       return newCharms;
     });
   };
@@ -248,9 +248,9 @@ const DesignerPage = () => {
           </p>
           <div style={{ marginBottom: '20px' }}>
             <label style={{ display: 'block', marginBottom: '10px', fontWeight: '600' }}>Chu vi cổ tay (cm) - Tùy chọn:</label>
-            <input 
-              type="number" 
-              min="1" 
+            <input
+              type="number"
+              min="1"
               step="0.1"
               value={wristSize}
               onChange={handleWristSizeChange}
@@ -264,17 +264,17 @@ const DesignerPage = () => {
             )}
 
             <label style={{ display: 'block', marginBottom: '10px', fontWeight: '600', marginTop: !wristSize ? '20px' : '0' }}>Số lượng hạt (Capacity):</label>
-            <input 
-              type="number" 
-              min="1" 
+            <input
+              type="number"
+              min="1"
               max="100"
               value={tempCapacity}
               onChange={(e) => setTempCapacity(Number(e.target.value))}
               style={{ padding: '12px', width: '150px', borderRadius: 'var(--radius-md)', border: '1px solid var(--primary-gold)', textAlign: 'center', fontSize: '1.2rem', marginBottom: '20px' }}
             />
-            
+
             <label style={{ display: 'block', marginBottom: '10px', fontWeight: '600' }}>Chất liệu dây:</label>
-            <select 
+            <select
               value={material}
               onChange={(e) => setMaterial(e.target.value)}
               style={{ padding: '12px', width: '200px', borderRadius: 'var(--radius-md)', border: '1px solid var(--primary-gold)', fontSize: '1rem' }}
@@ -324,31 +324,28 @@ const DesignerPage = () => {
           </div>
         </header>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '40px', alignItems: 'start' }}>
-          <CharmSidebar charms={availableCharms} categories={categories} onCharmClick={addCharm} />
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
-            <BraceletCanvas
-              ref={designRef}
-              selectedCharms={selectedCharms}
-              onAddCharm={addCharm}
-              moveCharmInSequence={moveCharmInSequence}
-              onRemoveCharm={removeCharm}
-              onReplaceCharm={replaceCharm}
-            />
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '30px', alignItems: 'stretch' }}>
-              <DesignerToolbar
-                onSave={handleSave}
-                onAddToCart={handleAddToCart}
-                onDownload={handleDownload}
-                onClear={() => fillWithDefaultCharms(capacity, material)} 
-                disabled={isSaving}
-              />
-              <PriceSummary totalPrice={totalPrice} count={selectedCharms.length} />
-            </div>
-          </div>
+        <div style={{ position: 'sticky', top: 0, zIndex: 10, background: 'var(--bg)', paddingBottom: '20px' }}>
+          <BraceletCanvas
+            ref={designRef}
+            selectedCharms={selectedCharms}
+            onAddCharm={addCharm}
+            moveCharmInSequence={moveCharmInSequence}
+            onRemoveCharm={removeCharm}
+            onReplaceCharm={replaceCharm}
+          />
         </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '30px', alignItems: 'stretch', marginBottom: '30px' }}>
+          <DesignerToolbar
+            onSave={handleSave}
+            onAddToCart={handleAddToCart}
+            onDownload={handleDownload}
+            onClear={() => fillWithDefaultCharms(capacity, material)}
+            disabled={isSaving}
+          />
+          <PriceSummary totalPrice={totalPrice} count={selectedCharms.length} />
+        </div>
+        <CharmSidebar charms={availableCharms} categories={categories} onCharmClick={addCharm} />
       </div>
     </DndProvider>
   );

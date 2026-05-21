@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 const CategoryForm = ({ initialData, onSubmit, onCancel }) => {
-  const [formData, setFormData] = useState({ name: '', description: '' });
+  const [formData, setFormData] = useState({ name: '' });
 
   useEffect(() => {
     if (initialData) setFormData(initialData);
@@ -25,14 +25,7 @@ const CategoryForm = ({ initialData, onSubmit, onCancel }) => {
           style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ccc' }}
         />
       </div>
-      <div style={{ margin: '15px 0' }}>
-        <textarea 
-          placeholder="Description" 
-          value={formData.description}
-          onChange={(e) => setFormData({...formData, description: e.target.value})}
-          style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ccc', minHeight: '80px' }}
-        />
-      </div>
+
       <div style={{ display: 'flex', gap: '10px' }}>
         <button type="submit" className="btn-premium">Save</button>
         <button type="button" onClick={onCancel} style={{ padding: '10px 20px' }}>Cancel</button>

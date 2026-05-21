@@ -7,7 +7,6 @@ const CategoryTable = ({ categories, onEdit, onDelete }) => {
         <thead>
           <tr style={{ borderBottom: '2px solid var(--primary-gold)' }}>
             <th style={{ textAlign: 'left', padding: '12px' }}>Name</th>
-            <th style={{ textAlign: 'left', padding: '12px' }}>Description</th>
             <th style={{ textAlign: 'right', padding: '12px' }}>Actions</th>
           </tr>
         </thead>
@@ -15,7 +14,6 @@ const CategoryTable = ({ categories, onEdit, onDelete }) => {
           {categories.map(cat => (
             <tr key={cat._id} style={{ borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
               <td style={{ padding: '12px' }}>{cat.name}</td>
-              <td style={{ padding: '12px' }}>{cat.description}</td>
               <td style={{ padding: '12px', textAlign: 'right' }}>
                 <button onClick={() => onEdit(cat)} style={{ color: 'var(--primary-gold)', marginRight: '10px' }}>Edit</button>
                 <button onClick={() => onDelete(cat._id)} style={{ color: '#ff4757' }}>Delete</button>

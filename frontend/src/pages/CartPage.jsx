@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import api from '../services/api';
@@ -13,22 +13,30 @@ const CartPage = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Debug logging
+  useEffect(() => {
+    console.log('CartPage mounted, cartItems:', cartItems);
+  }, [cartItems]);
+
   const handleCheckout = async (e) => {
     e.preventDefault();
     
     const selectedItems = cartItems.filter(item => item.selected);
     
     if (selectedItems.length === 0) {
-      return alert('Vui lòng chọn ít nhất một sản phẩm để thanh toán!');
+      alert('Vui lòng chọn ít nhất một sản phẩm để thanh toán!');
+      return;
     }
 
-    if (!customerInfo.name || !customerInfo.phone || !customerInfo.address) {
-      return alert('Vui lòng điền đầy đủ thông tin giao hàng!');
+    if (!customerInfo.name.trim() || !customerInfo.phone.trim() || !customerInfo.address.trim()) {
+      alert('Vui lòng điền đầy đủ thông tin giao hàng!');
+      return;
     }
 
     const phoneRegex = /^0[0-9]{9}$/;
     if (!phoneRegex.test(customerInfo.phone)) {
-      return alert('Vui lòng nhập số điện thoại Việt Nam hợp lệ (VD: 0912345678)!');
+      alert('Vui lòng nhập số điện thoại Việt Nam hợp lệ (VD: 0912345678)!');
+      return;
     }
 
     setIsSubmitting(true);
@@ -47,12 +55,18 @@ const CartPage = () => {
       await api.post('/orders', orderData);
       alert('Đặt hàng thành công!');
       
-      // Clear only selected items or all? Usually clear only selected.
-      // But for simplicity, I'll clear all if that's the existing logic, 
-      // or filter them out.
+      // Remove selected items from cart
       selectedItems.forEach(item => removeFromCart(item._id, item.type));
+      
+      // Reset form
+      setCustomerInfo({
+        name: '',
+        phone: '',
+        address: ''
+      });
     } catch (error) {
-      alert('Lỗi khi đặt hàng: ' + error.message);
+      console.error('Lỗi khi đặt hàng:', error);
+      alert('Lỗi khi đặt hàng: ' + (error.response?.data?.message || error.message));
     } finally {
       setIsSubmitting(false);
     }
@@ -72,9 +86,22 @@ const CartPage = () => {
     );
   }
 
+  // Debug rendering
+  console.log('Rendering cart with items:', cartItems.length);
+
   return (
-    <div className="cart-page container fade-in" style={{ padding: '60px 20px' }}>
-      <h1 className="section-title" style={{ marginBottom: '40px' }}>Giỏ hàng</h1>
+    <div className="cart-page container fade-in" style={{ padding: '60px 20px', minHeight: '100vh', backgroundColor: '#fff' }}>
+      <h1 className="section-title" style={{ marginBottom: '40px', color: '#000' }}>Giỏ hàng ({cartItems.length} items)</h1>
+      
+      {/* Debug Panel */}
+      <div style={{ background: '#f0f0f0', padding: '15px', borderRadius: '8px', marginBottom: '20px', fontSize: '12px', display: process.env.NODE_ENV === 'development' ? 'block' : 'none' }}>
+        <strong>Debug Info:</strong>
+        <pre style={{ margin: '10px 0 0 0' }}>
+          Items: {cartItems.length}
+          Total Price: ${totalPrice.toFixed(2)}
+          localStorage: {typeof localStorage !== 'undefined' ? 'available' : 'unavailable'}
+        </pre>
+      </div>
       
       <div className="cart-content">
         <div className="cart-left">
@@ -149,6 +176,14 @@ const CartPage = () => {
                 required
                 rows="3"
               />
+              <button 
+                type="submit"
+                className="btn-premium checkout-btn" 
+                disabled={isSubmitting}
+                style={{ marginTop: '10px' }}
+              >
+                {isSubmitting ? 'Đang xử lý...' : 'Đặt hàng ngay'}
+              </button>
             </form>
           </div>
         </div>
@@ -167,13 +202,6 @@ const CartPage = () => {
             <span>Tổng cộng</span>
             <span>${totalPrice.toFixed(2)}</span>
           </div>
-          <button 
-            className="btn-premium checkout-btn" 
-            onClick={handleCheckout}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Đang xử lý...' : 'Đặt hàng ngay'}
-          </button>
           <button className="btn-clear" onClick={clearCart}>
             Xóa toàn bộ giỏ hàng
           </button>

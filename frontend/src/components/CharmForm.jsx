@@ -6,7 +6,6 @@ const CharmForm = ({ initialData, categories, onSubmit, onCancel }) => {
     image: '',
     price: 0,
     stock: 0,
-    description: '',
     category: ''
   });
 
@@ -80,14 +79,7 @@ const CharmForm = ({ initialData, categories, onSubmit, onCancel }) => {
         />
       </div>
 
-      <div style={{ margin: '15px 0' }}>
-        <textarea 
-          placeholder="Description" 
-          value={formData.description}
-          onChange={(e) => setFormData({...formData, description: e.target.value})}
-          style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ccc', minHeight: '80px' }}
-        />
-      </div>
+
 
       <div style={{ display: 'flex', gap: '10px' }}>
         <button type="submit" className="btn-premium">Save</button>

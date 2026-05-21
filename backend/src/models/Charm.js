@@ -23,10 +23,6 @@ const charmSchema = new mongoose.Schema({
         min: [0, 'Stock cannot be negative'],
         default: 0
     },
-    description: {
-        type: String,
-        maxlength: [1000, 'Description can not be more than 1000 characters']
-    },
     category: {
         type: mongoose.Schema.ObjectId,
         ref: 'Category',

@@ -1,8 +1,16 @@
 const Category = require('../models/Category');
+const Charm = require('../models/Charm');
 
 const getCategories = async (req, res, next) => {
     try {
-        const categories = await Category.find();
+        const categories = await Category.find().lean();
+        
+        // Fetch up to 6 charm images for each category
+        for (let cat of categories) {
+            const charms = await Charm.find({ category: cat._id }).limit(6).select('image').lean();
+            cat.thumbnails = charms.map(c => c.image);
+        }
+
         res.status(200).json({
             success: true,
             count: categories.length,

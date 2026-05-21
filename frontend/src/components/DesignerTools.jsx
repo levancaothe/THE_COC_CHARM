@@ -3,12 +3,12 @@ import React from 'react';
 export const PriceSummary = ({ totalPrice, count }) => {
   return (
     <div className="price-summary glass" style={{ padding: '30px', borderRadius: '24px', textAlign: 'right', minWidth: '250px' }}>
-      <p style={{ color: 'var(--text)', opacity: 0.7, marginBottom: '10px', fontSize: '1.1rem', fontWeight: 500 }}>
-        Số lượng: <span style={{ color: 'var(--text-h)', fontWeight: '700' }}>{count} hạt</span>
-      </p>
-      <h2 style={{ color: 'var(--text-h)', fontFamily: 'var(--heading)', margin: 0 }}>
-        Tổng cộng: <span style={{ color: 'var(--accent)', fontSize: '2.5rem', display: 'block', marginTop: '5px' }}>${totalPrice.toFixed(2)}</span>
-      </h2>
+        <p style={{ color: 'var(--text)', opacity: 0.7, marginBottom: '10px', fontSize: '1.1rem', fontWeight: 500 }}>
+          Số lượng: <span style={{ color: 'var(--text-h)', fontWeight: '700' }}>{count} hạt</span>
+        </p>
+        <h2 style={{ color: 'var(--text-h)', fontFamily: 'var(--heading)', margin: 0 }}>
+          Tổng cộng: <span style={{ color: 'var(--accent)', fontSize: '2.5rem', display: 'block', marginTop: '5px' }}>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalPrice)}</span>
+        </h2>
     </div>
   );
 };

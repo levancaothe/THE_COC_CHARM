@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useDrag } from 'react-dnd';
+import CategoryCard from './CategoryCard';
 
 const DraggableCharm = ({ charm, onClick }) => {
   const [{ isDragging }, drag] = useDrag(() => ({
@@ -11,73 +12,83 @@ const DraggableCharm = ({ charm, onClick }) => {
   }));
 
   return (
-    <div 
+    <div
       ref={drag}
       className="draggable-charm glass"
       onClick={() => onClick(charm)}
-      style={{ 
-        padding: '10px', 
-        borderRadius: 'var(--radius-md)', 
+      style={{
+        padding: '10px',
+        borderRadius: 'var(--radius-md)',
         textAlign: 'center',
         opacity: isDragging ? 0.5 : 1,
-        cursor: 'pointer', // Đổi sang pointer để báo hiệu có thể click
+        cursor: 'pointer',
         transition: 'transform 0.2s ease',
-        border: '1px solid transparent'
+        border: '1px solid transparent',
+        width: '100px'
       }}
       onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--primary-gold)'}
       onMouseLeave={(e) => e.currentTarget.style.borderColor = 'transparent'}
     >
-      <img src={`http://localhost:5000/api/proxy/image?url=${encodeURIComponent(charm.image)}`} alt={charm.name} crossOrigin="anonymous" style={{ width: '50px', height: '50px', objectFit: 'contain' }} />
-      <p style={{ fontSize: '0.75rem', marginTop: '5px', fontWeight: '500' }}>{charm.name}</p>
-      <p style={{ fontSize: '0.7rem', color: 'var(--primary-gold)', fontWeight: '700' }}>${charm.price}</p>
+      <img src={`http://localhost:5000/api/proxy/image?url=${encodeURIComponent(charm.image)}`} alt={charm.name} crossOrigin="anonymous" style={{ width: '60px', height: '60px', objectFit: 'contain', margin: '0 auto' }} />
+      <p style={{ fontSize: '0.8rem', color: 'var(--primary-gold)', fontWeight: '700', marginTop: '10px' }}>{charm.price.toLocaleString()}đ</p>
     </div>
   );
 };
 
 const CharmSidebar = ({ charms, categories = [], onCharmClick }) => {
-  const [selectedEvent, setSelectedEvent] = useState('');
+  const [selectedEvent, setSelectedEvent] = useState(null);
 
-  const filteredCharms = selectedEvent 
-    ? charms.filter(c => c.category && (c.category._id === selectedEvent || c.category === selectedEvent))
-    : charms;
+  const filteredCharms = selectedEvent
+    ? charms.filter(c => c.category && (c.category._id === selectedEvent._id || c.category === selectedEvent._id))
+    : [];
 
   return (
-    <aside className="charm-sidebar glass" style={{ padding: '20px', height: 'fit-content', borderRadius: 'var(--radius-lg)', position: 'sticky', top: '100px' }}>
-      <h3 style={{ marginBottom: '15px', fontSize: '1.2rem' }}>Thư viện Charm</h3>
-      <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '15px' }}>Click hoặc kéo để thêm vào vòng</p>
-      
-      {categories.length > 0 && (
-        <select 
-          className="glass"
-          style={{ width: '100%', marginBottom: '20px', padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', outline: 'none' }}
-          value={selectedEvent}
-          onChange={(e) => setSelectedEvent(e.target.value)}
-        >
-          <option value="">Tất cả chủ đề</option>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '30px', width: '100%' }}>
+      {/* Bước 3: Chọn Bộ Charm */}
+      <div>
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+          gap: '20px',
+          paddingBottom: '10px'
+        }}>
           {categories.map(cat => (
-            <option key={cat._id} value={cat._id}>{cat.name}</option>
+            <CategoryCard
+              key={cat._id}
+              category={cat}
+              isSelected={selectedEvent?._id === cat._id}
+              onClick={setSelectedEvent}
+            />
           ))}
-        </select>
-      )}
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '12px', 
-        maxHeight: '600px', 
-        overflowY: 'auto',
-        paddingRight: '5px'
-      }}>
-        {filteredCharms.map(charm => (
-          <DraggableCharm key={charm._id} charm={charm} onClick={onCharmClick} />
-        ))}
-        {filteredCharms.length === 0 && (
-          <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', gridColumn: '1 / -1', textAlign: 'center', marginTop: '20px' }}>
-            Không có hạt charm nào thuộc chủ đề này.
-          </p>
-        )}
+        </div>
       </div>
-    </aside>
+
+      {/* Bước 4: Kéo Thả Charm */}
+      {selectedEvent && (
+        <div className="fade-in">
+          <h3 style={{ marginBottom: '15px', fontSize: '1.5rem', borderLeft: '4px solid var(--primary-gold)', paddingLeft: '10px' }}>Kéo Thả Charm</h3>
+          <div style={{
+            display: 'flex',
+            flexWrap: 'nowrap',
+            overflowX: 'auto',
+            overflowY: 'hidden',
+            gap: '15px',
+            padding: '10px 0',
+            marginTop: '20px'
+          }}>
+            {filteredCharms.map(charm => (
+              <DraggableCharm key={charm._id} charm={charm} onClick={onCharmClick} />
+            ))}
+            {filteredCharms.length === 0 && (
+              <p style={{ fontSize: '1rem', color: 'var(--text-muted)' }}>
+                Không có hạt charm nào thuộc chủ đề này.
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 

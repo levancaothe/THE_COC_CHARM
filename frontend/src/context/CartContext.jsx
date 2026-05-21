@@ -6,11 +6,17 @@ export const useCart = () => useContext(CartContext);
 
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState(() => {
-    const localData = localStorage.getItem('charmify_cart');
-    if (!localData) return [];
-    const items = JSON.parse(localData);
-    // Ensure all items have the selected property
-    return items.map(item => ({ ...item, selected: item.selected ?? true }));
+    try {
+      const localData = localStorage.getItem('charmify_cart');
+      if (!localData) return [];
+      const items = JSON.parse(localData);
+      // Ensure all items have the selected property
+      return items.map(item => ({ ...item, selected: item.selected ?? true }));
+    } catch (error) {
+      console.error('Error parsing cart from localStorage:', error);
+      localStorage.removeItem('charmify_cart');
+      return [];
+    }
   });
 
   useEffect(() => {
