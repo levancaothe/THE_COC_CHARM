@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { jwtAuth, requireRole } = require('../middleware/authMiddleware');
-const { getStats, getOrders } = require('../controllers/adminController');
+const { getStats, getOrders, updateOrderStatus } = require('../controllers/adminController');
 const { login } = require('../controllers/adminAuthController');
 const {
   getCharms,
@@ -20,6 +20,7 @@ router.post('/login', login);
 // protect admin APIs with JWT and require admin role
 router.get('/stats', jwtAuth, requireRole('admin', 'manager'), getStats);
 router.get('/orders', jwtAuth, requireRole('admin', 'manager'), getOrders);
+router.put('/orders/:id/status', jwtAuth, requireRole('admin', 'manager'), updateOrderStatus);
 
 // Charms management
 router.get('/charms', jwtAuth, requireRole('admin', 'manager'), getCharms);

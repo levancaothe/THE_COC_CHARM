@@ -43,6 +43,24 @@ export const CartProvider = ({ children }) => {
     });
   };
 
+  const updateCartItem = (item, type = 'charm') => {
+    setCartItems((prevItems) => {
+      const existingItemIndex = prevItems.findIndex(
+        (i) => i._id === item._id && i.type === type
+      );
+
+      if (existingItemIndex > -1) {
+        return prevItems.map((currentItem) =>
+          currentItem._id === item._id && currentItem.type === type
+            ? { ...currentItem, ...item, type, selected: currentItem.selected ?? true }
+            : currentItem
+        );
+      }
+
+      return [{ ...item, type, quantity: 1, selected: true }, ...prevItems];
+    });
+  };
+
   const toggleSelection = (id, type) => {
     setCartItems((prevItems) =>
       prevItems.map((item) =>
@@ -80,6 +98,7 @@ export const CartProvider = ({ children }) => {
       value={{
         cartItems,
         addToCart,
+        updateCartItem,
         toggleSelection,
         removeFromCart,
         updateQuantity,

@@ -12,7 +12,7 @@ export default function TestModal() {
         style={{
           padding: '15px 30px',
           fontSize: '16px',
-          background: '#e95f16',
+          background: '#d95c14',
           color: 'white',
           border: 'none',
           borderRadius: '5px',

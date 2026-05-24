@@ -16,7 +16,7 @@
 
 .success-modal-content {
   background: #fff;
-  border: 4px solid #e95f16;
+  border: 4px solid #d95c14;
   border-radius: 8px;
   padding: 48px 40px;
   max-width: 480px;
@@ -40,17 +40,17 @@
 }
 
 .success-title {
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--serif);
   font-size: 28px;
   font-weight: 700;
-  color: #0c3554;
+  color: #0a2e4f;
   margin: 0 0 16px 0;
   line-height: 1.2;
 }
 
 .success-message {
   font-size: 15px;
-  color: #496278;
+  color: #4b647c;
   line-height: 1.6;
   margin: 0 0 32px 0;
   max-width: 360px;
@@ -59,7 +59,7 @@
 }
 
 .success-btn {
-  background: #0c3554;
+  background: #0a2e4f;
   color: #fff;
   border: none;
   padding: 16px 40px;
@@ -74,7 +74,7 @@
 }
 
 .success-btn:hover {
-  background: #0a2a42;
+  background: #082847;
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(12, 53, 84, 0.4);
 }

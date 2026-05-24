@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import api from '../services/api';
 import SuccessModal from '../components/SuccessModal';
@@ -28,9 +28,18 @@ const CartPage = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const checkoutRef = useRef(null);
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const selectedItems = useMemo(() => cartItems.filter((item) => item.selected), [cartItems]);
   const hasSelectedItems = selectedItems.length > 0;
+
+  useEffect(() => {
+    if (location.state?.focusCheckout && checkoutRef.current && hasSelectedItems) {
+      checkoutRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [location.state, hasSelectedItems]);
 
   const shippingAddress = [
     customerInfo.addressLine,
@@ -178,9 +187,33 @@ const CartPage = () => {
                 <p>{formatVnd(item.price * item.quantity)}</p>
               </div>
 
-              <button className="btn-remove" type="button" onClick={() => removeFromCart(item._id, item.type)}>
-                &times;
-              </button>
+              <div className="item-actions">
+                {item.type === 'design' && (
+                  <button
+                    className="btn-edit"
+                    type="button"
+                    onClick={() => navigate('/designer', {
+                      state: {
+                        editDesign: {
+                          _id: item._id,
+                          name: item.name,
+                          charms: (item.charms || []).map((charm) => ({ charm })),
+                          totalPrice: item.price,
+                          isSaved: item.isSaved ?? false,
+                        },
+                        source: 'cart',
+                        returnTo: '/cart',
+                      }
+                    })}
+                    title="Sửa mẫu"
+                  >
+                    ✎
+                  </button>
+                )}
+                <button className="btn-remove" type="button" onClick={() => removeFromCart(item._id, item.type)}>
+                  &times;
+                </button>
+              </div>
             </article>
           ))}
         </div>
@@ -191,7 +224,7 @@ const CartPage = () => {
         </div>
 
         {hasSelectedItems && (
-          <section className="checkout-section">
+          <section className="checkout-section" ref={checkoutRef}>
             <form className="checkout-form-card" onSubmit={handleCheckout}>
               <h2>Thông tin đơn hàng</h2>
 

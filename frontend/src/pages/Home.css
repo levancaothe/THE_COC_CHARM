@@ -1,23 +1,23 @@
 :root {
-  --coc-navy: #0c3554;
-  --coc-navy-dark: #082b47;
-  --coc-orange: #e95f16;
-  --coc-paper: #ffffff;
-  --coc-muted: #496278;
-  --coc-line: #e95f16;
+  --coc-navy: #0a2e4f;
+  --coc-navy-dark: #082847;
+  --coc-orange: #d95c14;
+  --coc-paper: #eff3f8;
+  --coc-muted: #4b647c;
+  --coc-line: #d95c14;
 }
 
 .home-page {
   background: var(--coc-paper);
   color: var(--coc-navy);
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: var(--sans);
   overflow: hidden;
 }
 
 .home-page h1,
 .home-page h2,
 .home-page h3 {
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--serif);
   color: var(--coc-navy);
   line-height: 1.08;
 }
@@ -93,6 +93,14 @@
 .hero-frame {
   position: absolute;
   background: #e7e7e7;
+  overflow: hidden;
+}
+
+.hero-frame img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
 }
 
 .hero-frame--orange {
@@ -233,13 +241,7 @@
   min-height: 355px;
   position: relative;
   text-align: center;
-}
-
-.product-card--featured {
-  background: var(--coc-navy);
-  border-color: var(--coc-navy);
-  color: #fff;
-  min-height: 405px;
+  overflow: hidden;
 }
 
 .product-badge {
@@ -252,6 +254,44 @@
   padding: 6px 10px;
   position: absolute;
   top: 12px;
+}
+
+.product-card__image {
+  aspect-ratio: 1 / 1;
+  background: linear-gradient(180deg, rgba(10, 46, 79, 0.06), rgba(217, 92, 20, 0.08));
+  display: grid;
+  place-items: center;
+  margin: 54px 18px 18px;
+  overflow: hidden;
+}
+
+.product-card__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.product-card__image--placeholder {
+  background:
+    linear-gradient(135deg, rgba(10, 46, 79, 0.15), rgba(217, 92, 20, 0.18)),
+    #e9eef4;
+}
+
+.product-card__body {
+  padding: 0 18px 20px;
+}
+
+.product-card__body strong {
+  display: block;
+  margin-top: 12px;
+  color: var(--coc-orange);
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.product-card--empty {
+  opacity: 0.95;
 }
 
 .product-card--featured .product-badge {
@@ -321,7 +361,7 @@
 
 .craft-emblem__rings {
   align-items: center;
-  background: #082f4f;
+  background: #082847;
   border: 1px solid rgba(255, 255, 255, 0.7);
   border-radius: 50%;
   box-shadow:
@@ -347,14 +387,14 @@
 
 .craft-emblem strong {
   color: #fff;
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--serif);
   font-size: 1.8rem;
   line-height: 1.1;
 }
 
 .craft-emblem em {
   color: var(--coc-orange);
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--serif);
   font-size: 1.9rem;
   margin-top: 10px;
 }
@@ -383,7 +423,7 @@
 
 .craft-item > span {
   align-items: center;
-  background: #072a45;
+  background: #082847;
   border-radius: 50%;
   color: var(--coc-orange);
   display: flex;
@@ -449,7 +489,7 @@
 
 .testimonial-card h3 {
   color: #fff;
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: var(--sans);
   font-size: 0.72rem;
   margin: 0 0 6px;
 }

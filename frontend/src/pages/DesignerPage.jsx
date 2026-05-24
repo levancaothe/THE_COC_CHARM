@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import html2canvas from 'html2canvas';
+import { useLocation, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import CharmSidebar from '../components/CharmSidebar';
 import BraceletCanvas from '../components/BraceletCanvas';
@@ -13,32 +14,63 @@ import './DesignerPage.css';
 const DesignerPage = () => {
   const [availableCharms, setAvailableCharms] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [selectedCharms, setSelectedCharms] = useState([]);
-  const [capacity, setCapacity] = useState(null); // Số lượng hạt tối đa
-  const [tempCapacity, setTempCapacity] = useState(10); // Giá trị tạm thời trong input
+  const location = useLocation();
+  const editDesign = location.state?.editDesign || null;
+  const returnTo = location.state?.returnTo || null;
+  const normalizeEditCharm = (entry) => {
+    const charm = entry?.charm || entry;
+    if (!charm) return null;
+    return {
+      ...charm,
+      instanceId: Math.random().toString(36).substr(2, 9),
+      isDefault: false
+    };
+  };
+
+  const initialEditCharms = editDesign?.charms
+    ? editDesign.charms.map(normalizeEditCharm).filter(Boolean)
+    : [];
+
+  const [selectedCharms, setSelectedCharms] = useState(initialEditCharms);
+  const [capacity, setCapacity] = useState(editDesign ? (initialEditCharms.length || 1) : null); // Số lượng hạt tối đa
+  const [tempCapacity, setTempCapacity] = useState(editDesign ? (initialEditCharms.length || 1) : 10); // Giá trị tạm thời trong input
   const [wristSize, setWristSize] = useState(''); // Chu vi tay
-  const [material, setMaterial] = useState('Bạc'); // Chất liệu dây
-  const [designName, setDesignName] = useState('Thiết kế của tôi');
+  const [material, setMaterial] = useState(''); // Id charm cơ bản dùng làm dây
+  const [designName, setDesignName] = useState(editDesign?.name || 'Thiết kế của tôi');
   const [isSaving, setIsSaving] = useState(false);
+  const [editingDesignId, setEditingDesignId] = useState(editDesign?._id || null);
+  const [editingSource, setEditingSource] = useState(location.state?.source || null);
   const designRef = useRef(null);
+  const navigate = useNavigate();
 
   const totalPrice = usePriceCalculator(selectedCharms);
   const formatVnd = (value) => `${new Intl.NumberFormat('vi-VN').format(value || 0)} VND`;
 
-  const findDefaultCharm = (mat = material) => {
-    const normalizedMaterial = mat.toLowerCase();
-    const isBaseCharm = (charm) => {
-      const name = charm.name.toLowerCase();
-      return name.includes('cơ bản') || name.includes('mặc định');
-    };
+  const baseCharmKeywords = ['cơ bản', 'co ban', 'basic', 'base', 'mặc định', 'mac dinh', 'default'];
+  const normalizeText = (value = '') => value.toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const getCategoryName = (charm) => {
+    if (typeof charm?.category === 'object' && charm?.category?.name) {
+      return charm.category.name;
+    }
 
-    return availableCharms.find((charm) =>
-      charm.name.toLowerCase().includes(normalizedMaterial) && isBaseCharm(charm)
-    ) || availableCharms.find(isBaseCharm);
+    const categoryId = charm?.category?._id || charm?.category;
+    return categories.find((category) => category._id === categoryId)?.name || '';
+  };
+  const isBaseCharm = (charm) => {
+    const charmName = normalizeText(charm?.name);
+    const categoryName = normalizeText(getCategoryName(charm));
+    return baseCharmKeywords.some((keyword) => {
+      const normalizedKeyword = normalizeText(keyword);
+      return charmName.includes(normalizedKeyword) || categoryName.includes(normalizedKeyword);
+    });
   };
 
-  const baseCharm = findDefaultCharm(material);
-  const basePrice = (baseCharm?.price || 0) * (Number(tempCapacity) || 0);
+  const baseCharmOptions = useMemo(() => availableCharms.filter(isBaseCharm), [availableCharms, categories]);
+  const selectedBaseCharm = useMemo(
+    () => baseCharmOptions.find((charm) => charm._id === material) || baseCharmOptions[0] || null,
+    [baseCharmOptions, material]
+  );
+  const basePrice = (selectedBaseCharm?.price || 0) * (Number(tempCapacity) || 0);
 
   useEffect(() => {
     const fetchCharmsAndCategories = async () => {
@@ -56,8 +88,28 @@ const DesignerPage = () => {
     fetchCharmsAndCategories();
   }, []);
 
+  useEffect(() => {
+    if (!editDesign || initialEditCharms.length === 0) return;
+
+    setEditingDesignId(editDesign._id || null);
+    setEditingSource(location.state?.source || null);
+    setSelectedCharms(initialEditCharms);
+    setCapacity(initialEditCharms.length);
+    setTempCapacity(initialEditCharms.length);
+    setDesignName(editDesign.name || 'Thiết kế của tôi');
+  }, [editDesign]);
+
+  useEffect(() => {
+    if (baseCharmOptions.length === 0) return;
+
+    const isSelectedMaterialValid = baseCharmOptions.some((charm) => charm._id === material);
+    if (!isSelectedMaterialValid) {
+      setMaterial(baseCharmOptions[0]._id);
+    }
+  }, [baseCharmOptions, material]);
+
   const fillWithDefaultCharms = (cap, mat) => {
-    const defaultCharm = findDefaultCharm(mat);
+    const defaultCharm = baseCharmOptions.find((charm) => charm._id === mat) || baseCharmOptions[0];
 
     if (defaultCharm) {
       const initialCharms = Array.from({ length: cap }).map(() => ({
@@ -95,8 +147,7 @@ const DesignerPage = () => {
 
       const defaultCharmIndex = prevCharms.findIndex(c =>
         c.isDefault ||
-        c.name.toLowerCase().includes('cơ bản') ||
-        c.name.toLowerCase().includes('mặc định')
+        (selectedBaseCharm && c._id === selectedBaseCharm._id)
       );
 
       if (defaultCharmIndex !== -1) {
@@ -128,7 +179,7 @@ const DesignerPage = () => {
       const newCharms = [...prevCharms];
 
       // Hoàn trả lại hạt mặc định khi xóa hạt sự kiện
-      const defaultCharm = findDefaultCharm(material);
+      const defaultCharm = selectedBaseCharm || baseCharmOptions[0];
 
       if (defaultCharm) {
         newCharms[index] = {
@@ -155,7 +206,7 @@ const DesignerPage = () => {
     });
   };
 
-  const { addToCart } = useCart();
+  const { addToCart, updateCartItem } = useCart();
 
   const handleDownload = async () => {
     if (selectedCharms.length === 0) return alert('Hãy thêm ít nhất 1 charm để tải ảnh!');
@@ -178,61 +229,93 @@ const DesignerPage = () => {
     }
   };
 
-  const handleSave = async () => {
+  const buildDesignPayload = (isSaved) => ({
+    name: designName || `Thiết kế vòng (${selectedCharms.length}/${capacity} hạt)`,
+    charms: selectedCharms.map((c) => ({
+      charm: c._id,
+      x: 0,
+      y: 0
+    })),
+    totalPrice,
+    isSaved
+  });
+
+  const persistDesign = async ({
+    isSaved,
+    addToCartAfter = false,
+    updateCartAfter = false,
+    showAlert = true,
+    useExistingId = false,
+    navigateBack = false
+  } = {}) => {
     if (selectedCharms.length === 0) return alert('Hãy thêm ít nhất 1 charm!');
     if (isSaving) return;
 
     setIsSaving(true);
     try {
-      const designData = {
-        name: designName || `Thiết kế vòng (${selectedCharms.length}/${capacity} hạt)`,
-        charms: selectedCharms.map((c) => ({
-          charm: c._id,
-          x: 0,
-          y: 0
-        })),
-        totalPrice,
-        isSaved: true
-      };
-      await api.post('/bracelets', designData);
-      alert('Đã lưu thiết kế vào "Thiết kế của tôi" thành công!');
+      const designData = buildDesignPayload(isSaved);
+      const savedDesign = (useExistingId && editingDesignId)
+        ? (await api.put(`/bracelets/${editingDesignId}`, designData)).data.data
+        : (await api.post('/bracelets', designData)).data.data;
+
+      if (updateCartAfter) {
+        updateCartItem({
+          _id: savedDesign._id,
+          name: savedDesign.name,
+          price: savedDesign.totalPrice ?? totalPrice,
+          charms: selectedCharms
+        }, 'design');
+      }
+
+      if (addToCartAfter) {
+        addToCart({
+          _id: savedDesign._id,
+          name: savedDesign.name,
+          price: savedDesign.totalPrice ?? totalPrice,
+          charms: selectedCharms,
+          isSaved: isSaved
+        }, 'design');
+      }
+
+      if (showAlert) {
+        const successMessage = addToCartAfter
+          ? 'Đã thêm thiết kế vào giỏ hàng!'
+          : (editingDesignId ? 'Đã cập nhật mẫu thành công!' : 'Đã lưu thiết kế vào "Thiết kế của tôi" thành công!');
+        alert(successMessage);
+      }
+
+      if (navigateBack && editingDesignId && returnTo) {
+        navigate(returnTo, { state: { focusCheckout: returnTo === '/cart' } });
+      }
+      return true;
     } catch (error) {
-      alert('Lỗi khi lưu thiết kế');
+      if (showAlert) {
+        alert('Lỗi khi lưu thiết kế');
+      }
+      return false;
     } finally {
       setIsSaving(false);
     }
   };
 
+  const persistDesignToCart = async ({ showAlert = true } = {}) => {
+    return persistDesign({
+      isSaved: false,
+      addToCartAfter: editingSource !== 'cart',
+      updateCartAfter: editingSource === 'cart',
+      showAlert,
+      useExistingId: editingSource === 'cart'
+    });
+  };
+
   const handleAddToCart = async () => {
-    if (selectedCharms.length === 0) return alert('Hãy thêm ít nhất 1 charm!');
-    if (isSaving) return;
+    await persistDesignToCart({ showAlert: true });
+  };
 
-    setIsSaving(true);
-    try {
-      const designData = {
-        name: designName || `Thiết kế vòng (${selectedCharms.length}/${capacity} hạt)`,
-        charms: selectedCharms.map((c) => ({
-          charm: c._id,
-          x: 0,
-          y: 0
-        })),
-        totalPrice,
-        isSaved: false // Not explicitly saved to "My Designs"
-      };
-      const { data } = await api.post('/bracelets', designData);
-
-      addToCart({
-        _id: data.data._id,
-        name: designData.name,
-        price: totalPrice,
-        charms: selectedCharms
-      }, 'design');
-
-      alert('Đã thêm thiết kế vào giỏ hàng!');
-    } catch (error) {
-      alert('Lỗi khi thêm vào giỏ hàng');
-    } finally {
-      setIsSaving(false);
+  const handleBuyNow = async () => {
+    const success = await persistDesignToCart({ showAlert: false });
+    if (success) {
+      navigate('/cart', { state: { focusCheckout: true } });
     }
   };
 
@@ -276,16 +359,28 @@ const DesignerPage = () => {
               placeholder="VD: 10"
             />
 
-            <label htmlFor="bracelet-material">Chất liệu dây (Base):</label>
+            <label htmlFor="bracelet-material">Chất liệu dây (từ bộ charm cơ bản):</label>
             <select
               id="bracelet-material"
               value={material}
               onChange={(e) => setMaterial(e.target.value)}
+              disabled={baseCharmOptions.length === 0}
             >
-              <option value="Bạc">Dây bạc ({formatVnd(basePrice)})</option>
-              <option value="Vàng">Dây vàng ({formatVnd(basePrice)})</option>
-              <option value="Vàng Hồng">Dây vàng hồng ({formatVnd(basePrice)})</option>
+              {baseCharmOptions.length > 0 ? (
+                baseCharmOptions.map((charm) => (
+                  <option key={charm._id} value={charm._id}>
+                    {charm.name} ({formatVnd((charm.price || 0) * (Number(tempCapacity) || 0))})
+                  </option>
+                ))
+              ) : (
+                <option value="">Chưa có charm cơ bản trong cơ sở dữ liệu</option>
+              )}
             </select>
+            {selectedBaseCharm && (
+              <p className="designer-hint">
+                Đang dùng: {selectedBaseCharm.name} - {formatVnd(basePrice)}
+              </p>
+            )}
           </div>
           <button className="designer-start-button" onClick={handleStartDesign}>
             Bắt đầu thiết kế
@@ -327,7 +422,7 @@ const DesignerPage = () => {
           </div>
         </header>
 
-        <div style={{ position: 'sticky', top: 0, zIndex: 10, background: 'var(--bg)', paddingBottom: '20px' }}>
+        <div className="designer-canvas-sticky">
           <BraceletCanvas
             ref={designRef}
             selectedCharms={selectedCharms}
@@ -341,8 +436,16 @@ const DesignerPage = () => {
         <div className="designer-checkout-panel">
           <PriceSummary totalPrice={totalPrice} count={selectedCharms.length} />
           <DesignerToolbar
-            onSave={handleSave}
+            onSave={() => persistDesign({
+              isSaved: true,
+              addToCartAfter: false,
+              updateCartAfter: editingSource === 'cart',
+              showAlert: true,
+              useExistingId: !!editingDesignId,
+              navigateBack: true
+            })}
             onAddToCart={handleAddToCart}
+            onBuyNow={handleBuyNow}
             onDownload={handleDownload}
             onClear={() => fillWithDefaultCharms(capacity, material)}
             disabled={isSaving}

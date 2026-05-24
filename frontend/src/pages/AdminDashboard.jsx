@@ -1,21 +1,17 @@
 import { useEffect, useState, useCallback } from 'react';
-import axios from 'axios';
 import OrderDetailModal from '../components/OrderDetailModal';
+import api from '../services/api';
 import './AdminDashboard.css';
 
-const API_BASE = 'http://localhost:5000/api/admin';
-const formatVND = (value) => new Intl.NumberFormat('vi-VN', {
-  style: 'currency',
-  currency: 'VND',
-  currencyDisplay: 'code',
+const formatVND = (value) => `${new Intl.NumberFormat('vi-VN', {
   maximumFractionDigits: 0
-}).format(Number(value) || 0);
+}).format(Number(value) || 0)} VND`;
 
 function StatCard({ title, value, icon, tone }) {
   return (
     <div className={`stat-card stat-card-${tone}`}>
       <div className="stat-icon">{icon}</div>
-      <div className="stat-content">
+      <div className={`stat-content ${tone === 'dark' ? 'stat-content-revenue' : ''}`}>
         <div className="stat-title">{title}</div>
         <div className="stat-value">{value}</div>
       </div>
@@ -156,6 +152,7 @@ export default function AdminDashboard() {
   const [filters, setFilters] = useState({ status: '', startDate: '', endDate: '', limit: 10, page: 1 });
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showOrderDetail, setShowOrderDetail] = useState(false);
+  const [updatingOrderStatus, setUpdatingOrderStatus] = useState(false);
 
   // Charms state
   const [charms, setCharms] = useState([]);
@@ -199,7 +196,7 @@ export default function AdminDashboard() {
   const fetchStats = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${API_BASE}/stats`, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await api.get('/admin/stats', { headers: { Authorization: `Bearer ${token}` } });
       setStats(res.data);
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to fetch stats');
@@ -213,7 +210,7 @@ export default function AdminDashboard() {
     setLoading(true);
     try {
       const params = { ...filters, page };
-      const res = await axios.get(`${API_BASE}/orders`, { headers: { Authorization: `Bearer ${token}` }, params });
+      const res = await api.get('/admin/orders', { headers: { Authorization: `Bearer ${token}` }, params });
       setOrders(res.data.orders || []);
       setTotalOrders(res.data.total || 0);
       setFilters(prev => ({ ...prev, page }));
@@ -229,7 +226,7 @@ export default function AdminDashboard() {
     try {
       const params = { ...nextFilters, page };
       console.log('Fetching charms with params:', params);
-      const res = await axios.get(`${API_BASE}/charms`, { 
+      const res = await api.get('/admin/charms', { 
         headers: { Authorization: `Bearer ${token}` }, 
         params 
       });
@@ -248,7 +245,7 @@ export default function AdminDashboard() {
   const fetchCategories = async () => {
     try {
       console.log('Fetching categories...');
-      const res = await axios.get(`${API_BASE}/categories`, { 
+      const res = await api.get('/admin/categories', { 
         headers: { Authorization: `Bearer ${token}` } 
       });
       console.log('Categories response:', res.data);
@@ -265,7 +262,7 @@ export default function AdminDashboard() {
       return;
     }
     try {
-      const res = await axios.post(`${API_BASE}/login`, { username, password });
+      const res = await api.post('/admin/login', { username, password });
       const t = res.data.token;
       localStorage.setItem('adminJwt', t);
       localStorage.setItem('adminRole', res.data.role || 'admin');
@@ -287,13 +284,13 @@ export default function AdminDashboard() {
     try {
       console.log('Saving charm:', formData);
       if (editingCharm) {
-        const res = await axios.put(`${API_BASE}/charms/${editingCharm._id}`, formData, {
+        const res = await api.put(`/admin/charms/${editingCharm._id}`, formData, {
           headers: { Authorization: `Bearer ${token}` }
         });
         console.log('Update response:', res.data);
         alert('Charm đã được cập nhật');
       } else {
-        const res = await axios.post(`${API_BASE}/charms`, formData, {
+        const res = await api.post('/admin/charms', formData, {
           headers: { Authorization: `Bearer ${token}` }
         });
         console.log('Create response:', res.data);
@@ -312,7 +309,7 @@ export default function AdminDashboard() {
   const handleDeleteCharm = async (id) => {
     if (!window.confirm('Bạn có chắc muốn xóa charm này?')) return;
     try {
-      await axios.delete(`${API_BASE}/charms/${id}`, {
+      await api.delete(`/admin/charms/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert('Charm đã được xóa');
@@ -332,12 +329,12 @@ export default function AdminDashboard() {
   const handleSaveCategory = async (formData) => {
     try {
       if (editingCategory) {
-        await axios.put(`${API_BASE}/categories/${editingCategory._id}`, formData, {
+        await api.put(`/admin/categories/${editingCategory._id}`, formData, {
           headers: { Authorization: `Bearer ${token}` }
         });
         alert('Danh mục đã được cập nhật');
       } else {
-        await axios.post(`${API_BASE}/categories`, formData, {
+        await api.post('/admin/categories', formData, {
           headers: { Authorization: `Bearer ${token}` }
         });
         alert('Danh mục đã được thêm');
@@ -354,7 +351,7 @@ export default function AdminDashboard() {
   const handleDeleteCategory = async (id) => {
     if (!window.confirm('Bạn có chắc muốn xóa danh mục này?')) return;
     try {
-      await axios.delete(`${API_BASE}/categories/${id}`, {
+      await api.delete(`/admin/categories/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert('Danh mục đã được xóa');
@@ -383,7 +380,7 @@ export default function AdminDashboard() {
         'Số điện thoại': order.customerInfo?.phone || 'N/A',
         'Email': order.customerInfo?.email || 'N/A',
         'Địa chỉ': order.customerInfo?.address || 'N/A',
-        'Tổng tiền ($)': order.totalPrice.toFixed(2),
+        'Tổng tiền (VND)': formatVND(order.totalPrice),
         'Trạng thái': order.status,
         'Ngày đặt': new Date(order.createdAt).toLocaleString('vi-VN')
       }));
@@ -422,6 +419,26 @@ export default function AdminDashboard() {
   const handleViewOrderDetail = (order) => {
     setSelectedOrder(order);
     setShowOrderDetail(true);
+  };
+
+  const handleUpdateOrderStatus = async (orderId, status) => {
+    if (!orderId || !status) return;
+
+    setUpdatingOrderStatus(true);
+    try {
+      const res = await api.put(`/admin/orders/${orderId}/status`, { status }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      const updatedOrder = res.data.order;
+      setSelectedOrder(updatedOrder);
+      setOrders((prev) => prev.map((order) => (order._id === orderId ? updatedOrder : order)));
+      alert('Đã cập nhật trạng thái đơn hàng');
+    } catch (err) {
+      alert(err.response?.data?.message || 'Không thể cập nhật trạng thái đơn hàng');
+    } finally {
+      setUpdatingOrderStatus(false);
+    }
   };
 
   const formatDate = (dateString) => new Date(dateString).toLocaleDateString('vi-VN', { 
@@ -544,6 +561,9 @@ export default function AdminDashboard() {
                     <h3>Danh sách đơn hàng</h3>
                     <p>Lọc và theo dõi đơn hàng theo trạng thái, thời gian.</p>
                   </div>
+                  <button className="btn btn-success btn-export" onClick={handleExportExcel} disabled={loading || orders.length === 0}>
+                    Export to Excel
+                  </button>
                 </div>
                 <div className="filters-container">
                   <div className="filter-group">
@@ -600,6 +620,7 @@ export default function AdminDashboard() {
                             <th>Tổng Tiền</th>
                             <th>Trạng Thái</th>
                             <th>Ngày</th>
+                            <th>Thao Tác</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -612,10 +633,19 @@ export default function AdminDashboard() {
                                 <td className="text-right">{formatVND(order.totalPrice)}</td>
                                 <td><span className={`badge badge-${order.status.toLowerCase()}`}>{order.status}</span></td>
                                 <td>{formatDate(order.createdAt)}</td>
+                                <td className="actions-cell">
+                                  <button
+                                    className="btn-icon btn-view"
+                                    onClick={() => handleViewOrderDetail(order)}
+                                    title="Xem chi tiết"
+                                  >
+                                    👁
+                                  </button>
+                                </td>
                               </tr>
                             ))
                           ) : (
-                            <tr><td colSpan="6" className="text-center">Không có đơn hàng nào</td></tr>
+                            <tr><td colSpan="7" className="text-center">Không có đơn hàng nào</td></tr>
                           )}
                         </tbody>
                       </table>
@@ -829,6 +859,18 @@ export default function AdminDashboard() {
           onClose={() => {
             setShowCategoryModal(false);
             setEditingCategory(null);
+          }}
+        />
+      )}
+
+      {showOrderDetail && (
+        <OrderDetailModal
+          order={selectedOrder}
+          onUpdateStatus={handleUpdateOrderStatus}
+          updatingStatus={updatingOrderStatus}
+          onClose={() => {
+            setShowOrderDetail(false);
+            setSelectedOrder(null);
           }}
         />
       )}

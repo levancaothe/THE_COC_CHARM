@@ -1,11 +1,27 @@
+import { useEffect, useState } from 'react';
 import './OrderDetailModal.css';
 
-export default function OrderDetailModal({ order, onClose }) {
+const STATUS_OPTIONS = ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'];
+const formatVND = (value) => `${new Intl.NumberFormat('vi-VN', {
+  maximumFractionDigits: 0
+}).format(Number(value) || 0)} VND`;
+
+export default function OrderDetailModal({ order, onClose, onUpdateStatus, updatingStatus = false }) {
   if (!order) return null;
+  const [status, setStatus] = useState(order.status || 'Pending');
 
   const formatDate = (dateString) => new Date(dateString).toLocaleDateString('vi-VN', { 
     year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' 
   });
+
+  useEffect(() => {
+    setStatus(order.status || 'Pending');
+  }, [order]);
+
+  const handleSaveStatus = () => {
+    if (status === (order.status || 'Pending')) return;
+    onUpdateStatus?.(order._id, status);
+  };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -46,7 +62,7 @@ export default function OrderDetailModal({ order, onClose }) {
               </div>
               <div className="detail-item">
                 <span className="detail-label">Trạng thái:</span>
-                <span className={`badge badge-${order.status.toLowerCase()}`}>{order.status}</span>
+                <span className={`badge badge-${status.toLowerCase()}`}>{status}</span>
               </div>
               <div className="detail-item">
                 <span className="detail-label">Ngày đặt:</span>
@@ -54,7 +70,30 @@ export default function OrderDetailModal({ order, onClose }) {
               </div>
               <div className="detail-item">
                 <span className="detail-label">Tổng tiền:</span>
-                <span className="detail-value price">${order.totalPrice.toFixed(2)}</span>
+                <span className="detail-value price">{formatVND(order.totalPrice)}</span>
+              </div>
+            </div>
+
+            <div className="status-editor">
+              <label htmlFor="order-status">Cập nhật trạng thái</label>
+              <div className="status-editor-row">
+                <select
+                  id="order-status"
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                >
+                  {STATUS_OPTIONS.map((option) => (
+                    <option key={option} value={option}>{option}</option>
+                  ))}
+                </select>
+                <button
+                  className="btn btn-primary"
+                  onClick={handleSaveStatus}
+                  disabled={updatingStatus || status === (order.status || 'Pending')}
+                  type="button"
+                >
+                  {updatingStatus ? 'Đang lưu...' : 'Lưu trạng thái'}
+                </button>
               </div>
             </div>
           </div>
@@ -71,7 +110,7 @@ export default function OrderDetailModal({ order, onClose }) {
                     <div className="order-item-info">
                       <h5>{item.name}</h5>
                       <p>Số lượng: <strong>{item.quantity}</strong></p>
-                      <p className="item-price">${item.price?.toFixed(2)}</p>
+                      <p className="item-price">{formatVND(item.price)}</p>
                     </div>
                   </div>
                 ))}

@@ -6,18 +6,18 @@ const CategoryCard = ({ category, onClick, isSelected }) => {
     <div
       className={`category-card glass ${isSelected ? 'selected' : ''}`}
       onClick={() => onClick(category)}
-      style={{
-        padding: '15px',
-        borderRadius: 'var(--radius-md)',
-        cursor: 'pointer',
-        border: isSelected ? '2px solid var(--primary-gold)' : '1px solid transparent',
-        transition: 'all 0.3s ease',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: '15px',
-        backgroundColor: isSelected ? 'rgba(212, 175, 55, 0.05)' : 'rgba(255, 255, 255, 0.02)'
-      }}
+        style={{
+          padding: '15px',
+          borderRadius: 'var(--radius-md)',
+          cursor: 'pointer',
+          border: isSelected ? '2px solid var(--primary-gold)' : '1px solid transparent',
+          transition: 'all 0.3s ease',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '15px',
+          backgroundColor: isSelected ? 'rgba(217, 92, 20, 0.08)' : 'rgba(255, 255, 255, 0.02)'
+        }}
     >
       <div
         style={{
@@ -40,7 +40,7 @@ const CategoryCard = ({ category, onClick, isSelected }) => {
               style={{
                 width: '100%',
                 height: '100%',
-                backgroundColor: thumb ? '#f5f5f5' : 'transparent',
+                backgroundColor: thumb ? '#eff3f8' : 'transparent',
                 borderRadius: '4px',
                 display: 'flex',
                 justifyContent: 'center',

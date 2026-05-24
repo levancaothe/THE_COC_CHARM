@@ -28,12 +28,13 @@ export const PriceSummary = ({ totalPrice, count }) => {
   );
 };
 
-export const DesignerToolbar = ({ onSave, onAddToCart, onDownload, onClear, disabled }) => {
+export const DesignerToolbar = ({ onSave, onAddToCart, onBuyNow, onDownload, onClear, disabled }) => {
   return (
     <div className="designer-toolbar">
       <div className="designer-toolbar-row">
         <button
           className="designer-action designer-action--outline"
+          type="button"
           onClick={onDownload}
           disabled={disabled}
         >
@@ -41,6 +42,7 @@ export const DesignerToolbar = ({ onSave, onAddToCart, onDownload, onClear, disa
         </button>
         <button
           className="designer-action designer-action--outline"
+          type="button"
           onClick={onSave}
           disabled={disabled}
         >
@@ -48,19 +50,31 @@ export const DesignerToolbar = ({ onSave, onAddToCart, onDownload, onClear, disa
         </button>
         <button
           className="designer-action designer-action--outline"
+          type="button"
           onClick={onClear}
           disabled={disabled}
         >
           <span>♲</span> Làm mới
         </button>
       </div>
-      <button
-        className="designer-action designer-action--primary"
-        onClick={onAddToCart}
-        disabled={disabled}
-      >
-        {disabled ? 'Đang xử lý...' : 'Hoàn tất & đặt hàng'}
-      </button>
+      <div className="designer-toolbar-row designer-toolbar-row--actions">
+        <button
+          className="designer-action designer-action--outline"
+          type="button"
+          onClick={onBuyNow}
+          disabled={disabled}
+        >
+          <span>→</span> Mua ngay
+        </button>
+        <button
+          className="designer-action designer-action--primary"
+          type="button"
+          onClick={onAddToCart}
+          disabled={disabled}
+        >
+          {disabled ? 'Đang xử lý...' : 'Lưu vào giỏ hàng'}
+        </button>
+      </div>
     </div>
   );
 };

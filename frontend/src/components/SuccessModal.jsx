@@ -19,7 +19,7 @@ export default function SuccessModal({ isOpen, onClose, title, message }) {
       <div className="success-modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="success-icon">
           <svg viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="26" cy="26" r="25" fill="#e95f16"/>
+            <circle cx="26" cy="26" r="25" fill="#d95c14"/>
             <path 
               fill="none" 
               stroke="#fff" 

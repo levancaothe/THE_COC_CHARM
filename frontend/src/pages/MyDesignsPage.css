@@ -1,6 +1,6 @@
 .my-designs-page {
   background: #fff;
-  color: #0c3554;
+  color: #0a2e4f;
   min-height: 640px;
   padding: 56px 24px 70px;
 }
@@ -16,7 +16,7 @@
 }
 
 .my-designs-header p {
-  color: #e95f16;
+  color: #d95c14;
   font-size: 0.88rem;
   font-weight: 900;
   letter-spacing: 0.04em;
@@ -25,8 +25,8 @@
 }
 
 .my-designs-header h1 {
-  color: #0c3554;
-  font-family: Georgia, 'Times New Roman', serif;
+  color: #0a2e4f;
+  font-family: var(--serif);
   font-size: clamp(2rem, 3vw, 2.7rem);
   line-height: 1.1;
   margin: 0;
@@ -52,8 +52,8 @@
 
 .my-design-card {
   background: #fff;
-  border: 1.5px solid #0c3554;
-  border-top: 3px solid #e95f16;
+  border: 1.5px solid #0a2e4f;
+  border-top: 3px solid #d95c14;
   display: grid;
   gap: 18px;
   padding: 20px;
@@ -62,7 +62,7 @@
 }
 
 .my-design-card:hover {
-  box-shadow: 0 6px 20px rgba(12, 53, 84, 0.12);
+  box-shadow: 0 6px 20px rgba(10, 46, 79, 0.12);
   transform: translateY(-2px);
 }
 
@@ -75,8 +75,8 @@
 }
 
 .my-design-card__head h2 {
-  color: #0c3554;
-  font-family: Georgia, 'Times New Roman', serif;
+  color: #0a2e4f;
+  font-family: var(--serif);
   font-size: 1.25rem;
   line-height: 1.2;
   margin: 0 0 6px;
@@ -84,15 +84,15 @@
 }
 
 .my-design-card__head p {
-  color: #496278;
+  color: #4b647c;
   font-size: 0.82rem;
   margin: 0;
 }
 
 .my-design-card__head > span {
-  border: 1.5px solid #e95f16;
-  background: rgba(233, 95, 22, 0.05);
-  color: #e95f16;
+  border: 1.5px solid #d95c14;
+  background: rgba(217, 92, 20, 0.08);
+  color: #d95c14;
   flex: 0 0 auto;
   font-size: 0.72rem;
   font-weight: 800;
@@ -103,8 +103,8 @@
 }
 
 .my-design-preview {
-  background: #f8fafb;
-  border: 1px solid rgba(12, 53, 84, 0.18);
+  background: #f5f8fb;
+  border: 1px solid rgba(10, 46, 79, 0.18);
   overflow-x: auto;
   padding: 16px 12px;
   border-radius: 4px;
@@ -121,7 +121,7 @@
 
 .my-design-band img {
   background: linear-gradient(to bottom, #fbfbfb 0%, #e4e4e4 52%, #c9c9c9 100%);
-  border: 1px solid rgba(12, 53, 84, 0.34);
+  border: 1px solid rgba(10, 46, 79, 0.34);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
   display: block;
   height: 32px;
@@ -144,7 +144,7 @@
 }
 
 .my-design-card__foot > strong {
-  color: #0c3554;
+  color: #0a2e4f;
   font-size: 1.15rem;
   font-weight: 900;
   flex: 0 0 auto;
@@ -158,6 +158,7 @@
 }
 
 .my-design-add,
+.my-design-edit,
 .my-design-delete {
   align-items: center;
   display: inline-flex;
@@ -176,44 +177,58 @@
 }
 
 .my-design-add {
-  background: #e95f16;
+  background: #d95c14;
   color: #fff;
   flex: 1;
   min-width: 140px;
 }
 
 .my-design-add:hover {
-  background: #cf4f0e;
+  background: #b94d11;
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(233, 95, 22, 0.3);
+  box-shadow: 0 4px 8px rgba(217, 92, 20, 0.3);
 }
 
 .my-design-delete {
   background: transparent;
-  border: 1.5px solid #0c3554;
-  color: #0c3554;
+  border: 1.5px solid #0a2e4f;
+  color: #0a2e4f;
   flex: 0 0 auto;
   min-width: 80px;
 }
 
+.my-design-edit {
+  background: #f5f8fb;
+  border: 1.5px solid #d95c14;
+  color: #d95c14;
+  flex: 0 0 auto;
+  min-width: 80px;
+}
+
+.my-design-edit:hover {
+  background: #fff4ee;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(217, 92, 20, 0.18);
+}
+
 .my-design-delete:hover {
-  background: #0c3554;
-  border-color: #0c3554;
+  background: #0a2e4f;
+  border-color: #0a2e4f;
   color: #fff;
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(12, 53, 84, 0.2);
+  box-shadow: 0 4px 8px rgba(10, 46, 79, 0.2);
 }
 
 .my-design-empty {
-  border: 1.5px solid #0c3554;
-  border-top: 2px solid #e95f16;
+  border: 1.5px solid #0a2e4f;
+  border-top: 2px solid #d95c14;
   grid-column: 1 / -1;
   padding: 48px 24px;
   text-align: center;
 }
 
 .my-design-empty p {
-  color: #0c3554;
+  color: #0a2e4f;
   font-weight: 800;
   margin: 0;
 }
@@ -224,7 +239,7 @@
   align-items: center;
   min-height: 300px;
   font-size: 1rem;
-  color: #0c3554;
+  color: #0a2e4f;
 }
 
 .loading-spinner::after {
@@ -232,7 +247,7 @@
   width: 40px;
   height: 40px;
   border: 4px solid #f3f3f3;
-  border-top: 4px solid #e95f16;
+  border-top: 4px solid #d95c14;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -277,6 +292,7 @@
     min-width: auto;
   }
 
+  .my-design-edit,
   .my-design-delete {
     flex: 1;
     min-width: auto;

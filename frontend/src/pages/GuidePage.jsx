@@ -3,7 +3,7 @@ import './GuidePage.css';
 
 const policySections = [
   {
-    icon: '🛡',
+    icon: '🛡️',
     title: '1. Chính sách bảo hành',
     accent: 'blue',
     items: [

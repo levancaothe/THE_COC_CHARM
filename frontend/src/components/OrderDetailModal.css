@@ -139,6 +139,41 @@
   margin: 0;
 }
 
+.status-editor {
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid #e1e8ed;
+  border-radius: 8px;
+  background: #f9fafb;
+}
+
+.status-editor label {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-editor-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.status-editor-row select {
+  flex: 1;
+  min-height: 42px;
+  padding: 10px 12px;
+  border: 1px solid #d9e2ec;
+  border-radius: 6px;
+  background: #fff;
+  color: #333;
+  font: inherit;
+}
+
 @media (max-width: 768px) {
   .modal-large {
     max-width: 95%;
@@ -159,5 +194,10 @@
   .order-item-image {
     width: 100%;
     height: 120px;
+  }
+
+  .status-editor-row {
+    flex-direction: column;
+    align-items: stretch;
   }
 }

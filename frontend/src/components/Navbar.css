@@ -1,6 +1,6 @@
 .navbar {
   background: #fff;
-  border-bottom: 2px solid #e95f16;
+  border-bottom: 2px solid #d95c14;
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -43,17 +43,22 @@
   padding: 0;
 }
 
+.nav-links li {
+  flex: 0 0 auto;
+}
+
 .nav-links a {
-  color: #0c3554;
+  color: #0a2e4f;
   font-size: 0.94rem;
   font-weight: 500;
   text-decoration: none;
   transition: color 0.2s ease;
+  white-space: nowrap;
 }
 
 .nav-links a:hover,
 .nav-links a.active {
-  color: #0c3554;
+  color: #0a2e4f;
   font-weight: 800;
 }
 
@@ -63,7 +68,7 @@
 
 .cart-icon-btn {
   align-items: center;
-  color: #0c3554;
+  color: #0a2e4f;
   display: flex;
   height: 38px;
   justify-content: center;
@@ -78,7 +83,7 @@
 
 .cart-badge {
   align-items: center;
-  background: #e95f16;
+  background: #d95c14;
   border-radius: 50%;
   color: white;
   display: flex;

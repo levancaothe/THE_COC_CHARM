@@ -1,21 +1,23 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+
 :root {
   /* Colors */
-  --primary-gold: #D4AF37;
-  --secondary-gold: #FFD700;
-  --dark-slate: #1A1A1A;
-  --light-gray: #F5F5F5;
+  --primary-gold: #D95C14;
+  --secondary-gold: #0A2E4F;
+  --dark-slate: #0A2E4F;
+  --light-gray: #EFF3F8;
   --white: #FFFFFF;
-  --text-main: #333333;
-  --text-muted: #666666;
+  --text-main: #0A2E4F;
+  --text-muted: #4B647C;
   
   /* Gradients */
-  --gold-gradient: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
-  --dark-gradient: linear-gradient(135deg, #1A1A1A 0%, #333333 100%);
+  --gold-gradient: linear-gradient(135deg, #0A2E4F 0%, #D95C14 100%);
+  --dark-gradient: linear-gradient(135deg, #0A2E4F 0%, #082847 100%);
 
   /* Shadows */
-  --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.15);
-  --shadow-lg: 0 10px 25px rgba(0,0,0,0.2);
+  --shadow-sm: 0 2px 4px rgba(10, 46, 79, 0.08);
+  --shadow-md: 0 4px 12px rgba(10, 46, 79, 0.12);
+  --shadow-lg: 0 10px 25px rgba(10, 46, 79, 0.18);
 
   /* Spacing */
   --spacing-xs: 4px;
@@ -33,4 +35,9 @@
   /* Transitions */
   --transition-fast: 0.2s ease;
   --transition-normal: 0.3s ease;
+
+  /* Typography */
+  --sans: 'Montserrat', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --heading: 'Montserrat', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
 }

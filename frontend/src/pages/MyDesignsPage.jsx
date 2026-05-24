@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useCart } from '../context/CartContext';
 import ConfirmModal from '../components/ConfirmModal';
@@ -8,6 +9,7 @@ const formatVnd = (value) => `${new Intl.NumberFormat('vi-VN').format(value || 0
 
 const MyDesignsPage = () => {
   const { addToCart } = useCart();
+  const navigate = useNavigate();
   const [designs, setDesigns] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -77,12 +79,14 @@ const MyDesignsPage = () => {
                   <div className="my-design-actions">
                     <button
                       className="my-design-add"
+                      type="button"
                       onClick={() => {
                         addToCart({
                           _id: design._id,
                           name: design.name,
                           price: design.totalPrice,
                           charms: design.charms.map((c) => c.charm),
+                          isSaved: true,
                         }, 'design');
                         alert('Đã thêm thiết kế vào giỏ hàng!');
                       }}
@@ -90,7 +94,21 @@ const MyDesignsPage = () => {
                       Thêm vào giỏ hàng
                     </button>
                     <button
+                      className="my-design-edit"
+                      type="button"
+                      onClick={() => navigate('/designer', {
+                        state: {
+                          editDesign: design,
+                          source: 'designs',
+                          returnTo: '/my-designs',
+                        }
+                      })}
+                    >
+                      Sửa mẫu
+                    </button>
+                    <button
                       className="my-design-delete"
+                      type="button"
                       onClick={() => {
                         setDeleteId(design._id);
                         setIsModalOpen(true);

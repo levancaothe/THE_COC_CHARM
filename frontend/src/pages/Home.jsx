@@ -1,6 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import api from '../services/api';
 import logo from "../assets/logo.png";
+import img1 from "../assets/img1.jpg";
+import img2 from "../assets/img2.jpg";
 import './Home.css';
 
 const processSteps = [
@@ -20,12 +23,6 @@ const processSteps = [
     title: 'Hoàn Thiện & Đặt Hàng',
     text: 'Lưu bản phác thảo và tiến hành đặt hàng. Sản phẩm sẽ được ráp thủ công và đóng hộp sang trọng gửi tới bạn.',
   },
-];
-
-const products = [
-  { badge: 'BEST SELLER' },
-  { badge: 'LIMITED', featured: true },
-  { badge: 'MINIMALIST' },
 ];
 
 const craftItems = [
@@ -62,6 +59,31 @@ const testimonials = [
 ];
 
 const Home = () => {
+  const [popularThemes, setPopularThemes] = useState([]);
+  const [loadingThemes, setLoadingThemes] = useState(true);
+  const displayThemes =
+    popularThemes.length >= 3
+      ? [popularThemes[1], popularThemes[0], popularThemes[2]]
+      : popularThemes.length === 2
+        ? [popularThemes[1], popularThemes[0]]
+        : popularThemes;
+
+  useEffect(() => {
+    const fetchPopularThemes = async () => {
+      try {
+        const res = await api.get('/bracelets/popular-themes?limit=3');
+        setPopularThemes(res.data.data || []);
+      } catch (error) {
+        console.error('Error fetching popular themes:', error);
+        setPopularThemes([]);
+      } finally {
+        setLoadingThemes(false);
+      }
+    };
+
+    fetchPopularThemes();
+  }, []);
+
   return (
     <div className="home-page fade-in">
       <header className="home-hero">
@@ -79,8 +101,12 @@ const Home = () => {
           </div>
         </div>
         <div className="home-hero__visual" aria-hidden="true">
-          <div className="hero-frame hero-frame--orange" />
-          <div className="hero-frame hero-frame--blue" />
+          <div className="hero-frame hero-frame--orange">
+            <img src={img1} alt="" />
+          </div>
+          <div className="hero-frame hero-frame--blue">
+            <img src={img2} alt="" />
+          </div>
         </div>
       </header>
 
@@ -103,20 +129,44 @@ const Home = () => {
         <h2>Thiết kế được yêu thích nhất</h2>
         <span className="section-rule" />
         <p className="section-intro">
-          Khám phá những bản phối charm (mắt xích) mang câu chuyện cảm hứng từ các khách hàng của The Cóc Charm. Bạn có thể mua ngay hoặc dùng làm nền tảng để tùy chỉnh.
+          Khám phá những chủ đề được khách hàng chọn nhiều nhất khi thiết kế. Các nhóm cơ bản đã được loại trừ để bạn thấy rõ xu hướng thật.
         </p>
         <div className="product-grid">
-          {products.map((product) => (
-            <article className={`product-card${product.featured ? ' product-card--featured' : ''}`} key={product.badge}>
-              <span className="product-badge">{product.badge}</span>
-              <div className="product-card__image" />
+          {loadingThemes ? (
+            <article className="product-card">
+              <span className="product-badge">ĐANG TẢI</span>
+              <div className="product-card__image product-card__image--placeholder" />
               <div className="product-card__body">
-                <h3>Bản Phối "Eternal Love"</h3>
-                <p>Bộ vòng cơ bản 18 hạt Charm phối cùng dải chữ nhật khắc chữ tình yêu độc đáo.</p>
-                <strong>30.000đ / Charm</strong>
+                <h3>Đang tải chủ đề nổi bật</h3>
+                <p>Hệ thống đang tổng hợp các chủ đề được chọn nhiều nhất từ các thiết kế đã lưu.</p>
+                <strong>...</strong>
               </div>
             </article>
-          ))}
+          ) : displayThemes.length > 0 ? (
+            displayThemes.map((theme, index) => (
+              <article className="product-card" key={theme.categoryId}>
+                <span className="product-badge">{index === 1 ? 'HOT' : theme.badge}</span>
+                <div className="product-card__image">
+                  {theme.image ? <img src={theme.image} alt={theme.categoryName} /> : null}
+                </div>
+                <div className="product-card__body">
+                  <h3>{theme.categoryName}</h3>
+                  <p>{theme.charmName ? `Charm đại diện: ${theme.charmName}` : 'Charm đại diện từ chủ đề này.'}</p>
+                  <strong>{theme.count} lượt chọn</strong>
+                </div>
+              </article>
+            ))
+          ) : (
+            <article className="product-card product-card--empty">
+              <span className="product-badge">N/A</span>
+              <div className="product-card__image product-card__image--placeholder" />
+              <div className="product-card__body">
+                <h3>Chưa có dữ liệu</h3>
+                <p>Chưa đủ thiết kế đã lưu để xếp hạng các chủ đề phổ biến.</p>
+                <strong>0 lượt chọn</strong>
+              </div>
+            </article>
+          )}
         </div>
         <Link to="/charms" className="view-all-link">Xem tất cả thiết kế <span>→</span></Link>
       </section>
