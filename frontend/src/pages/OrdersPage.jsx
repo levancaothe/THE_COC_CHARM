@@ -1,91 +1,121 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import api from '../services/api';
+import './OrdersPage.css';
+
+const formatVnd = (value) => `${new Intl.NumberFormat('vi-VN').format(value || 0)} VND`;
 
 const OrdersPage = () => {
+  const [phone, setPhone] = useState('');
   const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [hasSearched, setHasSearched] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
+  const handleLookup = async (event) => {
+    event.preventDefault();
+    const normalizedPhone = phone.trim();
 
-  const fetchOrders = async () => {
+    if (!normalizedPhone) {
+      setError('Vui lòng nhập số điện thoại để tra cứu.');
+      setOrders([]);
+      setHasSearched(false);
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+    setHasSearched(true);
+
     try {
-      const { data } = await api.get('/orders');
-      setOrders(data.data);
-    } catch (error) {
-      console.error('Error fetching orders:', error);
+      const { data } = await api.get('/orders', {
+        params: { phone: normalizedPhone },
+      });
+      setOrders(data.data || []);
+    } catch (fetchError) {
+      console.error('Error fetching orders:', fetchError);
+      setError('Không thể tra cứu đơn hàng. Vui lòng thử lại sau.');
+      setOrders([]);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="orders-page container fade-in" style={{ padding: '60px 20px' }}>
-      <h1 className="section-title" style={{ marginBottom: '40px' }}>Đơn hàng của tôi</h1>
+    <div className="lookup-page fade-in">
+      <section className="lookup-shell">
+        <div className="lookup-panel">
+          <div className="lookup-icon" aria-hidden="true">
+            <svg viewBox="0 0 64 64" role="img">
+              <path d="M14 21.5 32 12l18 9.5-18 9.8L14 21.5Z" />
+              <path d="M14 25.5 30 34v18L14 43.4V25.5Z" />
+              <path d="M50 25.5 34 34v18l16-8.6V25.5Z" />
+              <path d="M22.5 17.1 41 27" />
+            </svg>
+          </div>
 
-      {loading ? (
-        <div className="loading-spinner"></div>
-      ) : (
-        <div className="orders-list" style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
-          {orders.map((order) => (
-            <div key={order._id} className="order-card glass" style={{ padding: '30px', borderRadius: '24px', border: '1px solid var(--border)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', borderBottom: '1px solid var(--border)', paddingBottom: '15px' }}>
-                <div>
-                  <h3 style={{ color: 'var(--accent)' }}>Mã đơn: #{order._id.slice(-6).toUpperCase()}</h3>
-                  <p style={{ fontSize: '0.9rem', opacity: 0.7 }}>Ngày đặt: {new Date(order.createdAt).toLocaleString('vi-VN')}</p>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <span style={{ 
-                    padding: '6px 15px', 
-                    borderRadius: '20px', 
-                    background: 'var(--accent-bg)', 
-                    color: 'var(--accent)', 
-                    fontSize: '0.8rem', 
-                    fontWeight: 700 
-                  }}>
-                    Đang xử lý
-                  </span>
-                </div>
-              </div>
+          <h1>Tra Cứu Đơn Hàng</h1>
+          <p className="lookup-intro">
+            Nhập số điện thoại của bạn để theo dõi tiến độ sản xuất và tình trạng vận chuyển.
+          </p>
 
-              <div className="order-items" style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                {order.items.map((item, idx) => (
-                  <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-                      <div style={{ width: '40px', height: '40px', background: 'white', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                         <span style={{ fontSize: '1.2rem' }}>✨</span>
-                      </div>
-                      <div>
-                        <p style={{ fontWeight: 600 }}>{item.productType === 'BraceletDesign' ? 'Vòng tay thiết kế' : 'Hạt Charm lẻ'}</p>
-                        <p style={{ fontSize: '0.8rem', opacity: 0.7 }}>Số lượng: {item.quantity}</p>
-                      </div>
-                    </div>
-                    <span style={{ fontWeight: 600 }}>${(item.price * item.quantity).toFixed(2)}</span>
+          <form className="lookup-form" onSubmit={handleLookup}>
+            <input
+              type="tel"
+              value={phone}
+              onChange={(event) => setPhone(event.target.value)}
+              placeholder="Số điện thoại của bạn"
+              aria-label="Số điện thoại của bạn"
+            />
+            {error && <p className="lookup-error">{error}</p>}
+            <button type="submit" disabled={loading}>
+              {loading ? 'Đang tra cứu...' : 'Tra cứu ngay'}
+            </button>
+          </form>
+        </div>
+      </section>
+
+      {hasSearched && !loading && !error && (
+        <section className="lookup-results">
+          {orders.length > 0 ? (
+            orders.map((order) => (
+              <article key={order._id} className="lookup-order-card">
+                <div className="lookup-order-head">
+                  <div>
+                    <h2>Mã đơn: #{order._id.slice(-6).toUpperCase()}</h2>
+                    <p>Ngày đặt: {new Date(order.createdAt).toLocaleString('vi-VN')}</p>
                   </div>
-                ))}
-              </div>
-
-              <div style={{ marginTop: '20px', paddingTop: '15px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ fontSize: '0.9rem' }}>
-                  <p><strong>Người nhận:</strong> {order.customerInfo.name}</p>
-                  <p><strong>Số điện thoại:</strong> {order.customerInfo.phone}</p>
-                  <p><strong>Địa chỉ:</strong> {order.customerInfo.address}</p>
+                  <span>{order.status || 'Pending'}</span>
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                  <p style={{ fontSize: '0.9rem', opacity: 0.7 }}>Tổng thanh toán:</p>
-                  <h2 style={{ color: 'var(--text-h)' }}>${order.totalPrice.toFixed(2)}</h2>
-                </div>
-              </div>
-            </div>
-          ))}
 
-          {orders.length === 0 && (
-            <div className="empty-state glass" style={{ padding: '60px', textAlign: 'center', borderRadius: '24px' }}>
-              <p>Bạn chưa có đơn hàng nào.</p>
+                <div className="lookup-order-items">
+                  {order.items.map((item, index) => (
+                    <div key={`${order._id}-${index}`} className="lookup-order-item">
+                      <span>{item.productType === 'BraceletDesign' ? 'Vòng tay thiết kế' : 'Hạt Charm lẻ'}</span>
+                      <span>Số lượng: {item.quantity}</span>
+                      <strong>{formatVnd(item.price * item.quantity)}</strong>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="lookup-order-foot">
+                  <div>
+                    <p><strong>Người nhận:</strong> {order.customerInfo.name}</p>
+                    <p><strong>Số điện thoại:</strong> {order.customerInfo.phone}</p>
+                    <p><strong>Địa chỉ:</strong> {order.customerInfo.address}</p>
+                  </div>
+                  <div className="lookup-total">
+                    <span>Tổng thanh toán</span>
+                    <strong>{formatVnd(order.totalPrice)}</strong>
+                  </div>
+                </div>
+              </article>
+            ))
+          ) : (
+            <div className="lookup-empty">
+              Không tìm thấy đơn hàng nào với số điện thoại này.
             </div>
           )}
-        </div>
+        </section>
       )}
     </div>
   );

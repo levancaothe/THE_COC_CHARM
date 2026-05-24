@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import api from '../services/api';
 import { useCart } from '../context/CartContext';
 import ConfirmModal from '../components/ConfirmModal';
+import './MyDesignsPage.css';
+
+const formatVnd = (value) => `${new Intl.NumberFormat('vi-VN').format(value || 0)} VND`;
 
 const MyDesignsPage = () => {
   const { addToCart } = useCart();
@@ -36,69 +39,78 @@ const MyDesignsPage = () => {
   };
 
   return (
-    <div className="my-designs-page container fade-in" style={{ padding: '40px 0' }}>
-      <h1 style={{ marginBottom: '30px' }}>Thiết kế của tôi</h1>
-
-      {loading ? (
-        <div className="loading-spinner"></div>
-      ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '30px' }}>
-          {designs.map(design => (
-            <div key={design._id} className="glass" style={{ padding: '20px', borderRadius: 'var(--radius-lg)' }}>
-              <h3>{design.name}</h3>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                Ngày lưu: {new Date(design.createdAt).toLocaleDateString()}
-              </p>
-
-              <div style={{ display: 'flex', gap: '5px', margin: '15px 0', overflowX: 'auto', padding: '10px 0' }}>
-                {design.charms.map((item, idx) => (
-                  <img
-                    key={idx}
-                    src={item.charm?.image}
-                    alt=""
-                    style={{ width: '30px', height: '30px', objectFit: 'contain' }}
-                  />
-                ))}
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontWeight: 'bold', color: 'var(--primary-gold)', fontSize: '1.2rem' }}>
-                  ${design.totalPrice}
-                </span>
-                <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-                  <button
-                    className="btn-premium"
-                    style={{ padding: '8px 15px', fontSize: '0.9rem' }}
-                    onClick={() => {
-                      addToCart({
-                        _id: design._id,
-                        name: design.name,
-                        price: design.totalPrice,
-                        charms: design.charms.map(c => c.charm)
-                      }, 'design');
-                      alert('Đã thêm thiết kế vào giỏ hàng!');
-                    }}
-                  >
-                    Thêm vào giỏ hàng
-                  </button>
-                  <button
-                    onClick={() => { setDeleteId(design._id); setIsModalOpen(true); }}
-                    style={{ color: '#ff4757', background: 'none', border: 'none', cursor: 'pointer' }}
-                  >
-                    Xóa
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-
-          {designs.length === 0 && (
-            <div className="empty-state">
-              <p>Bạn chưa có thiết kế nào được lưu.</p>
-            </div>
-          )}
+    <div className="my-designs-page fade-in">
+      <div className="my-designs-wrap">
+        <div className="my-designs-header">
+          <p>Mẫu đã lưu</p>
+          <h1>Thiết kế của tôi</h1>
         </div>
-      )}
+
+        {loading ? (
+          <div className="loading-spinner"></div>
+        ) : (
+          <div className="my-designs-grid">
+            {designs.map((design) => (
+              <article key={design._id} className="my-design-card">
+                <div className="my-design-card__head">
+                  <div>
+                    <h2>{design.name}</h2>
+                    <p>Ngày lưu: {new Date(design.createdAt).toLocaleDateString('vi-VN')}</p>
+                  </div>
+                  <span>{design.charms.length} hạt</span>
+                </div>
+
+                <div className="my-design-preview" aria-label={`Preview ${design.name}`}>
+                  <div className="my-design-band">
+                    {design.charms.map((item, index) => (
+                      <img
+                        key={`${item.charm?._id || item.charm?.name || 'charm'}-${index}`}
+                        src={item.charm?.image}
+                        alt=""
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="my-design-card__foot">
+                  <strong>{formatVnd(design.totalPrice)}</strong>
+                  <div className="my-design-actions">
+                    <button
+                      className="my-design-add"
+                      onClick={() => {
+                        addToCart({
+                          _id: design._id,
+                          name: design.name,
+                          price: design.totalPrice,
+                          charms: design.charms.map((c) => c.charm),
+                        }, 'design');
+                        alert('Đã thêm thiết kế vào giỏ hàng!');
+                      }}
+                    >
+                      Thêm vào giỏ hàng
+                    </button>
+                    <button
+                      className="my-design-delete"
+                      onClick={() => {
+                        setDeleteId(design._id);
+                        setIsModalOpen(true);
+                      }}
+                    >
+                      Xóa
+                    </button>
+                  </div>
+                </div>
+              </article>
+            ))}
+
+            {designs.length === 0 && (
+              <div className="my-design-empty">
+                <p>Bạn chưa có thiết kế nào được lưu.</p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       <ConfirmModal
         isOpen={isModalOpen}

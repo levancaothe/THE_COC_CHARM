@@ -19,7 +19,14 @@ router.post('/', async (req, res) => {
 
 router.get('/', async (req, res) => {
   try {
-    const orders = await Order.find().sort('-createdAt');
+    const filter = {};
+    const phone = req.query.phone?.trim();
+
+    if (phone) {
+      filter['customerInfo.phone'] = phone;
+    }
+
+    const orders = await Order.find(filter).sort('-createdAt');
     res.status(200).json({
       success: true,
       count: orders.length,

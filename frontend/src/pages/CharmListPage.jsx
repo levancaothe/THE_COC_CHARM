@@ -7,6 +7,7 @@ const CharmListPage = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     fetchCategories();
@@ -36,8 +37,16 @@ const CharmListPage = () => {
 
   const getCharmsByCategory = (catId) => {
     return charms.filter(
-      (c) => c.category && (c.category._id === catId || c.category === catId)
+      (c) =>
+        c.category &&
+        (c.category._id === catId || c.category === catId) &&
+        c.name.toLowerCase().includes(searchTerm.trim().toLowerCase())
     );
+  };
+
+  const handleCategoryClick = (categoryId) => {
+    setSearchTerm("");
+    setSelectedCategory(categoryId === selectedCategory ? null : categoryId);
   };
 
   return (
@@ -72,11 +81,51 @@ const CharmListPage = () => {
             <CategoryCard
               key={cat._id}
               category={cat}
-              onClick={(c) => setSelectedCategory(c._id === selectedCategory ? null : c._id)}
+              onClick={(c) => handleCategoryClick(c._id)}
               isSelected={selectedCategory === cat._id}
             />
           ))}
         </div>
+
+        {selectedCategory && (
+          <div
+            style={{
+              maxWidth: "520px",
+              margin: "28px 0 0",
+              textAlign: "left",
+            }}
+          >
+            <label
+              htmlFor="charm-search"
+              style={{
+                display: "block",
+                marginBottom: "8px",
+                color: "var(--text-muted)",
+                fontSize: "0.9rem",
+                fontWeight: 700,
+              }}
+            >
+              Tìm kiếm charm
+            </label>
+            <input
+              id="charm-search"
+              type="search"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Nhập tên charm..."
+              style={{
+                width: "100%",
+                padding: "12px 16px",
+                border: "1px solid var(--border)",
+                borderRadius: "var(--radius-md)",
+                background: "var(--white)",
+                color: "var(--text)",
+                font: "inherit",
+                outline: "none",
+              }}
+            />
+          </div>
+        )}
       </div>
 
       {/* Charm list for selected category */}
@@ -129,15 +178,28 @@ const CharmListPage = () => {
                 />
                 <p
                   style={{
+                    minHeight: "36px",
+                    margin: "10px 0 0",
+                    color: "var(--text-h)",
+                    fontSize: "0.9rem",
+                    fontWeight: "700",
+                    lineHeight: "1.25",
+                  }}
+                >
+                  {charm.name}
+                </p>
+                <p
+                  style={{
                     fontSize: "0.85rem",
                     color: "var(--primary-gold)",
                     fontWeight: "700",
-                    marginTop: "10px",
+                    marginTop: "6px",
                   }}
                 >
                   {new Intl.NumberFormat("vi-VN", {
                     style: "currency",
                     currency: "VND",
+                    currencyDisplay: "code",
                   }).format(charm.price)}
                 </p>
               </div>

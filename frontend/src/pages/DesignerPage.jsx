@@ -8,6 +8,7 @@ import BraceletCanvas from '../components/BraceletCanvas';
 import { PriceSummary, DesignerToolbar } from '../components/DesignerTools';
 import { usePriceCalculator } from '../hooks/usePriceCalculator';
 import { useCart } from '../context/CartContext';
+import './DesignerPage.css';
 
 const DesignerPage = () => {
   const [availableCharms, setAvailableCharms] = useState([]);
@@ -22,6 +23,22 @@ const DesignerPage = () => {
   const designRef = useRef(null);
 
   const totalPrice = usePriceCalculator(selectedCharms);
+  const formatVnd = (value) => `${new Intl.NumberFormat('vi-VN').format(value || 0)} VND`;
+
+  const findDefaultCharm = (mat = material) => {
+    const normalizedMaterial = mat.toLowerCase();
+    const isBaseCharm = (charm) => {
+      const name = charm.name.toLowerCase();
+      return name.includes('cơ bản') || name.includes('mặc định');
+    };
+
+    return availableCharms.find((charm) =>
+      charm.name.toLowerCase().includes(normalizedMaterial) && isBaseCharm(charm)
+    ) || availableCharms.find(isBaseCharm);
+  };
+
+  const baseCharm = findDefaultCharm(material);
+  const basePrice = (baseCharm?.price || 0) * (Number(tempCapacity) || 0);
 
   useEffect(() => {
     const fetchCharmsAndCategories = async () => {
@@ -40,16 +57,7 @@ const DesignerPage = () => {
   }, []);
 
   const fillWithDefaultCharms = (cap, mat) => {
-    let defaultCharm = availableCharms.find(c =>
-      c.name.toLowerCase().includes(mat.toLowerCase()) &&
-      (c.name.toLowerCase().includes('cơ bản') || c.name.toLowerCase().includes('mặc định'))
-    );
-
-    if (!defaultCharm) {
-      defaultCharm = availableCharms.find(c =>
-        c.name.toLowerCase().includes('cơ bản') || c.name.toLowerCase().includes('mặc định')
-      );
-    }
+    const defaultCharm = findDefaultCharm(mat);
 
     if (defaultCharm) {
       const initialCharms = Array.from({ length: cap }).map(() => ({
@@ -120,16 +128,7 @@ const DesignerPage = () => {
       const newCharms = [...prevCharms];
 
       // Hoàn trả lại hạt mặc định khi xóa hạt sự kiện
-      let defaultCharm = availableCharms.find(c =>
-        c.name.toLowerCase().includes(material.toLowerCase()) &&
-        (c.name.toLowerCase().includes('cơ bản') || c.name.toLowerCase().includes('mặc định'))
-      );
-
-      if (!defaultCharm) {
-        defaultCharm = availableCharms.find(c =>
-          c.name.toLowerCase().includes('cơ bản') || c.name.toLowerCase().includes('mặc định')
-        );
-      }
+      const defaultCharm = findDefaultCharm(material);
 
       if (defaultCharm) {
         newCharms[index] = {
@@ -237,57 +236,61 @@ const DesignerPage = () => {
     }
   };
 
-  // Màn hình khởi đầu nhập số hạt
   if (capacity === null) {
     return (
-      <div className="container fade-in" style={{ padding: '100px 0', textAlign: 'center' }}>
-        <div className="glass" style={{ maxWidth: '500px', margin: '0 auto', padding: '40px', borderRadius: 'var(--radius-lg)' }}>
-          <h2 style={{ marginBottom: '20px' }}>Chào mừng bạn đến với Designer</h2>
-          <p style={{ color: 'var(--text-muted)', marginBottom: '30px' }}>
-            Vui lòng nhập chu vi tay hoặc chọn số lượng hạt charm bạn muốn thiết kế.
+      <div className="designer-start fade-in">
+        <section className="designer-start-card" aria-labelledby="designer-start-title">
+          <h1 id="designer-start-title">
+            Chào mừng bạn đến với
+            <span>không gian thiết kế</span>
+          </h1>
+          <p className="designer-start-intro">
+            Vui lòng nhập chu vi cổ tay hoặc chọn số lượng hạt charm (mắt xích) bạn muốn thiết kế.
           </p>
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', marginBottom: '10px', fontWeight: '600' }}>Chu vi cổ tay (cm) - Tùy chọn:</label>
+
+          <div className="designer-start-form">
+            <label htmlFor="wrist-size">Chu vi cổ tay (cm) - Tùy chọn:</label>
             <input
+              id="wrist-size"
               type="number"
               min="1"
               step="0.1"
               value={wristSize}
               onChange={handleWristSizeChange}
               placeholder="VD: 16"
-              style={{ padding: '12px', width: '150px', borderRadius: 'var(--radius-md)', border: '1px solid var(--primary-gold)', textAlign: 'center', fontSize: '1.2rem', marginBottom: '5px' }}
             />
             {wristSize && parseFloat(wristSize) > 0 && (
-              <p style={{ fontSize: '0.9rem', color: 'var(--primary-gold)', marginBottom: '20px', fontStyle: 'italic' }}>
+              <p className="designer-hint">
                 Gợi ý: Cổ tay {wristSize}cm nên dùng khoảng {Math.round(parseFloat(wristSize) / 0.9)} hạt.
               </p>
             )}
 
-            <label style={{ display: 'block', marginBottom: '10px', fontWeight: '600', marginTop: !wristSize ? '20px' : '0' }}>Số lượng hạt (Capacity):</label>
+            <label htmlFor="charm-capacity">Số lượng hạt (Capacity):</label>
             <input
+              id="charm-capacity"
               type="number"
               min="1"
               max="100"
               value={tempCapacity}
               onChange={(e) => setTempCapacity(Number(e.target.value))}
-              style={{ padding: '12px', width: '150px', borderRadius: 'var(--radius-md)', border: '1px solid var(--primary-gold)', textAlign: 'center', fontSize: '1.2rem', marginBottom: '20px' }}
+              placeholder="VD: 10"
             />
 
-            <label style={{ display: 'block', marginBottom: '10px', fontWeight: '600' }}>Chất liệu dây:</label>
+            <label htmlFor="bracelet-material">Chất liệu dây (Base):</label>
             <select
+              id="bracelet-material"
               value={material}
               onChange={(e) => setMaterial(e.target.value)}
-              style={{ padding: '12px', width: '200px', borderRadius: 'var(--radius-md)', border: '1px solid var(--primary-gold)', fontSize: '1rem' }}
             >
-              <option value="Bạc">Dây Bạc</option>
-              <option value="Vàng">Dây Vàng</option>
-              <option value="Vàng Hồng">Dây Vàng Hồng</option>
+              <option value="Bạc">Dây bạc ({formatVnd(basePrice)})</option>
+              <option value="Vàng">Dây vàng ({formatVnd(basePrice)})</option>
+              <option value="Vàng Hồng">Dây vàng hồng ({formatVnd(basePrice)})</option>
             </select>
           </div>
-          <button className="btn-premium" onClick={handleStartDesign} style={{ padding: '12px 40px' }}>
+          <button className="designer-start-button" onClick={handleStartDesign}>
             Bắt đầu thiết kế
           </button>
-        </div>
+        </section>
       </div>
     );
   }
@@ -335,7 +338,8 @@ const DesignerPage = () => {
           />
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '30px', alignItems: 'stretch', marginBottom: '30px' }}>
+        <div className="designer-checkout-panel">
+          <PriceSummary totalPrice={totalPrice} count={selectedCharms.length} />
           <DesignerToolbar
             onSave={handleSave}
             onAddToCart={handleAddToCart}
@@ -343,7 +347,6 @@ const DesignerPage = () => {
             onClear={() => fillWithDefaultCharms(capacity, material)}
             disabled={isSaving}
           />
-          <PriceSummary totalPrice={totalPrice} count={selectedCharms.length} />
         </div>
         <CharmSidebar charms={availableCharms} categories={categories} onCharmClick={addCharm} />
       </div>

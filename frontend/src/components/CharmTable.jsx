@@ -22,7 +22,7 @@ const CharmTable = ({ charms, onEdit, onDelete }) => {
               </td>
               <td style={{ padding: '12px' }}>{charm.name}</td>
               <td style={{ padding: '12px' }}>{charm.category?.name}</td>
-              <td style={{ padding: '12px' }}>${charm.price}</td>
+              <td style={{ padding: '12px' }}>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', currencyDisplay: 'code' }).format(charm.price)}</td>
               <td style={{ padding: '12px' }}>{charm.stock}</td>
               <td style={{ padding: '12px', textAlign: 'right' }}>
                 <button onClick={() => onEdit(charm)} style={{ color: 'var(--primary-gold)', marginRight: '10px' }}>Edit</button>

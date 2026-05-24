@@ -16,7 +16,7 @@ const CharmCard = ({ charm }) => {
         <div className="charm-info">
           <span className="charm-category">{charm.category?.name}</span>
           <h3 className="charm-name">{charm.name}</h3>
-          <p className="charm-price">${charm.price}</p>
+          <p className="charm-price">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', currencyDisplay: 'code' }).format(charm.price)}</p>
           <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
             <button className="btn-add" onClick={() => addToCart(charm)}>Thêm vào giỏ</button>
             <button className="btn-secondary" style={{ flex: 1 }} onClick={() => setIsModalOpen(true)}>Chi tiết</button>

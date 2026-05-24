@@ -1,68 +1,111 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import api from '../services/api';
+import SuccessModal from '../components/SuccessModal';
 import './CartPage.css';
 
+const formatVnd = (value) => `${new Intl.NumberFormat('vi-VN').format(value || 0)} VND`;
+
 const CartPage = () => {
-  const { cartItems, toggleSelection, removeFromCart, updateQuantity, totalPrice, clearCart } = useCart();
+  const {
+    cartItems,
+    toggleSelection,
+    removeFromCart,
+    updateQuantity,
+    totalPrice,
+    clearCart,
+  } = useCart();
+
   const [customerInfo, setCustomerInfo] = useState({
     name: '',
     phone: '',
-    address: ''
+    email: '',
+    addressLine: '',
+    district: '',
+    city: '',
+    note: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
-  // Debug logging
-  useEffect(() => {
-    console.log('CartPage mounted, cartItems:', cartItems);
-  }, [cartItems]);
+  const selectedItems = useMemo(() => cartItems.filter((item) => item.selected), [cartItems]);
+  const hasSelectedItems = selectedItems.length > 0;
 
-  const handleCheckout = async (e) => {
-    e.preventDefault();
-    
-    const selectedItems = cartItems.filter(item => item.selected);
-    
-    if (selectedItems.length === 0) {
+  const shippingAddress = [
+    customerInfo.addressLine,
+    customerInfo.district,
+    customerInfo.city,
+    customerInfo.note ? `Ghi chú: ${customerInfo.note}` : '',
+  ].filter(Boolean).join(', ');
+
+  const handleFieldChange = (field, value) => {
+    setCustomerInfo((current) => ({ ...current, [field]: value }));
+  };
+
+  const handleCheckout = async (event) => {
+    event.preventDefault();
+
+    if (!hasSelectedItems) {
       alert('Vui lòng chọn ít nhất một sản phẩm để thanh toán!');
       return;
     }
 
-    if (!customerInfo.name.trim() || !customerInfo.phone.trim() || !customerInfo.address.trim()) {
-      alert('Vui lòng điền đầy đủ thông tin giao hàng!');
+    if (!customerInfo.name.trim() || !customerInfo.phone.trim() || !customerInfo.addressLine.trim()) {
+      alert('Vui lòng điền đầy đủ họ tên, số điện thoại và địa chỉ nhận hàng!');
       return;
     }
 
     const phoneRegex = /^0[0-9]{9}$/;
-    if (!phoneRegex.test(customerInfo.phone)) {
+    if (!phoneRegex.test(customerInfo.phone.trim())) {
       alert('Vui lòng nhập số điện thoại Việt Nam hợp lệ (VD: 0912345678)!');
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const orderData = {
-        items: selectedItems.map(item => ({
+      await api.post('/orders', {
+        items: selectedItems.map((item) => ({
           product: item._id,
           productType: item.type === 'design' ? 'BraceletDesign' : 'Charm',
           quantity: item.quantity,
-          price: item.price
+          price: item.price,
         })),
         totalPrice,
-        customerInfo
-      };
+        customerInfo: {
+          name: customerInfo.name.trim(),
+          phone: customerInfo.phone.trim(),
+          email: customerInfo.email.trim(),
+          address: shippingAddress,
+          addressLine: customerInfo.addressLine.trim(),
+          district: customerInfo.district.trim(),
+          city: customerInfo.city.trim(),
+          note: customerInfo.note.trim(),
+        },
+        paymentInfo: {
+          method: 'BankTransfer',
+          status: 'TransferConfirmed',
+          bankName: 'Techcombank',
+          accountNumber: '123 456 789',
+          accountHolder: 'Trần Hà Trang',
+        },
+      });
 
-      await api.post('/orders', orderData);
-      alert('Đặt hàng thành công!');
+      // Show success modal instead of alert
+      console.log('Order successful, showing modal...');
+      setShowSuccessModal(true);
+      console.log('showSuccessModal set to:', true);
       
-      // Remove selected items from cart
-      selectedItems.forEach(item => removeFromCart(item._id, item.type));
-      
-      // Reset form
+      // Clear selected items and form
+      selectedItems.forEach((item) => removeFromCart(item._id, item.type));
       setCustomerInfo({
         name: '',
         phone: '',
-        address: ''
+        email: '',
+        addressLine: '',
+        district: '',
+        city: '',
+        note: '',
       });
     } catch (error) {
       console.error('Lỗi khi đặt hàng:', error);
@@ -74,142 +117,200 @@ const CartPage = () => {
 
   if (cartItems.length === 0) {
     return (
-      <div className="cart-page container fade-in" style={{ padding: '100px 0', textAlign: 'center' }}>
-        <div className="glass" style={{ padding: '60px', borderRadius: '24px' }}>
-          <h2 style={{ marginBottom: '20px' }}>Giỏ hàng của bạn đang trống</h2>
-          <p style={{ color: 'var(--text)', marginBottom: '30px' }}>Hãy chọn cho mình những hạt charm tuyệt vời nhất nhé!</p>
-          <Link to="/charms" className="btn-premium" style={{ textDecoration: 'none' }}>
-            Bắt đầu mua sắm
-          </Link>
+      <div className="cart-page cart-empty-page fade-in">
+        <div className="cart-empty-card">
+          <h2>Giỏ hàng của bạn đang trống</h2>
+          <p>Hãy chọn cho mình những hạt charm phù hợp nhất.</p>
+          <Link to="/charms">Bắt đầu mua sắm</Link>
         </div>
       </div>
     );
   }
 
-  // Debug rendering
-  console.log('Rendering cart with items:', cartItems.length);
-
   return (
-    <div className="cart-page container fade-in" style={{ padding: '60px 20px', minHeight: '100vh', backgroundColor: '#fff' }}>
-      <h1 className="section-title" style={{ marginBottom: '40px', color: '#000' }}>Giỏ hàng ({cartItems.length} items)</h1>
-      
-      {/* Debug Panel */}
-      <div style={{ background: '#f0f0f0', padding: '15px', borderRadius: '8px', marginBottom: '20px', fontSize: '12px', display: process.env.NODE_ENV === 'development' ? 'block' : 'none' }}>
-        <strong>Debug Info:</strong>
-        <pre style={{ margin: '10px 0 0 0' }}>
-          Items: {cartItems.length}
-          Total Price: ${totalPrice.toFixed(2)}
-          localStorage: {typeof localStorage !== 'undefined' ? 'available' : 'unavailable'}
-        </pre>
-      </div>
-      
-      <div className="cart-content">
-        <div className="cart-left">
-          <div className="cart-items-list">
-            {cartItems.map((item) => (
-              <div key={`${item._id}-${item.type}`} className={`cart-item glass ${item.selected ? 'selected' : ''}`}>
-                <div className="item-checkbox">
-                  <input 
-                    type="checkbox" 
-                    checked={item.selected} 
-                    onChange={() => toggleSelection(item._id, item.type)}
+    <div className="cart-page fade-in">
+      <div className="cart-wrap">
+        <h1>Giỏ hàng ({cartItems.length} sản phẩm)</h1>
+
+        <div className="cart-items-list">
+          {cartItems.map((item) => (
+            <article key={`${item._id}-${item.type}`} className={`cart-item ${item.selected ? 'selected' : ''}`}>
+              <div className="item-checkbox">
+                <input
+                  type="checkbox"
+                  checked={item.selected}
+                  onChange={() => toggleSelection(item._id, item.type)}
+                  aria-label={`Chọn ${item.name}`}
+                />
+              </div>
+
+              <div className="item-image">
+                {item.type === 'design' && item.charms ? (
+                  <div className="design-preview">
+                    {item.charms.map((charm, index) => (
+                      <img
+                        key={`${charm._id || charm.name}-${index}`}
+                        src={charm.image || 'https://via.placeholder.com/50'}
+                        alt=""
+                        className="design-charm-mini"
+                        title={charm.name}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <img src={item.image || 'https://via.placeholder.com/100'} alt={item.name} />
+                )}
+              </div>
+
+              <div className="item-details">
+                <span className="item-type">{item.type === 'design' ? 'Vòng tay thiết kế' : 'Hạt Charm lẻ'}</span>
+                <h3>{item.name}</h3>
+                <p className="item-price-unit">{formatVnd(item.price)}</p>
+              </div>
+
+              <div className="item-quantity">
+                <button type="button" onClick={() => updateQuantity(item._id, item.type, item.quantity - 1)}>-</button>
+                <span>{item.quantity}</span>
+                <button type="button" onClick={() => updateQuantity(item._id, item.type, item.quantity + 1)}>+</button>
+              </div>
+
+              <div className="item-total">
+                <p>{formatVnd(item.price * item.quantity)}</p>
+              </div>
+
+              <button className="btn-remove" type="button" onClick={() => removeFromCart(item._id, item.type)}>
+                &times;
+              </button>
+            </article>
+          ))}
+        </div>
+
+        <div className="cart-list-actions">
+          <Link to="/charms" className="continue-shopping">&larr; Tiếp tục mua sắm</Link>
+          <button className="btn-clear" type="button" onClick={clearCart}>Xóa toàn bộ giỏ hàng</button>
+        </div>
+
+        {hasSelectedItems && (
+          <section className="checkout-section">
+            <form className="checkout-form-card" onSubmit={handleCheckout}>
+              <h2>Thông tin đơn hàng</h2>
+
+              <fieldset>
+                <legend>Thông tin liên hệ</legend>
+                <div className="form-grid form-grid--two">
+                  <input
+                    type="text"
+                    placeholder="Họ và tên"
+                    value={customerInfo.name}
+                    onChange={(event) => handleFieldChange('name', event.target.value)}
+                    required
+                  />
+                  <input
+                    type="tel"
+                    placeholder="Số điện thoại"
+                    value={customerInfo.phone}
+                    onChange={(event) => handleFieldChange('phone', event.target.value)}
+                    required
                   />
                 </div>
-                <div className="item-image">
-                  {item.type === 'design' && item.charms ? (
-                    <div className="design-preview">
-                      {item.charms.map((charm, idx) => (
-                        <img 
-                          key={idx} 
-                          src={charm.image || 'https://via.placeholder.com/50'} 
-                          alt="" 
-                          className="design-charm-mini"
-                          title={charm.name}
-                        />
-                      ))}
+                <input
+                  type="email"
+                  placeholder="Email (Tùy chọn)"
+                  value={customerInfo.email}
+                  onChange={(event) => handleFieldChange('email', event.target.value)}
+                />
+              </fieldset>
+
+              <fieldset>
+                <legend>Địa chỉ nhận hàng</legend>
+                <input
+                  type="text"
+                  placeholder="Địa chỉ cụ thể (Số nhà, Tên đường, ...)"
+                  value={customerInfo.addressLine}
+                  onChange={(event) => handleFieldChange('addressLine', event.target.value)}
+                  required
+                />
+                <div className="form-grid form-grid--two">
+                  <input
+                    type="text"
+                    placeholder="Quận / Huyện"
+                    value={customerInfo.district}
+                    onChange={(event) => handleFieldChange('district', event.target.value)}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Tỉnh / Thành phố"
+                    value={customerInfo.city}
+                    onChange={(event) => handleFieldChange('city', event.target.value)}
+                  />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Ghi chú thêm cho đơn hàng"
+                  value={customerInfo.note}
+                  onChange={(event) => handleFieldChange('note', event.target.value)}
+                />
+              </fieldset>
+
+              <fieldset>
+                <legend>Phương thức thanh toán</legend>
+                <div className="payment-box">
+                  <p>
+                    The Cóc Charm áp dụng hình thức thanh toán chuyển khoản 100% cho các thiết kế cá nhân hóa.
+                  </p>
+                  <div className="bank-card">
+                    <div className="qr-placeholder" aria-hidden="true" />
+                    <div>
+                      <h3>Quét mã QR để chuyển khoản nhanh</h3>
+                      <dl>
+                        <div><dt>Ngân hàng</dt><dd>Techcombank</dd></div>
+                        <div><dt>Số tài khoản</dt><dd>123 456 789</dd></div>
+                        <div><dt>Chủ thẻ</dt><dd>Trần Hà Trang</dd></div>
+                      </dl>
                     </div>
-                  ) : (
-                    <img src={item.image || 'https://via.placeholder.com/100'} alt={item.name} />
-                  )}
+                  </div>
                 </div>
-                <div className="item-details">
-                  <span className="item-type">{item.type === 'design' ? 'Vòng tay thiết kế' : 'Hạt Charm lẻ'}</span>
-                  <h3>{item.name}</h3>
-                  <p className="item-price-unit">${item.price}</p>
-                </div>
-                <div className="item-quantity">
-                  <button onClick={() => updateQuantity(item._id, item.type, item.quantity - 1)}>-</button>
-                  <span>{item.quantity}</span>
-                  <button onClick={() => updateQuantity(item._id, item.type, item.quantity + 1)}>+</button>
-                </div>
-                <div className="item-total">
-                  <p>${(item.price * item.quantity).toFixed(2)}</p>
-                </div>
-                <button className="btn-remove" onClick={() => removeFromCart(item._id, item.type)}>
-                  &times;
-                </button>
-              </div>
-            ))}
-          </div>
-          
-          <div className="checkout-form glass" style={{ marginTop: '40px', padding: '30px' }}>
-            <h3>Thông tin khách hàng</h3>
-            <form onSubmit={handleCheckout} style={{ display: 'grid', gap: '15px', marginTop: '20px' }}>
-              <input 
-                type="text" 
-                placeholder="Họ và tên" 
-                value={customerInfo.name} 
-                onChange={(e) => setCustomerInfo({...customerInfo, name: e.target.value})}
-                required
-              />
-              <input 
-                type="tel" 
-                placeholder="Số điện thoại" 
-                value={customerInfo.phone} 
-                onChange={(e) => setCustomerInfo({...customerInfo, phone: e.target.value})}
-                required
-              />
-              <textarea 
-                placeholder="Địa chỉ nhận hàng" 
-                value={customerInfo.address} 
-                onChange={(e) => setCustomerInfo({...customerInfo, address: e.target.value})}
-                required
-                rows="3"
-              />
-              <button 
-                type="submit"
-                className="btn-premium checkout-btn" 
-                disabled={isSubmitting}
-                style={{ marginTop: '10px' }}
-              >
-                {isSubmitting ? 'Đang xử lý...' : 'Đặt hàng ngay'}
+              </fieldset>
+
+              <button type="submit" className="confirm-transfer-btn" disabled={isSubmitting}>
+                {isSubmitting ? 'Đang xác nhận...' : 'Xác nhận đã chuyển khoản thành công ✓'}
               </button>
             </form>
-          </div>
-        </div>
 
-        <div className="cart-summary glass">
-          <h3>Tóm tắt đơn hàng</h3>
-          <div className="summary-row">
-            <span>Tạm tính</span>
-            <span>${totalPrice.toFixed(2)}</span>
-          </div>
-          <div className="summary-row">
-            <span>Vận chuyển</span>
-            <span>Miễn phí</span>
-          </div>
-          <div className="summary-total">
-            <span>Tổng cộng</span>
-            <span>${totalPrice.toFixed(2)}</span>
-          </div>
-          <button className="btn-clear" onClick={clearCart}>
-            Xóa toàn bộ giỏ hàng
-          </button>
-          <Link to="/charms" className="continue-shopping">
-            &larr; Tiếp tục mua sắm
-          </Link>
-        </div>
+            <aside className="checkout-summary-card">
+              <h2>Đặt hàng</h2>
+              <div className="checkout-summary-lines">
+                {selectedItems.map((item) => (
+                  <div className="checkout-summary-line" key={`${item._id}-${item.type}`}>
+                    <span>{item.name}</span>
+                    <span>{item.quantity}</span>
+                    <strong>{formatVnd(item.price * item.quantity)}</strong>
+                  </div>
+                ))}
+                <div className="checkout-summary-line checkout-summary-line--shipping">
+                  <span>Phí vận chuyển</span>
+                  <span />
+                  <strong>Miễn phí</strong>
+                </div>
+              </div>
+              <div className="checkout-summary-total">
+                <span>Tổng cộng:</span>
+                <strong>{formatVnd(totalPrice)}</strong>
+              </div>
+              <p className="checkout-note">
+                Sản phẩm được chế tác thủ công, đóng gói trong hộp có kèm thẻ bảo hành chính hãng từ The Cóc Charm.
+              </p>
+            </aside>
+          </section>
+        )}
       </div>
+
+      <SuccessModal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        title="Đặt Hàng Thành Công!"
+        message="Cảm ơn bạn đã lựa chọn The Cốc Charm. Đơn hàng của bạn đang được xử lý."
+      />
     </div>
   );
 };

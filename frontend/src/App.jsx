@@ -8,6 +8,8 @@ import DesignerPage from './pages/DesignerPage';
 import MyDesignsPage from './pages/MyDesignsPage';
 import CartPage from './pages/CartPage';
 import OrdersPage from './pages/OrdersPage';
+import AdminDashboard from './pages/AdminDashboard';
+import GuidePage from './pages/GuidePage';
 import { CartProvider } from './context/CartContext';
 
 function App() {
@@ -22,8 +24,9 @@ function App() {
               <Route path="/designer" element={<DesignerPage />} />
               <Route path="/my-designs" element={<MyDesignsPage />} />
               <Route path="/orders" element={<OrdersPage />} />
+              <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/cart" element={<CartPage />} />
-              <Route path="/about" element={<div className="container" style={{ padding: '100px 0', textAlign: 'center' }}>Về chúng tôi (Đang cập nhật)</div>} />
+              <Route path="/about" element={<GuidePage />} />
             </Routes>
           </Layout>
         </Router>

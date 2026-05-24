@@ -5,7 +5,6 @@ const getCategories = async (req, res, next) => {
     try {
         const categories = await Category.find().lean();
         
-        // Fetch up to 6 charm images for each category
         for (let cat of categories) {
             const charms = await Charm.find({ category: cat._id }).limit(6).select('image').lean();
             cat.thumbnails = charms.map(c => c.image);

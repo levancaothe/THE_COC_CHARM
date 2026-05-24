@@ -30,17 +30,30 @@ const DraggableCharm = ({ charm, onClick }) => {
       onMouseLeave={(e) => e.currentTarget.style.borderColor = 'transparent'}
     >
       <img src={`http://localhost:5000/api/proxy/image?url=${encodeURIComponent(charm.image)}`} alt={charm.name} crossOrigin="anonymous" style={{ width: '60px', height: '60px', objectFit: 'contain', margin: '0 auto' }} />
-      <p style={{ fontSize: '0.8rem', color: 'var(--primary-gold)', fontWeight: '700', marginTop: '10px' }}>{charm.price.toLocaleString()}đ</p>
+      <p style={{ minHeight: '34px', fontSize: '0.82rem', color: 'var(--text-h)', fontWeight: '700', lineHeight: '1.2', marginTop: '10px' }}>{charm.name}</p>
+      <p style={{ fontSize: '0.8rem', color: 'var(--primary-gold)', fontWeight: '700', marginTop: '6px' }}>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', currencyDisplay: 'code' }).format(charm.price)}</p>
     </div>
   );
 };
 
 const CharmSidebar = ({ charms, categories = [], onCharmClick }) => {
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const filteredCharms = selectedEvent
-    ? charms.filter(c => c.category && (c.category._id === selectedEvent._id || c.category === selectedEvent._id))
+    ? charms.filter(c =>
+        c.category &&
+        (c.category._id === selectedEvent._id || c.category === selectedEvent._id) &&
+        c.name.toLowerCase().includes(searchTerm.trim().toLowerCase())
+      )
     : [];
+
+  const handleCategoryClick = (category) => {
+    setSearchTerm('');
+    setSelectedEvent((currentCategory) =>
+      currentCategory?._id === category._id ? null : category
+    );
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '30px', width: '100%' }}>
@@ -58,10 +71,44 @@ const CharmSidebar = ({ charms, categories = [], onCharmClick }) => {
               key={cat._id}
               category={cat}
               isSelected={selectedEvent?._id === cat._id}
-              onClick={setSelectedEvent}
+              onClick={handleCategoryClick}
             />
           ))}
         </div>
+
+        {selectedEvent && (
+          <div style={{ maxWidth: '520px', marginTop: '28px', textAlign: 'left' }}>
+            <label
+              htmlFor="designer-charm-search"
+              style={{
+                display: 'block',
+                marginBottom: '8px',
+                color: 'var(--text-muted)',
+                fontSize: '0.9rem',
+                fontWeight: 700
+              }}
+            >
+              Tìm kiếm charm
+            </label>
+            <input
+              id="designer-charm-search"
+              type="search"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Nhập tên charm..."
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-md)',
+                background: 'var(--white)',
+                color: 'var(--text)',
+                font: 'inherit',
+                outline: 'none'
+              }}
+            />
+          </div>
+        )}
       </div>
 
       {/* Bước 4: Kéo Thả Charm */}
