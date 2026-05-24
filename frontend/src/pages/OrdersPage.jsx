@@ -1,0 +1,124 @@
+import React, { useState } from 'react';
+import api from '../services/api';
+import './OrdersPage.css';
+
+const formatVnd = (value) => `${new Intl.NumberFormat('vi-VN').format(value || 0)} VND`;
+
+const OrdersPage = () => {
+  const [phone, setPhone] = useState('');
+  const [orders, setOrders] = useState([]);
+  const [hasSearched, setHasSearched] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleLookup = async (event) => {
+    event.preventDefault();
+    const normalizedPhone = phone.trim();
+
+    if (!normalizedPhone) {
+      setError('Vui lòng nhập số điện thoại để tra cứu.');
+      setOrders([]);
+      setHasSearched(false);
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+    setHasSearched(true);
+
+    try {
+      const { data } = await api.get('/orders', {
+        params: { phone: normalizedPhone },
+      });
+      setOrders(data.data || []);
+    } catch (fetchError) {
+      console.error('Error fetching orders:', fetchError);
+      setError('Không thể tra cứu đơn hàng. Vui lòng thử lại sau.');
+      setOrders([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="lookup-page fade-in">
+      <section className="lookup-shell">
+        <div className="lookup-panel">
+          <div className="lookup-icon" aria-hidden="true">
+            <svg viewBox="0 0 64 64" role="img">
+              <path d="M14 21.5 32 12l18 9.5-18 9.8L14 21.5Z" />
+              <path d="M14 25.5 30 34v18L14 43.4V25.5Z" />
+              <path d="M50 25.5 34 34v18l16-8.6V25.5Z" />
+              <path d="M22.5 17.1 41 27" />
+            </svg>
+          </div>
+
+          <h1>Tra Cứu Đơn Hàng</h1>
+          <p className="lookup-intro">
+            Nhập số điện thoại của bạn để theo dõi tiến độ sản xuất và tình trạng vận chuyển.
+          </p>
+
+          <form className="lookup-form" onSubmit={handleLookup}>
+            <input
+              type="tel"
+              value={phone}
+              onChange={(event) => setPhone(event.target.value)}
+              placeholder="Số điện thoại của bạn"
+              aria-label="Số điện thoại của bạn"
+            />
+            {error && <p className="lookup-error">{error}</p>}
+            <button type="submit" disabled={loading}>
+              {loading ? 'Đang tra cứu...' : 'Tra cứu ngay'}
+            </button>
+          </form>
+        </div>
+      </section>
+
+      {hasSearched && !loading && !error && (
+        <section className="lookup-results">
+          {orders.length > 0 ? (
+            orders.map((order) => (
+              <article key={order._id} className="lookup-order-card">
+                <div className="lookup-order-head">
+                  <div>
+                    <h2>Mã đơn: #{order._id.slice(-6).toUpperCase()}</h2>
+                    <p>Ngày đặt: {new Date(order.createdAt).toLocaleString('vi-VN')}</p>
+                  </div>
+                  <span>{order.status || 'Pending'}</span>
+                </div>
+
+                <div className="lookup-order-items">
+                  {order.items.map((item, index) => (
+                    <div key={`${order._id}-${index}`} className="lookup-order-item">
+                      <span>{item.productType === 'BraceletDesign' ? 'Vòng tay thiết kế' : 'Hạt Charm lẻ'}</span>
+                      <span>Số lượng: {item.quantity}</span>
+                      <strong>{formatVnd(item.price * item.quantity)}</strong>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="lookup-order-foot">
+                  <div>
+                    <p><strong>Người nhận:</strong> {order.customerInfo.name}</p>
+                    <p><strong>Số điện thoại:</strong> {order.customerInfo.phone}</p>
+                    <p><strong>Địa chỉ:</strong> {order.customerInfo.address}</p>
+                  </div>
+                  <div className="lookup-total">
+                    <span>Tổng thanh toán</span>
+                    <strong>{formatVnd(order.totalPrice)}</strong>
+                  </div>
+                </div>
+              </article>
+            ))
+          ) : (
+            <div className="lookup-empty">
+              Không tìm thấy đơn hàng nào với số điện thoại này.
+            </div>
+          )}
+        </section>
+      )}
+    </div>
+  );
+};
+
+export default OrdersPage;

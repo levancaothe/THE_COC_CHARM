@@ -1,0 +1,103 @@
+.charm-card {
+  background: white;
+  border-radius: 24px;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+}
+
+.charm-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 40px rgba(74, 63, 53, 0.1);
+  border-color: var(--accent);
+}
+
+.charm-image {
+  background: #fcfcfc;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.charm-image img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  transition: transform 0.5s ease;
+}
+
+.charm-card:hover .charm-image img {
+  transform: scale(1.1);
+}
+
+.charm-info {
+  padding: 1.5rem;
+  text-align: left;
+}
+
+.charm-category {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--secondary);
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  margin-bottom: 0.5rem;
+}
+
+.charm-name {
+  font-family: var(--heading);
+  font-weight: 700;
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-h);
+  line-height: 1.2;
+}
+
+.charm-price {
+  color: var(--accent);
+  font-weight: 800;
+  font-size: 1.4rem;
+  margin-bottom: 1rem;
+}
+
+.btn-add {
+  flex: 2;
+  padding: 0.8rem;
+  border-radius: 50px;
+  border: none;
+  background: var(--accent);
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(255, 158, 158, 0.2);
+}
+
+.btn-add:hover {
+  background: #ff8a8a;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(255, 158, 158, 0.3);
+}
+
+.btn-secondary {
+  flex: 1;
+  padding: 0.8rem;
+  border-radius: 50px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+  background: var(--border);
+  border-color: var(--text);
+}

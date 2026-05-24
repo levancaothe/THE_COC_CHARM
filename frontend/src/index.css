@@ -1,23 +1,23 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
 
 :root {
-  --text: #4a3f35;
-  --text-h: #2d241e;
-  --bg: #fffdf5;
-  --border: #e8e4d9;
-  --code-bg: #f4f3ec;
-  --accent: #ff9e9e;
-  --accent-bg: rgba(255, 158, 158, 0.1);
-  --accent-border: rgba(255, 158, 158, 0.5);
-  --secondary: #8ba888;
-  --primary-gold: #d4af37;
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow: rgba(74, 63, 53, 0.1) 0 10px 15px -3px, rgba(74, 63, 53, 0.05) 0 4px 6px -2px;
-  --glass-bg: rgba(255, 253, 245, 0.8);
+  --text: #0a2e4f;
+  --text-h: #082847;
+  --bg: #eff3f8;
+  --border: #d9e2ec;
+  --code-bg: #f5f8fb;
+  --accent: #d95c14;
+  --accent-bg: rgba(217, 92, 20, 0.1);
+  --accent-border: rgba(217, 92, 20, 0.42);
+  --secondary: #0a2e4f;
+  --primary-gold: #d95c14;
+  --social-bg: rgba(239, 243, 248, 0.82);
+  --shadow: rgba(10, 46, 79, 0.12) 0 10px 15px -3px, rgba(10, 46, 79, 0.08) 0 4px 6px -2px;
+  --glass-bg: rgba(239, 243, 248, 0.86);
 
-  --sans: 'Outfit', system-ui, -apple-system, sans-serif;
-  --heading: 'Outfit', sans-serif;
-  --serif: 'Playfair Display', serif;
+  --sans: 'Montserrat', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --heading: 'Montserrat', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
   --mono: ui-monospace, Consolas, monospace;
 
   font: 18px/145% var(--sans);
@@ -38,11 +38,11 @@
 /* Force light mode for this aesthetic */
 @media (prefers-color-scheme: dark) {
   :root {
-    --text: #4a3f35;
-    --text-h: #2d241e;
-    --bg: #fffdf5;
-    --border: #e8e4d9;
-    --accent: #ff9e9e;
+    --text: #0a2e4f;
+    --text-h: #082847;
+    --bg: #eff3f8;
+    --border: #d9e2ec;
+    --accent: #d95c14;
   }
 }
 
@@ -106,12 +106,11 @@ h2 {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(255, 158, 158, 0.3);
+  box-shadow: 0 4px 15px rgba(217, 92, 20, 0.24);
 }
 
 .btn-premium:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255, 158, 158, 0.4);
-  background: #ff8a8a;
+  box-shadow: 0 6px 20px rgba(217, 92, 20, 0.32);
+  background: #c94f0e;
 }
-

@@ -1,0 +1,144 @@
+/* Success Modal Styles */
+
+.success-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(12, 53, 84, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: fadeIn 0.3s ease;
+}
+
+.success-modal-content {
+  background: #fff;
+  border: 4px solid #d95c14;
+  border-radius: 8px;
+  padding: 48px 40px;
+  max-width: 480px;
+  width: 90%;
+  text-align: center;
+  animation: slideUp 0.4s ease;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.success-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 24px;
+  animation: scaleIn 0.5s ease 0.2s both;
+}
+
+.success-icon svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 4px 12px rgba(233, 95, 22, 0.3));
+}
+
+.success-title {
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 700;
+  color: #0a2e4f;
+  margin: 0 0 16px 0;
+  line-height: 1.2;
+}
+
+.success-message {
+  font-size: 15px;
+  color: #4b647c;
+  line-height: 1.6;
+  margin: 0 0 32px 0;
+  max-width: 360px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.success-btn {
+  background: #0a2e4f;
+  color: #fff;
+  border: none;
+  padding: 16px 40px;
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(12, 53, 84, 0.3);
+}
+
+.success-btn:hover {
+  background: #082847;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(12, 53, 84, 0.4);
+}
+
+.success-btn:active {
+  transform: translateY(0);
+}
+
+/* Animations */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.5) rotate(-45deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* Responsive */
+
+@media (max-width: 640px) {
+  .success-modal-content {
+    padding: 40px 24px;
+    width: 95%;
+  }
+
+  .success-icon {
+    width: 64px;
+    height: 64px;
+  }
+
+  .success-title {
+    font-size: 24px;
+  }
+
+  .success-message {
+    font-size: 14px;
+  }
+
+  .success-btn {
+    width: 100%;
+    padding: 14px 32px;
+  }
+}

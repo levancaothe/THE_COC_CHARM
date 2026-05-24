@@ -1,0 +1,43 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+
+:root {
+  /* Colors */
+  --primary-gold: #D95C14;
+  --secondary-gold: #0A2E4F;
+  --dark-slate: #0A2E4F;
+  --light-gray: #EFF3F8;
+  --white: #FFFFFF;
+  --text-main: #0A2E4F;
+  --text-muted: #4B647C;
+  
+  /* Gradients */
+  --gold-gradient: linear-gradient(135deg, #0A2E4F 0%, #D95C14 100%);
+  --dark-gradient: linear-gradient(135deg, #0A2E4F 0%, #082847 100%);
+
+  /* Shadows */
+  --shadow-sm: 0 2px 4px rgba(10, 46, 79, 0.08);
+  --shadow-md: 0 4px 12px rgba(10, 46, 79, 0.12);
+  --shadow-lg: 0 10px 25px rgba(10, 46, 79, 0.18);
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  /* Transitions */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+
+  /* Typography */
+  --sans: 'Montserrat', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --heading: 'Montserrat', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+}
