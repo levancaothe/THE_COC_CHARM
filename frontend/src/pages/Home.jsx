@@ -59,23 +59,17 @@ const testimonials = [
 ];
 
 const Home = () => {
-  const [popularThemes, setPopularThemes] = useState([]);
+  const [popularCharms, setPopularCharms] = useState([]);
   const [loadingThemes, setLoadingThemes] = useState(true);
-  const displayThemes =
-    popularThemes.length >= 3
-      ? [popularThemes[1], popularThemes[0], popularThemes[2]]
-      : popularThemes.length === 2
-        ? [popularThemes[1], popularThemes[0]]
-        : popularThemes;
 
   useEffect(() => {
     const fetchPopularThemes = async () => {
       try {
-        const res = await api.get('/bracelets/popular-themes?limit=3');
-        setPopularThemes(res.data.data || []);
+        const res = await api.get('/charms/popular?limit=3');
+        setPopularCharms(res.data.data || []);
       } catch (error) {
-        console.error('Error fetching popular themes:', error);
-        setPopularThemes([]);
+        console.error('Error fetching popular charms:', error);
+        setPopularCharms([]);
       } finally {
         setLoadingThemes(false);
       }
@@ -126,10 +120,10 @@ const Home = () => {
 
       <section className="home-section products-section">
         <p className="home-kicker">Sản phẩm nổi bật</p>
-        <h2>Thiết kế được yêu thích nhất</h2>
+        <h2>Charm hot trên hệ thống</h2>
         <span className="section-rule" />
         <p className="section-intro">
-          Khám phá những chủ đề được khách hàng chọn nhiều nhất khi thiết kế. Các nhóm cơ bản đã được loại trừ để bạn thấy rõ xu hướng thật.
+          Khám phá những charm được chọn nhiều nhất trên toàn hệ thống. Khi chưa có đủ dữ liệu mua hàng, hệ thống sẽ tạm hiển thị các charm mới nhất.
         </p>
         <div className="product-grid">
           {loadingThemes ? (
@@ -137,38 +131,38 @@ const Home = () => {
               <span className="product-badge">ĐANG TẢI</span>
               <div className="product-card__image product-card__image--placeholder" />
               <div className="product-card__body">
-                <h3>Đang tải chủ đề nổi bật</h3>
-                <p>Hệ thống đang tổng hợp các chủ đề được chọn nhiều nhất từ các thiết kế đã lưu.</p>
+                <h3>Đang tải charm hot</h3>
+                <p>Hệ thống đang tổng hợp các charm được chọn nhiều nhất từ toàn bộ đơn hàng.</p>
                 <strong>...</strong>
               </div>
             </article>
-          ) : displayThemes.length > 0 ? (
-            displayThemes.map((theme, index) => (
-              <article className="product-card" key={theme.categoryId}>
-                <span className="product-badge">{index === 1 ? 'HOT' : theme.badge}</span>
+          ) : popularCharms.length > 0 ? (
+            popularCharms.map((charm, index) => (
+              <article className="product-card" key={charm._id}>
+                <span className="product-badge">{index === 0 ? 'HOT' : charm.badge}</span>
                 <div className="product-card__image">
-                  {theme.image ? <img src={theme.image} alt={theme.categoryName} /> : null}
+                  {charm.image ? <img src={charm.image} alt={charm.name} /> : null}
                 </div>
                 <div className="product-card__body">
-                  <h3>{theme.categoryName}</h3>
-                  <p>{theme.charmName ? `Charm đại diện: ${theme.charmName}` : 'Charm đại diện từ chủ đề này.'}</p>
-                  <strong>{theme.count} lượt chọn</strong>
+                  <h3>{charm.name}</h3>
+                  <p>{charm.category?.name ? `Danh mục: ${charm.category.name}` : 'Charm hot toàn hệ thống.'}</p>
+                  <strong>{charm.count} lượt chọn</strong>
                 </div>
               </article>
             ))
           ) : (
             <article className="product-card product-card--empty">
-              <span className="product-badge">N/A</span>
+              <span className="product-badge">NEW</span>
               <div className="product-card__image product-card__image--placeholder" />
               <div className="product-card__body">
-                <h3>Chưa có dữ liệu</h3>
-                <p>Chưa đủ thiết kế đã lưu để xếp hạng các chủ đề phổ biến.</p>
+                <h3>Chưa có dữ liệu mua hàng</h3>
+                <p>Hệ thống đang hiển thị các charm mới nhất để bạn vẫn có nội dung nổi bật.</p>
                 <strong>0 lượt chọn</strong>
               </div>
             </article>
           )}
         </div>
-        <Link to="/charms" className="view-all-link">Xem tất cả thiết kế <span>→</span></Link>
+        <Link to="/charms" className="view-all-link">Xem tất cả charm <span>→</span></Link>
       </section>
 
       <section className="craft-section">

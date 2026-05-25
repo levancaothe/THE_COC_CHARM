@@ -1,4 +1,5 @@
 const Charm = require("../models/Charm");
+const Order = require("../models/Order");
 
 const getCharms = async (req, res, next) => {
   try {
@@ -142,10 +143,90 @@ const deleteCharm = async (req, res, next) => {
   }
 };
 
+const getPopularCharms = async (req, res, next) => {
+  try {
+    const limit = Math.max(1, parseInt(req.query.limit, 10) || 3);
+    const orders = await Order.find({}, { items: 1 }).lean();
+    const countMap = new Map();
+
+    orders.forEach((order) => {
+      (order.items || []).forEach((item) => {
+        const quantity = Math.max(1, Number(item?.quantity) || 1);
+
+        if (item?.productType === 'BraceletDesign' && Array.isArray(item?.designCharms)) {
+          item.designCharms.forEach((charmId) => {
+            if (!charmId) return;
+            countMap.set(charmId, (countMap.get(charmId) || 0) + quantity);
+          });
+          return;
+        }
+
+        if (item?.productType === 'Charm' && item?.product) {
+          const charmId = String(item.product);
+          countMap.set(charmId, (countMap.get(charmId) || 0) + quantity);
+        }
+      });
+    });
+
+    if (countMap.size === 0) {
+      const latestCharms = await Charm.find({})
+        .populate('category')
+        .sort('-createdAt')
+        .limit(limit)
+        .lean();
+
+      const fallbackData = latestCharms.map((charm, index) => ({
+        ...charm,
+        count: 0,
+        rank: index + 1,
+        badge: index === 0 ? 'NEW' : index === 1 ? 'TRENDING' : 'POPULAR'
+      }));
+
+      res.status(200).json({
+        success: true,
+        count: fallbackData.length,
+        data: fallbackData
+      });
+      return;
+    }
+
+    const topEntries = [...countMap.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, limit);
+
+    const charmIds = topEntries.map(([id]) => id);
+    const charms = await Charm.find({ _id: { $in: charmIds } }).populate('category').lean();
+    const charmMap = new Map(charms.map((charm) => [String(charm._id), charm]));
+
+    const data = topEntries
+      .map(([charmId, count], index) => {
+        const charm = charmMap.get(charmId);
+        if (!charm) return null;
+
+        return {
+          ...charm,
+          count,
+          rank: index + 1,
+          badge: index === 0 ? 'HOT' : index === 1 ? 'TRENDING' : 'POPULAR'
+        };
+      })
+      .filter(Boolean);
+
+    res.status(200).json({
+      success: true,
+      count: data.length,
+      data
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getCharms,
   getCharm,
   createCharm,
   updateCharm,
   deleteCharm,
+  getPopularCharms,
 };

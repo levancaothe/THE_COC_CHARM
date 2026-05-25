@@ -4,15 +4,17 @@ const orderSchema = new mongoose.Schema({
   items: [
     {
       product: {
-        type: mongoose.Schema.ObjectId,
+        type: String,
         required: true,
-        refPath: 'items.productType'
       },
       productType: {
         type: String,
         required: true,
         enum: ['Charm', 'BraceletDesign']
       },
+      designCharms: [{
+        type: String,
+      }],
       quantity: {
         type: Number,
         required: true,

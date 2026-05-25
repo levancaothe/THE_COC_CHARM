@@ -11,34 +11,10 @@ import { usePriceCalculator } from '../hooks/usePriceCalculator';
 import { useCart } from '../context/CartContext';
 import './DesignerPage.css';
 
-const DESIGN_DRAFT_KEY = 'charmify_designer_draft';
 const SAVED_DESIGNS_KEY = 'charmify_saved_designs';
-
-const readDesignDraft = () => {
-  if (typeof window === 'undefined') return null;
-
-  try {
-    const raw = window.localStorage.getItem(DESIGN_DRAFT_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch (error) {
-    console.error('Error reading design draft:', error);
-    return null;
-  }
-};
-
-const writeDesignDraft = (draft) => {
-  if (typeof window === 'undefined') return;
-
-  try {
-    window.localStorage.setItem(DESIGN_DRAFT_KEY, JSON.stringify(draft));
-  } catch (error) {
-    console.error('Error saving design draft:', error);
-  }
-};
 
 const readSavedDesigns = () => {
   if (typeof window === 'undefined') return [];
-
   try {
     const raw = window.localStorage.getItem(SAVED_DESIGNS_KEY);
     const parsed = raw ? JSON.parse(raw) : [];
@@ -93,29 +69,27 @@ const DesignerPage = () => {
     ? editDesign.charms.map(normalizeEditCharm).filter(Boolean)
     : [];
 
-  const savedDraft = !editDesign ? readDesignDraft() : null;
-
   const [selectedCharms, setSelectedCharms] = useState(
-    savedDraft?.selectedCharms?.length ? savedDraft.selectedCharms : initialEditCharms
+    initialEditCharms
   );
   const [capacity, setCapacity] = useState(
     editDesign
       ? (initialEditCharms.length || 1)
-      : (typeof savedDraft?.capacity === 'number' ? savedDraft.capacity : null)
+      : null
   ); // Số lượng hạt tối đa
   const [tempCapacity, setTempCapacity] = useState(
     editDesign
       ? (initialEditCharms.length || 1)
-      : (typeof savedDraft?.tempCapacity === 'number' ? savedDraft.tempCapacity : 10)
+      : 10
   ); // Giá trị tạm thời trong input
   const [wristSize, setWristSize] = useState(
-    editDesign ? '' : (savedDraft?.wristSize || '')
+    ''
   ); // Chu vi tay
   const [material, setMaterial] = useState(
-    editDesign ? '' : (savedDraft?.material || '')
+    ''
   ); // Id charm cơ bản dùng làm dây
   const [designName, setDesignName] = useState(
-    editDesign?.name || (!editDesign ? (savedDraft?.designName || 'Thiết kế của tôi') : 'Thiết kế của tôi')
+    editDesign?.name || 'Thiết kế của tôi'
   );
   const [isSaving, setIsSaving] = useState(false);
   const [editingDesignId, setEditingDesignId] = useState(editDesign?._id || null);
@@ -187,23 +161,6 @@ const DesignerPage = () => {
       setMaterial(baseCharmOptions[0]._id);
     }
   }, [baseCharmOptions, material]);
-
-  useEffect(() => {
-    if (editDesign) return;
-
-    if (capacity === null) {
-      return;
-    }
-
-    writeDesignDraft({
-      selectedCharms,
-      capacity,
-      tempCapacity,
-      wristSize,
-      material,
-      designName
-    });
-  }, [editDesign, selectedCharms, capacity, tempCapacity, wristSize, material, designName]);
 
   const fillWithDefaultCharms = (cap, mat) => {
     const defaultCharm = baseCharmOptions.find((charm) => charm._id === mat) || baseCharmOptions[0];

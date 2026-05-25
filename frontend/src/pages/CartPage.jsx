@@ -75,8 +75,9 @@ const CartPage = () => {
     try {
       await api.post('/orders', {
         items: selectedItems.map((item) => ({
-          product: item._id,
+          product: String(item._id),
           productType: item.type === 'design' ? 'BraceletDesign' : 'Charm',
+          designCharms: item.type === 'design' ? (item.charms || []).map((charm) => String(charm._id)) : [],
           quantity: item.quantity,
           price: item.price,
         })),
