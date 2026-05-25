@@ -2,9 +2,27 @@ const express = require('express');
 const router = express.Router();
 const Order = require('../models/Order');
 
+const normalizeOrderItems = (items = []) =>
+  items.map((item) => ({
+    product: String(item?.product ?? item?._id ?? ''),
+    productType: item?.productType === 'BraceletDesign' ? 'BraceletDesign' : 'Charm',
+    designCharms: Array.isArray(item?.designCharms) ? item.designCharms.map(String) : [],
+    quantity: Number(item?.quantity) || 1,
+    price: Number(item?.price) || 0
+  }));
+
 router.post('/', async (req, res) => {
   try {
-    const order = await Order.create(req.body);
+    const payload = {
+      ...req.body,
+      items: normalizeOrderItems(req.body.items),
+      totalPrice: Number(req.body.totalPrice) || 0,
+      createdAt: req.body.createdAt || new Date()
+    };
+
+    const result = await Order.collection.insertOne(payload);
+    const order = await Order.findById(result.insertedId);
+
     res.status(201).json({
       success: true,
       data: order

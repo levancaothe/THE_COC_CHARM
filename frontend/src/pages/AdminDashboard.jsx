@@ -625,25 +625,30 @@ export default function AdminDashboard() {
                         </thead>
                         <tbody>
                           {orders.length > 0 ? (
-                            orders.map((order, idx) => (
-                              <tr key={order._id} className={`status-${order.status.toLowerCase()}`}>
-                                <td className="text-center">{(filters.page - 1) * filters.limit + idx + 1}</td>
-                                <td>{order.customerInfo?.name || 'N/A'}</td>
-                                <td>{order.customerInfo?.phone || 'N/A'}</td>
-                                <td className="text-right">{formatVND(order.totalPrice)}</td>
-                                <td><span className={`badge badge-${order.status.toLowerCase()}`}>{order.status}</span></td>
-                                <td>{formatDate(order.createdAt)}</td>
-                                <td className="actions-cell">
-                                  <button
-                                    className="btn-icon btn-view"
-                                    onClick={() => handleViewOrderDetail(order)}
-                                    title="Xem chi tiết"
-                                  >
-                                    👁
-                                  </button>
-                                </td>
-                              </tr>
-                            ))
+                            orders.map((order, idx) => {
+                              const orderStatus = order.status || 'Pending';
+                              const normalizedStatus = orderStatus.toLowerCase();
+
+                              return (
+                                <tr key={order._id} className={`status-${normalizedStatus}`}>
+                                  <td className="text-center">{(filters.page - 1) * filters.limit + idx + 1}</td>
+                                  <td>{order.customerInfo?.name || 'N/A'}</td>
+                                  <td>{order.customerInfo?.phone || 'N/A'}</td>
+                                  <td className="text-right">{formatVND(order.totalPrice)}</td>
+                                  <td><span className={`badge badge-${normalizedStatus}`}>{orderStatus}</span></td>
+                                  <td>{formatDate(order.createdAt)}</td>
+                                  <td className="actions-cell">
+                                    <button
+                                      className="btn-icon btn-view"
+                                      onClick={() => handleViewOrderDetail(order)}
+                                      title="Xem chi tiết"
+                                    >
+                                      👁
+                                    </button>
+                                  </td>
+                                </tr>
+                              );
+                            })
                           ) : (
                             <tr><td colSpan="7" className="text-center">Không có đơn hàng nào</td></tr>
                           )}
