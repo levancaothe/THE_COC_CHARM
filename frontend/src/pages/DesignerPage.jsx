@@ -11,6 +11,68 @@ import { usePriceCalculator } from '../hooks/usePriceCalculator';
 import { useCart } from '../context/CartContext';
 import './DesignerPage.css';
 
+const DESIGN_DRAFT_KEY = 'charmify_designer_draft';
+const SAVED_DESIGNS_KEY = 'charmify_saved_designs';
+
+const readDesignDraft = () => {
+  if (typeof window === 'undefined') return null;
+
+  try {
+    const raw = window.localStorage.getItem(DESIGN_DRAFT_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (error) {
+    console.error('Error reading design draft:', error);
+    return null;
+  }
+};
+
+const writeDesignDraft = (draft) => {
+  if (typeof window === 'undefined') return;
+
+  try {
+    window.localStorage.setItem(DESIGN_DRAFT_KEY, JSON.stringify(draft));
+  } catch (error) {
+    console.error('Error saving design draft:', error);
+  }
+};
+
+const readSavedDesigns = () => {
+  if (typeof window === 'undefined') return [];
+
+  try {
+    const raw = window.localStorage.getItem(SAVED_DESIGNS_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    console.error('Error reading saved designs:', error);
+    return [];
+  }
+};
+
+const writeSavedDesigns = (designs) => {
+  if (typeof window === 'undefined') return;
+
+  try {
+    window.localStorage.setItem(SAVED_DESIGNS_KEY, JSON.stringify(designs));
+  } catch (error) {
+    console.error('Error saving designs:', error);
+  }
+};
+
+const stripCharmMeta = (charm) => {
+  if (!charm) return charm;
+  const { instanceId, isDefault, ...cleanCharm } = charm;
+  return cleanCharm;
+};
+
+const buildStoredCharmEntry = (charm) => ({
+  charm: stripCharmMeta(charm),
+  x: 0,
+  y: 0
+});
+
+const createDesignId = () => `design-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
 const DesignerPage = () => {
   const [availableCharms, setAvailableCharms] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -31,12 +93,30 @@ const DesignerPage = () => {
     ? editDesign.charms.map(normalizeEditCharm).filter(Boolean)
     : [];
 
-  const [selectedCharms, setSelectedCharms] = useState(initialEditCharms);
-  const [capacity, setCapacity] = useState(editDesign ? (initialEditCharms.length || 1) : null); // Số lượng hạt tối đa
-  const [tempCapacity, setTempCapacity] = useState(editDesign ? (initialEditCharms.length || 1) : 10); // Giá trị tạm thời trong input
-  const [wristSize, setWristSize] = useState(''); // Chu vi tay
-  const [material, setMaterial] = useState(''); // Id charm cơ bản dùng làm dây
-  const [designName, setDesignName] = useState(editDesign?.name || 'Thiết kế của tôi');
+  const savedDraft = !editDesign ? readDesignDraft() : null;
+
+  const [selectedCharms, setSelectedCharms] = useState(
+    savedDraft?.selectedCharms?.length ? savedDraft.selectedCharms : initialEditCharms
+  );
+  const [capacity, setCapacity] = useState(
+    editDesign
+      ? (initialEditCharms.length || 1)
+      : (typeof savedDraft?.capacity === 'number' ? savedDraft.capacity : null)
+  ); // Số lượng hạt tối đa
+  const [tempCapacity, setTempCapacity] = useState(
+    editDesign
+      ? (initialEditCharms.length || 1)
+      : (typeof savedDraft?.tempCapacity === 'number' ? savedDraft.tempCapacity : 10)
+  ); // Giá trị tạm thời trong input
+  const [wristSize, setWristSize] = useState(
+    editDesign ? '' : (savedDraft?.wristSize || '')
+  ); // Chu vi tay
+  const [material, setMaterial] = useState(
+    editDesign ? '' : (savedDraft?.material || '')
+  ); // Id charm cơ bản dùng làm dây
+  const [designName, setDesignName] = useState(
+    editDesign?.name || (!editDesign ? (savedDraft?.designName || 'Thiết kế của tôi') : 'Thiết kế của tôi')
+  );
   const [isSaving, setIsSaving] = useState(false);
   const [editingDesignId, setEditingDesignId] = useState(editDesign?._id || null);
   const [editingSource, setEditingSource] = useState(location.state?.source || null);
@@ -107,6 +187,23 @@ const DesignerPage = () => {
       setMaterial(baseCharmOptions[0]._id);
     }
   }, [baseCharmOptions, material]);
+
+  useEffect(() => {
+    if (editDesign) return;
+
+    if (capacity === null) {
+      return;
+    }
+
+    writeDesignDraft({
+      selectedCharms,
+      capacity,
+      tempCapacity,
+      wristSize,
+      material,
+      designName
+    });
+  }, [editDesign, selectedCharms, capacity, tempCapacity, wristSize, material, designName]);
 
   const fillWithDefaultCharms = (cap, mat) => {
     const defaultCharm = baseCharmOptions.find((charm) => charm._id === mat) || baseCharmOptions[0];
@@ -231,14 +328,30 @@ const DesignerPage = () => {
 
   const buildDesignPayload = (isSaved) => ({
     name: designName || `Thiết kế vòng (${selectedCharms.length}/${capacity} hạt)`,
-    charms: selectedCharms.map((c) => ({
-      charm: c._id,
-      x: 0,
-      y: 0
-    })),
+    charms: selectedCharms.map(buildStoredCharmEntry),
     totalPrice,
     isSaved
   });
+
+  const saveDesignToLibrary = (design, existingId = null) => {
+    const savedDesigns = readSavedDesigns();
+    const timestamp = new Date().toISOString();
+    const existingDesign = savedDesigns.find((item) => item._id === (existingId || design._id));
+    const nextDesign = {
+      ...design,
+      _id: existingId || design._id || createDesignId(),
+      isSaved: true,
+      createdAt: design.createdAt || existingDesign?.createdAt || timestamp,
+      updatedAt: timestamp
+    };
+
+    const nextDesigns = savedDesigns.some((item) => item._id === nextDesign._id)
+      ? savedDesigns.map((item) => (item._id === nextDesign._id ? nextDesign : item))
+      : [nextDesign, ...savedDesigns];
+
+    writeSavedDesigns(nextDesigns);
+    return nextDesign;
+  };
 
   const persistDesign = async ({
     isSaved,
@@ -254,27 +367,36 @@ const DesignerPage = () => {
     setIsSaving(true);
     try {
       const designData = buildDesignPayload(isSaved);
-      const savedDesign = (useExistingId && editingDesignId)
-        ? (await api.put(`/bracelets/${editingDesignId}`, designData)).data.data
-        : (await api.post('/bracelets', designData)).data.data;
+
+      const existingId = useExistingId && editingDesignId ? editingDesignId : null;
+      const designRecord = isSaved
+        ? saveDesignToLibrary(designData, existingId)
+        : {
+            ...designData,
+            _id: existingId || createDesignId(),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          };
+
+      const cartDesign = {
+        _id: designRecord._id,
+        name: designRecord.name,
+        price: designRecord.totalPrice ?? totalPrice,
+        charms: selectedCharms.map(stripCharmMeta),
+        isSaved: designRecord.isSaved ?? false
+      };
+
+      if (isSaved) {
+        setEditingDesignId(designRecord._id);
+        setEditingSource('designs');
+      }
 
       if (updateCartAfter) {
-        updateCartItem({
-          _id: savedDesign._id,
-          name: savedDesign.name,
-          price: savedDesign.totalPrice ?? totalPrice,
-          charms: selectedCharms
-        }, 'design');
+        updateCartItem(cartDesign, 'design');
       }
 
       if (addToCartAfter) {
-        addToCart({
-          _id: savedDesign._id,
-          name: savedDesign.name,
-          price: savedDesign.totalPrice ?? totalPrice,
-          charms: selectedCharms,
-          isSaved: isSaved
-        }, 'design');
+        addToCart(cartDesign, 'design');
       }
 
       if (showAlert) {
