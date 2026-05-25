@@ -1,11 +1,35 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
 import { useCart } from '../context/CartContext';
 import ConfirmModal from '../components/ConfirmModal';
 import './MyDesignsPage.css';
 
+const SAVED_DESIGNS_KEY = 'charmify_saved_designs';
+
 const formatVnd = (value) => `${new Intl.NumberFormat('vi-VN').format(value || 0)} VND`;
+
+const readSavedDesigns = () => {
+  if (typeof window === 'undefined') return [];
+
+  try {
+    const raw = window.localStorage.getItem(SAVED_DESIGNS_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    console.error('Error reading saved designs:', error);
+    return [];
+  }
+};
+
+const writeSavedDesigns = (designs) => {
+  if (typeof window === 'undefined') return;
+
+  try {
+    window.localStorage.setItem(SAVED_DESIGNS_KEY, JSON.stringify(designs));
+  } catch (error) {
+    console.error('Error saving designs:', error);
+  }
+};
 
 const MyDesignsPage = () => {
   const { addToCart } = useCart();
@@ -16,25 +40,30 @@ const MyDesignsPage = () => {
   const [deleteId, setDeleteId] = useState(null);
 
   useEffect(() => {
-    fetchDesigns();
-  }, []);
-
-  const fetchDesigns = async () => {
-    try {
-      const { data } = await api.get('/bracelets');
-      setDesigns(data.data);
-    } catch (error) {
-      console.error('Error fetching designs:', error);
-    } finally {
+    const loadDesigns = () => {
+      setDesigns(readSavedDesigns());
       setLoading(false);
-    }
-  };
+    };
+
+    loadDesigns();
+
+    const handleStorage = (event) => {
+      if (event.key === SAVED_DESIGNS_KEY) {
+        loadDesigns();
+      }
+    };
+
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
 
   const handleDelete = async () => {
     try {
-      await api.delete(`/bracelets/${deleteId}`);
+      const nextDesigns = designs.filter((design) => design._id !== deleteId);
+      writeSavedDesigns(nextDesigns);
+      setDesigns(nextDesigns);
       setIsModalOpen(false);
-      fetchDesigns();
+      setDeleteId(null);
     } catch (error) {
       alert('Lỗi khi xóa thiết kế');
     }
@@ -57,14 +86,16 @@ const MyDesignsPage = () => {
                 <div className="my-design-card__head">
                   <div>
                     <h2>{design.name}</h2>
-                    <p>Ngày lưu: {new Date(design.createdAt).toLocaleDateString('vi-VN')}</p>
+                    <p>
+                      Ngày lưu: {new Date(design.createdAt || design.updatedAt || Date.now()).toLocaleDateString('vi-VN')}
+                    </p>
                   </div>
-                  <span>{design.charms.length} hạt</span>
+                  <span>{design.charms?.length || 0} hạt</span>
                 </div>
 
                 <div className="my-design-preview" aria-label={`Preview ${design.name}`}>
                   <div className="my-design-band">
-                    {design.charms.map((item, index) => (
+                    {(design.charms || []).map((item, index) => (
                       <img
                         key={`${item.charm?._id || item.charm?.name || 'charm'}-${index}`}
                         src={item.charm?.image}
@@ -85,7 +116,7 @@ const MyDesignsPage = () => {
                           _id: design._id,
                           name: design.name,
                           price: design.totalPrice,
-                          charms: design.charms.map((c) => c.charm),
+                          charms: (design.charms || []).map((c) => c.charm),
                           isSaved: true,
                         }, 'design');
                         alert('Đã thêm thiết kế vào giỏ hàng!');
