@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { clampItemQuantity, getItemMaxQuantity } from '../utils/inventory';
 
 const CartContext = createContext();
 
@@ -32,14 +33,24 @@ export const CartProvider = ({ children }) => {
       if (existingItemIndex > -1) {
         const newItems = [...prevItems];
         const existingItem = newItems[existingItemIndex];
-        existingItem.quantity += 1;
+        const maxQuantity = getItemMaxQuantity(existingItem);
+        if (Number.isFinite(maxQuantity) && existingItem.quantity >= maxQuantity) {
+          return prevItems;
+        }
+
+        existingItem.quantity = clampItemQuantity(existingItem, existingItem.quantity + 1);
         // Move to top
         newItems.splice(existingItemIndex, 1);
         return [existingItem, ...newItems];
       }
 
+      const nextItem = { ...item, type, quantity: clampItemQuantity({ ...item, type }, 1), selected: true };
+      if (getItemMaxQuantity(nextItem) === 0) {
+        return prevItems;
+      }
+
       // Prepend new item to top
-      return [{ ...item, type, quantity: 1, selected: true }, ...prevItems];
+      return [nextItem, ...prevItems];
     });
   };
 
@@ -57,7 +68,12 @@ export const CartProvider = ({ children }) => {
         );
       }
 
-      return [{ ...item, type, quantity: 1, selected: true }, ...prevItems];
+      const nextItem = { ...item, type, quantity: clampItemQuantity({ ...item, type }, 1), selected: true };
+      if (getItemMaxQuantity(nextItem) === 0) {
+        return prevItems;
+      }
+
+      return [nextItem, ...prevItems];
     });
   };
 
@@ -79,7 +95,9 @@ export const CartProvider = ({ children }) => {
     if (quantity < 1) return;
     setCartItems((prevItems) =>
       prevItems.map((item) =>
-        item._id === id && item.type === type ? { ...item, quantity } : item
+        item._id === id && item.type === type
+          ? { ...item, quantity: clampItemQuantity(item, quantity) }
+          : item
       )
     );
   };

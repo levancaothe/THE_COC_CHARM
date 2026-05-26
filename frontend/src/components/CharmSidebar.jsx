@@ -3,10 +3,14 @@ import { useDrag } from 'react-dnd';
 import CategoryCard from './CategoryCard';
 import { getProxyImageUrl } from '../utils/imageProxy';
 
-const DraggableCharm = ({ charm, onClick }) => {
+const DraggableCharm = ({ charm, selectedCount = 0, onClick }) => {
+  const stock = Number(charm?.stock) || 0;
+  const remainingStock = Math.max(0, stock - selectedCount);
+  const isAvailable = remainingStock > 0;
   const [{ isDragging }, drag] = useDrag(() => ({
     type: 'CHARM',
     item: charm,
+    canDrag: () => isAvailable,
     collect: (monitor) => ({
       isDragging: !!monitor.isDragging(),
     }),
@@ -16,28 +20,37 @@ const DraggableCharm = ({ charm, onClick }) => {
     <div
       ref={drag}
       className="draggable-charm glass"
-      onClick={() => onClick(charm)}
+      onClick={() => {
+        if (!isAvailable) return;
+        onClick(charm);
+      }}
       style={{
         padding: '10px',
         borderRadius: 'var(--radius-md)',
         textAlign: 'center',
         opacity: isDragging ? 0.5 : 1,
-        cursor: 'pointer',
+        cursor: isAvailable ? 'pointer' : 'not-allowed',
         transition: 'transform 0.2s ease',
         border: '1px solid transparent',
-        width: '100px'
+        width: '100px',
+        filter: isAvailable ? 'none' : 'grayscale(1) opacity(0.55)'
       }}
-      onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--primary-gold)'}
+      onMouseEnter={(e) => {
+        if (isAvailable) e.currentTarget.style.borderColor = 'var(--primary-gold)';
+      }}
       onMouseLeave={(e) => e.currentTarget.style.borderColor = 'transparent'}
     >
       <img src={getProxyImageUrl(charm.image)} alt={charm.name} crossOrigin="anonymous" style={{ width: '60px', height: '60px', objectFit: 'contain', margin: '0 auto' }} />
       <p style={{ minHeight: '34px', fontSize: '0.82rem', color: 'var(--text-h)', fontWeight: '700', lineHeight: '1.2', marginTop: '10px' }}>{charm.name}</p>
       <p style={{ fontSize: '0.8rem', color: 'var(--primary-gold)', fontWeight: '700', marginTop: '6px' }}>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', currencyDisplay: 'code' }).format(charm.price)}</p>
+      <p style={{ fontSize: '0.72rem', color: isAvailable ? 'var(--text-muted)' : '#b94d11', marginTop: '4px' }}>
+        {isAvailable ? `Còn ${remainingStock}` : 'Hết hàng'}
+      </p>
     </div>
   );
 };
 
-const CharmSidebar = ({ charms, categories = [], onCharmClick }) => {
+const CharmSidebar = ({ charms, categories = [], selectedCharmCounts = {}, onCharmClick }) => {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -126,7 +139,12 @@ const CharmSidebar = ({ charms, categories = [], onCharmClick }) => {
             marginTop: '20px'
           }}>
             {filteredCharms.map(charm => (
-              <DraggableCharm key={charm._id} charm={charm} onClick={onCharmClick} />
+              <DraggableCharm
+                key={charm._id}
+                charm={charm}
+                selectedCount={selectedCharmCounts[charm._id] || 0}
+                onClick={onCharmClick}
+              />
             ))}
             {filteredCharms.length === 0 && (
               <p style={{ fontSize: '1rem', color: 'var(--text-muted)' }}>

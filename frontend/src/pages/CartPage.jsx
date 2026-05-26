@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import api from '../services/api';
 import SuccessModal from '../components/SuccessModal';
+import { getItemMaxQuantity } from '../utils/inventory';
 import './CartPage.css';
 
 const formatVnd = (value) => `${new Intl.NumberFormat('vi-VN').format(value || 0)} VND`;
@@ -34,6 +35,10 @@ const CartPage = () => {
 
   const selectedItems = useMemo(() => cartItems.filter((item) => item.selected), [cartItems]);
   const hasSelectedItems = selectedItems.length > 0;
+  const getCanIncreaseQuantity = (item) => {
+    const maxQuantity = getItemMaxQuantity(item);
+    return !Number.isFinite(maxQuantity) || item.quantity < maxQuantity;
+  };
 
   useEffect(() => {
     if (location.state?.focusCheckout && checkoutRef.current && hasSelectedItems) {
@@ -47,6 +52,29 @@ const CartPage = () => {
     customerInfo.city,
     customerInfo.note ? `Ghi chú: ${customerInfo.note}` : '',
   ].filter(Boolean).join(', ');
+
+  const buildInventoryImpact = (items = []) => {
+    const impactMap = new Map();
+
+    items.forEach((item) => {
+      const quantity = Math.max(1, Number(item.quantity) || 1);
+
+      if (item.type === 'design') {
+        (item.charms || []).forEach((charm) => {
+          const charmId = String(charm?._id ?? charm?.charm?._id ?? '');
+          if (!charmId) return;
+          impactMap.set(charmId, (impactMap.get(charmId) || 0) + quantity);
+        });
+        return;
+      }
+
+      const charmId = String(item._id || '');
+      if (!charmId) return;
+      impactMap.set(charmId, (impactMap.get(charmId) || 0) + quantity);
+    });
+
+    return [...impactMap.entries()].map(([charmId, quantity]) => ({ charmId, quantity }));
+  };
 
   const handleFieldChange = (field, value) => {
     setCustomerInfo((current) => ({ ...current, [field]: value }));
@@ -73,14 +101,17 @@ const CartPage = () => {
 
     setIsSubmitting(true);
     try {
-      await api.post('/orders', {
+      const orderPayload = {
         items: selectedItems.map((item) => ({
           product: String(item._id),
           productType: item.type === 'design' ? 'BraceletDesign' : 'Charm',
-          designCharms: item.type === 'design' ? (item.charms || []).map((charm) => String(charm._id)) : [],
+          designCharms: item.type === 'design'
+            ? (item.charms || []).map((charm) => String(charm?._id ?? charm?.charm?._id ?? ''))
+            : [],
           quantity: item.quantity,
           price: item.price,
         })),
+        inventoryImpact: buildInventoryImpact(selectedItems),
         totalPrice,
         customerInfo: {
           name: customerInfo.name.trim(),
@@ -99,10 +130,14 @@ const CartPage = () => {
           accountNumber: '123 456 789',
           accountHolder: 'Trần Hà Trang',
         },
-      });
+      };
+
+      const orderResponse = await api.post('/orders', orderPayload);
+      console.log('Order inventory result:', orderResponse.data?.inventory);
 
       // Show success modal instead of alert
       console.log('Order successful, showing modal...');
+      window.dispatchEvent(new Event('inventory-updated'));
       setShowSuccessModal(true);
       console.log('showSuccessModal set to:', true);
       
@@ -181,7 +216,14 @@ const CartPage = () => {
               <div className="item-quantity">
                 <button type="button" onClick={() => updateQuantity(item._id, item.type, item.quantity - 1)}>-</button>
                 <span>{item.quantity}</span>
-                <button type="button" onClick={() => updateQuantity(item._id, item.type, item.quantity + 1)}>+</button>
+                <button
+                  type="button"
+                  onClick={() => updateQuantity(item._id, item.type, item.quantity + 1)}
+                  disabled={!getCanIncreaseQuantity(item)}
+                  title={getCanIncreaseQuantity(item) ? 'Tăng số lượng' : 'Đã đạt số lượng tối đa theo tồn kho'}
+                >
+                  +
+                </button>
               </div>
 
               <div className="item-total">
