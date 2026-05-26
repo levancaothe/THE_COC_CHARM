@@ -6,6 +6,7 @@ const braceletRoutes = require('./routes/braceletRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const proxyRoutes = require('./routes/proxyRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const aiRoutes = require('./routes/aiRoutes');
 
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
@@ -20,6 +21,7 @@ app.use('/api/bracelets', braceletRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/proxy', proxyRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/ai', aiRoutes);
 
 app.get('/', (req, res) => {
     res.send('Charm Bracelet API is running...');

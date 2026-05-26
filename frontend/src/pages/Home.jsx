@@ -61,6 +61,15 @@ const testimonials = [
 const Home = () => {
   const [popularCharms, setPopularCharms] = useState([]);
   const [loadingThemes, setLoadingThemes] = useState(true);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatInput, setChatInput] = useState('');
+  const [chatMessages, setChatMessages] = useState([
+    {
+      role: 'assistant',
+      text: 'Xin chào, mình là trợ lý The Cóc Charm. Bạn cần gợi ý charm, phối vòng hay chọn quà tặng?',
+    },
+  ]);
+  const [sendingChat, setSendingChat] = useState(false);
 
   useEffect(() => {
     const fetchPopularThemes = async () => {
@@ -78,8 +87,102 @@ const Home = () => {
     fetchPopularThemes();
   }, []);
 
+  const handleSendChat = async (event) => {
+    event.preventDefault();
+
+    const message = chatInput.trim();
+    if (!message || sendingChat) {
+      return;
+    }
+
+    const nextMessages = [...chatMessages, { role: 'user', text: message }];
+    setChatMessages(nextMessages);
+    setChatInput('');
+    setSendingChat(true);
+
+    try {
+      const res = await api.post('/ai/chat', {
+        message,
+        history: nextMessages.slice(-4),
+      });
+
+      setChatMessages((current) => [
+        ...current,
+        {
+          role: 'assistant',
+          text: res.data?.reply || 'Mình chưa có phản hồi phù hợp lúc này.',
+        },
+      ]);
+    } catch (error) {
+      console.error('Chatbot request failed:', error);
+      setChatMessages((current) => [
+        ...current,
+        {
+          role: 'assistant',
+          text: 'Tính năng sẽ sớm được ra mắt.',
+        },
+      ]);
+    } finally {
+      setSendingChat(false);
+    }
+  };
+
   return (
     <div className="home-page fade-in">
+      <button
+        type="button"
+        className="chat-launcher"
+        onClick={() => setChatOpen((open) => !open)}
+        aria-label="Mở chatbot The Cóc Charm"
+      >
+        <img src={logo} alt="" />
+        <span>AI</span>
+      </button>
+
+      {chatOpen ? (
+        <section className="chat-panel" aria-label="Chatbot The Cóc Charm">
+          <header className="chat-panel__header">
+            <div className="chat-panel__brand">
+              <img src={logo} alt="" />
+              <div>
+                <strong>The Cóc Charm AI</strong>
+                <p>Trợ lý tư vấn charm</p>
+              </div>
+            </div>
+            <button type="button" className="chat-panel__close" onClick={() => setChatOpen(false)}>
+              ×
+            </button>
+          </header>
+
+          <div className="chat-panel__messages">
+            {chatMessages.map((message, index) => (
+              <div
+                key={`${message.role}-${index}`}
+                className={`chat-bubble chat-bubble--${message.role}`}
+              >
+                {message.text}
+              </div>
+            ))}
+            {sendingChat ? <div className="chat-bubble chat-bubble--assistant">Đang trả lời...</div> : null}
+          </div>
+
+          <form className="chat-panel__form" onSubmit={handleSendChat}>
+            <div className="chat-panel__input-wrap">
+              <img src={logo} alt="" className="chat-panel__icon" />
+              <input
+                type="text"
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                placeholder="Nhập câu hỏi về charm..."
+              />
+            </div>
+            <button type="submit" className="chat-panel__send" disabled={sendingChat}>
+              Gửi
+            </button>
+          </form>
+        </section>
+      ) : null}
+
       <header className="home-hero">
         <div className="home-hero__content">
           <h1>

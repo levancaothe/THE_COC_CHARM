@@ -62,7 +62,7 @@ const Footer = () => {
             Hòa Lạc, Thạch Thất, Hà Nội
           </p>
           <p>0976 924 958</p>
-          <p>Fbrickss@gmail.com</p>
+          <p>Thecoccharm@gmail.com</p>
         </div>
 
         <div className="footer-column">
