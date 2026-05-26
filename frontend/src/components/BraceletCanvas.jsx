@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDrop, useDrag } from 'react-dnd';
 
-const PlacedCharm = ({ charm, index, onRemove, onReplace, moveCharmInSequence }) => {
+const PlacedCharm = ({ charm, index, onRemove, onReplace, moveCharmInSequence, exportMode }) => {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: 'SORTABLE_CHARM',
     item: { index },
@@ -47,10 +47,10 @@ const PlacedCharm = ({ charm, index, onRemove, onReplace, moveCharmInSequence })
       <div style={{
         width: '55px',
         height: '45px',
-        background: 'linear-gradient(to bottom, #f9f9f9 0%, #e0e0e0 50%, #c0c0c0 100%)',
-        border: '1px solid #999',
-        borderRight: '1.5px solid #666',
-        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.8), 0 3px 6px rgba(0,0,0,0.1)',
+        background: exportMode ? 'transparent' : 'linear-gradient(to bottom, #f9f9f9 0%, #e0e0e0 50%, #c0c0c0 100%)',
+        border: exportMode ? 'none' : '1px solid #999',
+        borderRight: exportMode ? 'none' : '1.5px solid #666',
+        boxShadow: exportMode ? 'none' : 'inset 0 1px 0 rgba(255,255,255,0.8), 0 3px 6px rgba(0,0,0,0.1)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -72,7 +72,7 @@ const PlacedCharm = ({ charm, index, onRemove, onReplace, moveCharmInSequence })
         <div style={{ 
           position: 'absolute', 
           inset: 0, 
-          border: '1px solid rgba(255,255,255,0.2)', 
+          border: exportMode ? 'none' : '1px solid rgba(255,255,255,0.2)', 
           pointerEvents: 'none' 
         }}></div>
       </div>
@@ -80,7 +80,7 @@ const PlacedCharm = ({ charm, index, onRemove, onReplace, moveCharmInSequence })
   );
 };
 
-const BraceletCanvas = React.forwardRef(({ selectedCharms, onAddCharm, onRemoveCharm, onReplaceCharm, moveCharmInSequence }, ref) => {
+const BraceletCanvas = React.forwardRef(({ selectedCharms, onAddCharm, onRemoveCharm, onReplaceCharm, moveCharmInSequence, exportMode = false }, ref) => {
   const [{ isOver }, drop] = useDrop(() => ({
     accept: 'CHARM',
     drop: (item, monitor) => {
@@ -92,6 +92,23 @@ const BraceletCanvas = React.forwardRef(({ selectedCharms, onAddCharm, onRemoveC
       isOver: !!monitor.isOver({ shallow: true }),
     }),
   }), [onAddCharm]);
+
+  const [stableIsOver, setStableIsOver] = useState(false);
+
+  useEffect(() => {
+    if (exportMode) {
+      setStableIsOver(false);
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      setStableIsOver(isOver);
+    }, 80);
+
+    return () => window.clearTimeout(timer);
+  }, [isOver, exportMode]);
+
+  const showDropHighlight = !exportMode && stableIsOver;
 
   return (
     <div 
@@ -110,14 +127,30 @@ const BraceletCanvas = React.forwardRef(({ selectedCharms, onAddCharm, onRemoveC
         alignItems: 'center',
         justifyContent: 'center',
         position: 'relative',
-        background: isOver ? 'var(--accent-bg)' : '#fdfdfd',
+        background: '#fdfdfd',
         padding: '40px',
         overflowX: 'auto',
         borderRadius: '24px',
-        border: '1px solid var(--border)',
-        boxShadow: 'inset 0 4px 15px rgba(0,0,0,0.02)'
+        border: exportMode ? 'none' : '1px solid rgba(10, 46, 79, 0.12)',
+        boxShadow: exportMode ? 'none' : 'inset 0 4px 15px rgba(0,0,0,0.02)'
       }}
     >
+      {!exportMode && (
+        <div
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            borderRadius: '24px',
+            pointerEvents: 'none',
+            background: 'rgba(217, 92, 20, 0.03)',
+            boxShadow: 'inset 0 0 0 1px rgba(217, 92, 20, 0.35)',
+            opacity: showDropHighlight ? 1 : 0,
+            transition: 'opacity 120ms ease',
+          }}
+        />
+      )}
+
       <div className="modular-bracelet-band" style={{ 
         display: 'flex', 
         alignItems: 'center', 
@@ -135,11 +168,12 @@ const BraceletCanvas = React.forwardRef(({ selectedCharms, onAddCharm, onRemoveC
             onRemove={onRemoveCharm}
             onReplace={onReplaceCharm}
             moveCharmInSequence={moveCharmInSequence}
+            exportMode={exportMode}
           />
         ))}
       </div>
 
-      {selectedCharms.length === 0 && !isOver && (
+      {selectedCharms.length === 0 && !showDropHighlight && (
         <div style={{ 
           position: 'absolute', 
           top: '50%', 

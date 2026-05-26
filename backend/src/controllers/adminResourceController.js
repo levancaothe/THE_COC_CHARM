@@ -1,5 +1,6 @@
 const Charm = require('../models/Charm');
 const Category = require('../models/Category');
+const { uploadImageToCloudinary } = require('../utils/cloudinary');
 
 exports.getCharms = async (req, res, next) => {
   try {
@@ -28,7 +29,14 @@ exports.createCharm = async (req, res, next) => {
       return res.status(400).json({ message: 'Missing required fields: name, image, price, category' });
     }
 
-    const charm = await Charm.create({ name, image, price, stock: stock || 0, category });
+    const uploadedImage = await uploadImageToCloudinary(image);
+    const charm = await Charm.create({
+      name,
+      image: uploadedImage,
+      price,
+      stock: stock ?? 0,
+      category
+    });
     await charm.populate('category', 'name');
 
     res.status(201).json({ message: 'Charm created', charm });
@@ -42,9 +50,21 @@ exports.updateCharm = async (req, res, next) => {
     const { id } = req.params;
     const { name, image, price, stock, category } = req.body;
 
+    let nextImage = image;
+    if (image) {
+      nextImage = await uploadImageToCloudinary(image);
+    }
+
+    const updateData = {};
+    if (name !== undefined) updateData.name = name;
+    if (image !== undefined) updateData.image = nextImage;
+    if (price !== undefined) updateData.price = price;
+    if (stock !== undefined) updateData.stock = stock;
+    if (category !== undefined) updateData.category = category;
+
     const charm = await Charm.findByIdAndUpdate(
       id,
-      { name, image, price, stock, category },
+      updateData,
       { new: true, runValidators: true }
     ).populate('category', 'name');
 
