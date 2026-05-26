@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDrop, useDrag } from 'react-dnd';
+import { getProxyImageUrl } from '../utils/imageProxy';
 
 const PlacedCharm = ({ charm, index, onRemove, onReplace, moveCharmInSequence, exportMode }) => {
   const [{ isDragging }, drag] = useDrag(() => ({
@@ -58,7 +59,7 @@ const PlacedCharm = ({ charm, index, onRemove, onReplace, moveCharmInSequence, e
         position: 'relative'
       }}>
         <img 
-          src={`http://localhost:5000/api/proxy/image?url=${encodeURIComponent(charm.image)}`} 
+          src={getProxyImageUrl(charm.image)}
           alt={charm.name} 
           crossOrigin="anonymous"
           style={{ 

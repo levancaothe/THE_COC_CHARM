@@ -1,4 +1,5 @@
 import React from 'react';
+import { getProxyImageUrl } from '../utils/imageProxy';
 
 const CategoryCard = ({ category, onClick, isSelected }) => {
 
@@ -50,7 +51,7 @@ const CategoryCard = ({ category, onClick, isSelected }) => {
             >
               {thumb ? (
                 <img
-                  src={`http://localhost:5000/api/proxy/image?url=${encodeURIComponent(thumb)}`}
+                  src={getProxyImageUrl(thumb)}
                   alt=""
                   crossOrigin="anonymous"
                   style={{ width: '90%', height: '90%', objectFit: 'contain' }}
