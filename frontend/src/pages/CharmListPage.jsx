@@ -36,6 +36,16 @@ const CharmListPage = () => {
     }
   };
 
+  useEffect(() => {
+    const handleInventoryUpdate = () => {
+      fetchCategories();
+      fetchCharms();
+    };
+
+    window.addEventListener('inventory-updated', handleInventoryUpdate);
+    return () => window.removeEventListener('inventory-updated', handleInventoryUpdate);
+  }, []);
+
   const getCharmsByCategory = (catId) => {
     return charms.filter(
       (c) =>

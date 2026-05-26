@@ -126,21 +126,61 @@ const DesignerPage = () => {
     [baseCharmOptions, material]
   );
   const basePrice = (selectedBaseCharm?.price || 0) * (Number(tempCapacity) || 0);
+  const getCharmUsageCount = (charmId, charms = selectedCharms) =>
+    charms.filter((charm) => charm?._id === charmId).length;
+  const selectedCharmCounts = useMemo(() => {
+    return selectedCharms.reduce((counts, charm) => {
+      if (!charm?._id) return counts;
+      counts[charm._id] = (counts[charm._id] || 0) + 1;
+      return counts;
+    }, {});
+  }, [selectedCharms]);
+
+  const canAddCharm = (charm, previewCharms = selectedCharms) => {
+    if (!charm?._id) return false;
+
+    const stock = Number(charm.stock);
+    if (Number.isFinite(stock) && stock <= 0) return false;
+
+    const defaultCharmIndex = previewCharms.findIndex((current) =>
+      current?.isDefault ||
+      (selectedBaseCharm && current?._id === selectedBaseCharm._id)
+    );
+
+    const currentCount = getCharmUsageCount(charm._id, previewCharms);
+    const replacingSameCharm = defaultCharmIndex !== -1 && previewCharms[defaultCharmIndex]?._id === charm._id;
+
+    if (Number.isFinite(stock) && !replacingSameCharm && currentCount >= stock) {
+      return false;
+    }
+
+    return true;
+  };
+
+  const fetchCharmsAndCategories = async () => {
+    try {
+      const [charmsRes, catRes] = await Promise.all([
+        api.get('/charms?limit=100'),
+        api.get('/categories')
+      ]);
+      setAvailableCharms(charmsRes.data.data);
+      setCategories(catRes.data.data);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
 
   useEffect(() => {
-    const fetchCharmsAndCategories = async () => {
-      try {
-        const [charmsRes, catRes] = await Promise.all([
-          api.get('/charms?limit=100'),
-          api.get('/categories')
-        ]);
-        setAvailableCharms(charmsRes.data.data);
-        setCategories(catRes.data.data);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
     fetchCharmsAndCategories();
+  }, []);
+
+  useEffect(() => {
+    const handleInventoryUpdate = () => {
+      fetchCharmsAndCategories();
+    };
+
+    window.addEventListener('inventory-updated', handleInventoryUpdate);
+    return () => window.removeEventListener('inventory-updated', handleInventoryUpdate);
   }, []);
 
   useEffect(() => {
@@ -167,7 +207,11 @@ const DesignerPage = () => {
     const defaultCharm = baseCharmOptions.find((charm) => charm._id === mat) || baseCharmOptions[0];
 
     if (defaultCharm) {
-      const initialCharms = Array.from({ length: cap }).map(() => ({
+      const safeCapacity = Number.isFinite(Number(defaultCharm.stock))
+        ? Math.min(cap, Math.max(0, Number(defaultCharm.stock)))
+        : cap;
+
+      const initialCharms = Array.from({ length: safeCapacity }).map(() => ({
         ...defaultCharm,
         instanceId: Math.random().toString(36).substr(2, 9),
         isDefault: true
@@ -189,6 +233,14 @@ const DesignerPage = () => {
   };
 
   const handleStartDesign = () => {
+    const defaultCharm = baseCharmOptions.find((charm) => charm._id === material) || baseCharmOptions[0];
+    const stock = Number(defaultCharm?.stock);
+
+    if (defaultCharm && Number.isFinite(stock) && stock < tempCapacity) {
+      alert(`Chỉ còn ${stock} hạt "${defaultCharm.name}" khả dụng, không đủ để tạo vòng ${tempCapacity} hạt.`);
+      return;
+    }
+
     setCapacity(tempCapacity);
     fillWithDefaultCharms(tempCapacity, material);
   };
@@ -199,6 +251,11 @@ const DesignerPage = () => {
         ...charm,
         instanceId: Math.random().toString(36).substr(2, 9),
       };
+
+      if (!canAddCharm(charm, prevCharms)) {
+        alert(`"${charm.name}" đã hết hoặc không đủ số lượng khả dụng.`);
+        return prevCharms;
+      }
 
       const defaultCharmIndex = prevCharms.findIndex(c =>
         c.isDefault ||
@@ -537,7 +594,12 @@ const DesignerPage = () => {
             disabled={isSaving}
           />
         </div>
-        <CharmSidebar charms={availableCharms} categories={categories} onCharmClick={addCharm} />
+        <CharmSidebar
+          charms={availableCharms}
+          categories={categories}
+          selectedCharmCounts={selectedCharmCounts}
+          onCharmClick={addCharm}
+        />
       </div>
     </DndProvider>
   );
