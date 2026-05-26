@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import api from "../services/api";
 import CategoryCard from "../components/CategoryCard";
+import { getProxyImageUrl } from "../utils/imageProxy";
 
 const CharmListPage = () => {
   const [charms, setCharms] = useState([]);
@@ -166,7 +167,7 @@ const CharmListPage = () => {
                 }}
               >
                 <img
-                  src={`http://localhost:5000/api/proxy/image?url=${encodeURIComponent(charm.image)}`}
+                  src={getProxyImageUrl(charm.image)}
                   alt={charm.name}
                   crossOrigin="anonymous"
                   style={{

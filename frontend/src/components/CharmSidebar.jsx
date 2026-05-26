@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useDrag } from 'react-dnd';
 import CategoryCard from './CategoryCard';
+import { getProxyImageUrl } from '../utils/imageProxy';
 
 const DraggableCharm = ({ charm, onClick }) => {
   const [{ isDragging }, drag] = useDrag(() => ({
@@ -29,7 +30,7 @@ const DraggableCharm = ({ charm, onClick }) => {
       onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--primary-gold)'}
       onMouseLeave={(e) => e.currentTarget.style.borderColor = 'transparent'}
     >
-      <img src={`http://localhost:5000/api/proxy/image?url=${encodeURIComponent(charm.image)}`} alt={charm.name} crossOrigin="anonymous" style={{ width: '60px', height: '60px', objectFit: 'contain', margin: '0 auto' }} />
+      <img src={getProxyImageUrl(charm.image)} alt={charm.name} crossOrigin="anonymous" style={{ width: '60px', height: '60px', objectFit: 'contain', margin: '0 auto' }} />
       <p style={{ minHeight: '34px', fontSize: '0.82rem', color: 'var(--text-h)', fontWeight: '700', lineHeight: '1.2', marginTop: '10px' }}>{charm.name}</p>
       <p style={{ fontSize: '0.8rem', color: 'var(--primary-gold)', fontWeight: '700', marginTop: '6px' }}>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', currencyDisplay: 'code' }).format(charm.price)}</p>
     </div>
