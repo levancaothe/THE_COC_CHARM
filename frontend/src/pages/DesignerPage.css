@@ -151,6 +151,9 @@
   font-size: 0.92rem;
   padding: 18px 78px 22px;
   width: 100%;
+  position: sticky;
+  top: 102px;
+  z-index: 9;
 }
 
 .designer-summary-grid {
@@ -274,6 +277,7 @@
   .designer-summary {
     overflow-x: auto;
     padding: 16px;
+    position: static;
   }
 
   .designer-summary-grid {
@@ -300,6 +304,10 @@
     padding: 10px 0 18px;
     top: 86px;
   }
+
+  .designer-checkout-panel {
+    position: static;
+  }
 }
 
 @media (min-width: 681px) and (max-width: 1024px) {
@@ -317,5 +325,9 @@
 
   .designer-canvas-sticky {
     top: 94px;
+  }
+
+  .designer-summary {
+    top: 92px;
   }
 }

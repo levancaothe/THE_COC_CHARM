@@ -92,6 +92,7 @@ const DesignerPage = () => {
     editDesign?.name || 'Thiết kế của tôi'
   );
   const [isSaving, setIsSaving] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [editingDesignId, setEditingDesignId] = useState(editDesign?._id || null);
   const [editingSource, setEditingSource] = useState(location.state?.source || null);
   const designRef = useRef(null);
@@ -267,6 +268,9 @@ const DesignerPage = () => {
     if (!designRef.current) return;
 
     try {
+      setIsExporting(true);
+      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
       const canvas = await html2canvas(designRef.current, {
         useCORS: true,
         backgroundColor: '#ffffff',
@@ -280,6 +284,8 @@ const DesignerPage = () => {
     } catch (error) {
       console.error('Lỗi khi tạo ảnh:', error);
       alert('Không thể tạo ảnh thiết kế. Vui lòng thử lại.');
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -509,6 +515,7 @@ const DesignerPage = () => {
             moveCharmInSequence={moveCharmInSequence}
             onRemoveCharm={removeCharm}
             onReplaceCharm={replaceCharm}
+            exportMode={isExporting}
           />
         </div>
 
