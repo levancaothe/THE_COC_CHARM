@@ -38,6 +38,24 @@ const orderSchema = new mongoose.Schema({
     enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'],
     default: 'Pending'
   },
+  paymentMethod: {
+    type: String,
+    enum: ['Cash', 'VietQR'],
+    default: 'Cash'
+  },
+  paymentStatus: {
+    type: String,
+    enum: ['Unpaid', 'Paid', 'Failed'],
+    default: 'Unpaid'
+  },
+  transactionId: {
+    type: String
+  },
+  orderCode: {
+    type: Number,
+    unique: true,
+    sparse: true
+  },
   createdAt: {
     type: Date,
     default: Date.now
