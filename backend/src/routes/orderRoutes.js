@@ -8,6 +8,7 @@ const normalizeOrderItems = (items = []) =>
     product: String(item?.product ?? item?._id ?? ''),
     productType: item?.productType === 'BraceletDesign' ? 'BraceletDesign' : 'Charm',
     designCharms: Array.isArray(item?.designCharms) ? item.designCharms.map(String) : [],
+    designCharmDetails: Array.isArray(item?.designCharmDetails) ? item.designCharmDetails : [],
     quantity: Number(item?.quantity) || 1,
     price: Number(item?.price) || 0
   }));

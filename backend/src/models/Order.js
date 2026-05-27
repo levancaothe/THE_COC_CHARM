@@ -15,6 +15,9 @@ const orderSchema = new mongoose.Schema({
       designCharms: [{
         type: String,
       }],
+      designCharmDetails: [{
+        type: mongoose.Schema.Types.Mixed,
+      }],
       quantity: {
         type: Number,
         required: true,

@@ -136,7 +136,6 @@ function CategoryModal({ category, onSave, onClose }) {
   );
 }
 
-
 export default function AdminDashboard() {
   const [token, setToken] = useState(localStorage.getItem('adminJwt') || '');
   const [username, setUsername] = useState('');
@@ -163,6 +162,7 @@ export default function AdminDashboard() {
 
   // Categories state
   const [categories, setCategories] = useState([]);
+  const [categoryFilters, setCategoryFilters] = useState({ limit: 8, page: 1 });
   const [editingCategory, setEditingCategory] = useState(null);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
 
@@ -179,21 +179,13 @@ export default function AdminDashboard() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  useEffect(() => {
-    if (token) {
-      fetchStats();
-      fetchCategories();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
+  function logout() {
+    localStorage.removeItem('adminJwt');
+    localStorage.removeItem('adminRole');
+    setToken('');
+  }
 
-  useEffect(() => {
-    if (token && activeTab === 'orders') fetchOrders(1);
-    if (token && activeTab === 'charms') fetchCharms(1);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, token]);
-
-  const fetchStats = async () => {
+  async function fetchStats() {
     setLoading(true);
     try {
       const res = await api.get('/admin/stats', { headers: { Authorization: `Bearer ${token}` } });
@@ -204,9 +196,9 @@ export default function AdminDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }
 
-  const fetchOrders = async (page = 1) => {
+  async function fetchOrders(page = 1) {
     setLoading(true);
     try {
       const params = { ...filters, page };
@@ -219,18 +211,16 @@ export default function AdminDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }
 
-  const fetchCharms = async (page = 1, nextFilters = charmFilters) => {
+  async function fetchCharms(page = 1, nextFilters = charmFilters) {
     setLoading(true);
     try {
       const params = { ...nextFilters, page };
-      console.log('Fetching charms with params:', params);
       const res = await api.get('/admin/charms', { 
         headers: { Authorization: `Bearer ${token}` }, 
         params 
       });
-      console.log('Charms response:', res.data);
       setCharms(res.data.charms || []);
       setTotalCharms(res.data.total || 0);
       setCharmFilters(prev => ({ ...prev, ...nextFilters, page }));
@@ -240,21 +230,33 @@ export default function AdminDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }
 
-  const fetchCategories = async () => {
+  async function fetchCategories() {
     try {
-      console.log('Fetching categories...');
       const res = await api.get('/admin/categories', { 
         headers: { Authorization: `Bearer ${token}` } 
       });
-      console.log('Categories response:', res.data);
       setCategories(res.data.categories || []);
     } catch (err) {
       console.error('Error fetching categories:', err);
       alert(err.response?.data?.message || 'Failed to fetch categories');
     }
-  };
+  }
+
+  /* eslint-disable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps */
+  useEffect(() => {
+    if (token) {
+      fetchStats();
+      fetchCategories();
+    }
+  }, [token]);
+
+  useEffect(() => {
+    if (token && activeTab === 'orders') fetchOrders(1);
+    if (token && activeTab === 'charms') fetchCharms(1);
+  }, [activeTab, token]);
+  /* eslint-enable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps */
 
   const handleLogin = async () => {
     if (!username || !password) {
@@ -274,26 +276,17 @@ export default function AdminDashboard() {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('adminJwt');
-    localStorage.removeItem('adminRole');
-    setToken('');
-  };
-
   const handleSaveCharm = async (formData) => {
     try {
-      console.log('Saving charm:', formData);
       if (editingCharm) {
-        const res = await api.put(`/admin/charms/${editingCharm._id}`, formData, {
+        await api.put(`/admin/charms/${editingCharm._id}`, formData, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        console.log('Update response:', res.data);
         alert('Charm đã được cập nhật');
       } else {
-        const res = await api.post('/admin/charms', formData, {
+        await api.post('/admin/charms', formData, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        console.log('Create response:', res.data);
         alert('Charm đã được thêm');
       }
       setShowCharmModal(false);
@@ -324,6 +317,17 @@ export default function AdminDashboard() {
     const nextFilters = { ...charmFilters, search: e.target.value };
     setCharmFilters(nextFilters);
     fetchCharms(1, nextFilters);
+  };
+
+  const handleCharmLimitChange = (e) => {
+    const nextFilters = { ...charmFilters, limit: Math.max(1, parseInt(e.target.value, 10) || 10) };
+    setCharmFilters(nextFilters);
+    fetchCharms(1, nextFilters);
+  };
+
+  const handleCategoryLimitChange = (e) => {
+    const limit = Math.max(1, parseInt(e.target.value, 10) || 8);
+    setCategoryFilters({ limit, page: 1 });
   };
 
   const handleSaveCategory = async (formData) => {
@@ -369,10 +373,8 @@ export default function AdminDashboard() {
     }
 
     try {
-      // Dynamic import xlsx
       const XLSX = await import('xlsx');
 
-      // Prepare data for Excel
       const excelData = orders.map((order, idx) => ({
         'STT': (filters.page - 1) * filters.limit + idx + 1,
         'Mã đơn hàng': order._id,
@@ -385,11 +387,9 @@ export default function AdminDashboard() {
         'Ngày đặt': new Date(order.createdAt).toLocaleString('vi-VN')
       }));
 
-      // Create workbook and worksheet
       const wb = XLSX.utils.book_new();
       const ws = XLSX.utils.json_to_sheet(excelData);
 
-      // Set column widths
       ws['!cols'] = [
         { wch: 5 },  // STT
         { wch: 25 }, // Mã đơn hàng
@@ -404,10 +404,8 @@ export default function AdminDashboard() {
 
       XLSX.utils.book_append_sheet(wb, ws, 'Đơn hàng');
 
-      // Generate filename with current date
       const filename = `DonHang_${new Date().toISOString().split('T')[0]}.xlsx`;
-      
-      // Save file
+
       XLSX.writeFile(wb, filename);
       alert(`Đã export ${orders.length} đơn hàng ra file ${filename}`);
     } catch (error) {
@@ -444,6 +442,16 @@ export default function AdminDashboard() {
   const formatDate = (dateString) => new Date(dateString).toLocaleDateString('vi-VN', { 
     year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' 
   });
+
+  const charmTotalPages = Math.max(1, Math.ceil(totalCharms / charmFilters.limit));
+  const categoryTotalPages = Math.max(1, Math.ceil(categories.length / categoryFilters.limit));
+  const categoryCurrentPage = Math.min(categoryFilters.page, categoryTotalPages);
+  const charmRangeStart = totalCharms ? (charmFilters.page - 1) * charmFilters.limit + 1 : 0;
+  const categoryRangeStart = categories.length ? (categoryCurrentPage - 1) * categoryFilters.limit + 1 : 0;
+  const categoryPageItems = categories.slice(
+    (categoryCurrentPage - 1) * categoryFilters.limit,
+    categoryCurrentPage * categoryFilters.limit
+  );
 
   if (!token) {
     return (
@@ -484,9 +492,7 @@ export default function AdminDashboard() {
     );
   }
 
-  const totalPages = activeTab === 'orders' 
-    ? Math.ceil(totalOrders / filters.limit)
-    : Math.ceil(totalCharms / charmFilters.limit);
+  const orderTotalPages = Math.max(1, Math.ceil(totalOrders / filters.limit));
 
   return (
     <div className="admin-dashboard-page">
@@ -663,10 +669,10 @@ export default function AdminDashboard() {
                       >
                         ← Trước
                       </button>
-                      <span className="page-info">Trang {filters.page} / {totalPages || 1}</span>
+                      <span className="page-info">Trang {filters.page} / {orderTotalPages}</span>
                       <button
                         className="btn btn-small"
-                        disabled={filters.page >= totalPages}
+                        disabled={filters.page >= orderTotalPages}
                         onClick={() => fetchOrders(filters.page + 1)}
                       >
                         Tiếp →
@@ -684,13 +690,24 @@ export default function AdminDashboard() {
                     <h3>Kho charms</h3>
                     <p>Quản lý thông tin, giá và tồn kho từng charm.</p>
                   </div>
-                  <div className="search-box">
-                    <input
-                      type="text"
-                      placeholder="Tìm kiếm charm..."
-                      value={charmFilters.search}
-                      onChange={handleCharmSearchChange}
-                    />
+                  <div className="toolbar-inline">
+                    <div className="search-box">
+                      <input
+                        type="text"
+                        placeholder="Tìm kiếm charm..."
+                        value={charmFilters.search}
+                        onChange={handleCharmSearchChange}
+                      />
+                    </div>
+                    <div className="filter-group compact">
+                      <label>Số Hàng/Trang</label>
+                      <select value={charmFilters.limit} onChange={handleCharmLimitChange}>
+                        <option value={5}>5</option>
+                        <option value={10}>10</option>
+                        <option value={20}>20</option>
+                        <option value={50}>50</option>
+                      </select>
+                    </div>
                   </div>
                   <button 
                     className="btn btn-success"
@@ -759,6 +776,13 @@ export default function AdminDashboard() {
                         </tbody>
                       </table>
                     </div>
+                    <div className="table-footer">
+                      <span>
+                        Hiển thị {charmRangeStart}-
+                        {Math.min(charmFilters.page * charmFilters.limit, totalCharms)} / {totalCharms} charm
+                      </span>
+                      <span>{charmFilters.limit} hàng/trang</span>
+                    </div>
                     <div className="pagination">
                       <button
                         className="btn btn-small"
@@ -767,10 +791,10 @@ export default function AdminDashboard() {
                       >
                         ← Trước
                       </button>
-                      <span className="page-info">Trang {charmFilters.page} / {totalPages || 1}</span>
+                      <span className="page-info">Trang {charmFilters.page} / {charmTotalPages}</span>
                       <button
                         className="btn btn-small"
-                        disabled={charmFilters.page >= totalPages}
+                        disabled={charmFilters.page >= charmTotalPages}
                         onClick={() => fetchCharms(charmFilters.page + 1)}
                       >
                         Tiếp →
@@ -788,19 +812,30 @@ export default function AdminDashboard() {
                     <h3>Quản Lý Danh Mục</h3>
                     <p>Sắp xếp nhóm charm hiển thị trong cửa hàng.</p>
                   </div>
-                  <button 
-                    className="btn btn-success"
-                    onClick={() => {
-                      setEditingCategory(null);
-                      setShowCategoryModal(true);
-                    }}
-                  >
-                    + Thêm Danh Mục
-                  </button>
+                  <div className="toolbar-inline">
+                    <div className="filter-group compact">
+                      <label>Số Hàng/Trang</label>
+                      <select value={categoryFilters.limit} onChange={handleCategoryLimitChange}>
+                        <option value={4}>4</option>
+                        <option value={8}>8</option>
+                        <option value={12}>12</option>
+                        <option value={24}>24</option>
+                      </select>
+                    </div>
+                    <button 
+                      className="btn btn-success"
+                      onClick={() => {
+                        setEditingCategory(null);
+                        setShowCategoryModal(true);
+                      }}
+                    >
+                      + Thêm Danh Mục
+                    </button>
+                  </div>
                 </div>
 
                 <div className="categories-grid">
-                  {categories.map(cat => (
+                  {categoryPageItems.map(cat => (
                     <div key={cat._id} className="category-card">
                       <div className="category-info">
                         <h4>{cat.name}</h4>
@@ -827,6 +862,30 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                   ))}
+                </div>
+                <div className="table-footer">
+                  <span>
+                    Hiển thị {categoryRangeStart}-
+                    {Math.min(categoryCurrentPage * categoryFilters.limit, categories.length)} / {categories.length} danh mục
+                  </span>
+                  <span>{categoryFilters.limit} hàng/trang</span>
+                </div>
+                <div className="pagination">
+                  <button
+                    className="btn btn-small"
+                    disabled={categoryCurrentPage === 1}
+                    onClick={() => setCategoryFilters((prev) => ({ ...prev, page: Math.max(1, prev.page - 1) }))}
+                  >
+                    ← Trước
+                  </button>
+                  <span className="page-info">Trang {categoryCurrentPage} / {categoryTotalPages || 1}</span>
+                  <button
+                    className="btn btn-small"
+                    disabled={categoryCurrentPage >= categoryTotalPages}
+                    onClick={() => setCategoryFilters((prev) => ({ ...prev, page: Math.min(categoryTotalPages, prev.page + 1) }))}
+                  >
+                    Tiếp →
+                  </button>
                 </div>
               </div>
             )}
@@ -870,6 +929,7 @@ export default function AdminDashboard() {
 
       {showOrderDetail && (
         <OrderDetailModal
+          key={`${selectedOrder?._id || 'order'}-${selectedOrder?.status || 'status'}`}
           order={selectedOrder}
           onUpdateStatus={handleUpdateOrderStatus}
           updatingStatus={updatingOrderStatus}

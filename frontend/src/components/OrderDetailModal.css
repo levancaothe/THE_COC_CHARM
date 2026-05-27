@@ -95,6 +95,22 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
+.order-item-card--design {
+  flex-direction: column;
+}
+
+.order-item-media {
+  flex: 0 0 84px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.order-item-media--design {
+  flex: 1 1 100%;
+  width: 100%;
+}
+
 .order-item-image {
   width: 60px;
   height: 60px;
@@ -102,6 +118,22 @@
   border-radius: 6px;
   border: 1px solid #e1e8ed;
   flex-shrink: 0;
+}
+
+.order-item-image--empty {
+  display: grid;
+  place-items: center;
+  color: #94a3b8;
+  font-size: 12px;
+  background: #fff;
+}
+
+.order-item-head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
 }
 
 .order-item-info {
@@ -126,6 +158,119 @@
   font-weight: 700;
   color: #28a745;
   margin-top: 8px;
+}
+
+.order-item-meta {
+  display: flex;
+  gap: 10px 16px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #667085;
+}
+
+.item-type-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.item-type-badge--charm {
+  background: #eaf2fb;
+  color: #0a2e4f;
+}
+
+.item-type-badge--design {
+  background: #fff1e8;
+  color: #d95c14;
+}
+
+.order-bracelet-preview {
+  width: 100%;
+  display: grid;
+  gap: 12px;
+  justify-items: stretch;
+}
+
+.order-design-summary {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.order-bracelet-strip {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  padding: 6px 2px 10px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid #e1e8ed;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #fff, #f8fafc);
+}
+
+.order-bracelet-strip::-webkit-scrollbar {
+  height: 8px;
+}
+
+.order-bracelet-strip::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: #c7d2e2;
+}
+
+.order-bracelet-chip {
+  flex: 0 0 auto;
+  width: 66px;
+  display: grid;
+  gap: 4px;
+  justify-items: center;
+  scroll-snap-align: start;
+}
+
+.order-bracelet-chip__image {
+  width: 42px;
+  height: 42px;
+  object-fit: cover;
+  border-radius: 9px;
+  border: 1px solid #dbe4ee;
+  background: #eef2f7;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
+}
+
+.order-bracelet-chip__image--empty {
+  display: grid;
+  place-items: center;
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.order-bracelet-chip__name {
+  width: 100%;
+  font-size: 10px;
+  color: #334155;
+  text-align: center;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.order-bracelet-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: #475569;
+  font-size: 12px;
+}
+
+.order-bracelet-summary strong {
+  color: #0f172a;
+  font-size: 13px;
 }
 
 .order-notes {
@@ -189,6 +334,15 @@
 
   .order-item-card {
     flex-direction: column;
+  }
+
+  .order-item-card--design {
+    flex-direction: column;
+  }
+
+  .order-item-media {
+    flex: 0 0 auto;
+    width: 100%;
   }
 
   .order-item-image {
