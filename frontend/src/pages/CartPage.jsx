@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import api from '../services/api';
@@ -101,6 +101,16 @@ const CartPage = () => {
 
     setIsSubmitting(true);
     try {
+      const buildDesignCharmDetails = (item) =>
+        (item.charms || []).map((charm) => ({
+          _id: String(charm?._id ?? charm?.charm?._id ?? ''),
+          name: charm?.name || charm?.charm?.name || '',
+          image: charm?.image || charm?.charm?.image || '',
+          price: Number(charm?.price ?? charm?.charm?.price) || 0,
+          stock: Number(charm?.stock ?? charm?.charm?.stock) || 0,
+          category: charm?.category || charm?.charm?.category || null
+        }));
+
       const orderPayload = {
         items: selectedItems.map((item) => ({
           product: String(item._id),
@@ -108,6 +118,7 @@ const CartPage = () => {
           designCharms: item.type === 'design'
             ? (item.charms || []).map((charm) => String(charm?._id ?? charm?.charm?._id ?? ''))
             : [],
+          designCharmDetails: item.type === 'design' ? buildDesignCharmDetails(item) : [],
           quantity: item.quantity,
           price: item.price,
         })),
@@ -132,16 +143,10 @@ const CartPage = () => {
         },
       };
 
-      const orderResponse = await api.post('/orders', orderPayload);
-      console.log('Order inventory result:', orderResponse.data?.inventory);
-
-      // Show success modal instead of alert
-      console.log('Order successful, showing modal...');
+      await api.post('/orders', orderPayload);
       window.dispatchEvent(new Event('inventory-updated'));
       setShowSuccessModal(true);
-      console.log('showSuccessModal set to:', true);
-      
-      // Clear selected items and form
+
       selectedItems.forEach((item) => removeFromCart(item._id, item.type));
       setCustomerInfo({
         name: '',
