@@ -1,8 +1,25 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import api from '../services/api';
 import './OrdersPage.css';
 
 const formatVnd = (value) => `${new Intl.NumberFormat('vi-VN').format(value || 0)} VND`;
+
+const getDesignCharms = (item) => {
+  const snapshotCharms = Array.isArray(item.designCharmDetails) ? item.designCharmDetails : [];
+  if (snapshotCharms.length > 0) return snapshotCharms;
+
+  return Array.isArray(item.designCharms)
+    ? item.designCharms.map((charm) => ({
+        _id: charm,
+        name: 'Charm',
+        image: '',
+      }))
+    : [];
+};
+
+const getCharmImage = (charm) => charm?.image || charm?.thumbnail || charm?.photo || '';
+
+const getCharmName = (charm) => charm?.name || charm?.title || charm?.charmName || 'Charm';
 
 const OrdersPage = () => {
   const [phone, setPhone] = useState('');
@@ -10,6 +27,45 @@ const OrdersPage = () => {
   const [hasSearched, setHasSearched] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const renderBraceletPreview = (item) => {
+    const charms = getDesignCharms(item);
+
+    return (
+      <div className="lookup-design-preview">
+        <div className="lookup-design-preview__title">
+          <strong>Vòng charm</strong>
+          <span>{charms.length} hạt</span>
+        </div>
+        <div className="lookup-design-strip" role="list" aria-label="Danh sách charm trong vòng">
+          {charms.length > 0 ? (
+            charms.map((charm, index) => {
+              const charmName = getCharmName(charm);
+              const charmImage = getCharmImage(charm);
+
+              return (
+                <div
+                  key={`${charm?._id || charmName || 'charm'}-${index}`}
+                  className="lookup-design-chip"
+                  role="listitem"
+                  title={charmName}
+                >
+                  {charmImage ? (
+                    <img src={charmImage} alt={charmName} className="lookup-design-chip__image" />
+                  ) : (
+                    <span className="lookup-design-chip__image lookup-design-chip__image--empty">?</span>
+                  )}
+                  <span className="lookup-design-chip__name">{charmName}</span>
+                </div>
+              );
+            })
+          ) : (
+            <div className="lookup-design-empty">Không có dữ liệu hạt charm.</div>
+          )}
+        </div>
+      </div>
+    );
+  };
 
   const handleLookup = async (event) => {
     event.preventDefault();
@@ -89,10 +145,21 @@ const OrdersPage = () => {
 
                 <div className="lookup-order-items">
                   {order.items.map((item, index) => (
-                    <div key={`${order._id}-${index}`} className="lookup-order-item">
-                      <span>{item.productType === 'BraceletDesign' ? 'Vòng tay thiết kế' : 'Hạt Charm lẻ'}</span>
-                      <span>Số lượng: {item.quantity}</span>
-                      <strong>{formatVnd(item.price * item.quantity)}</strong>
+                    <div
+                      key={`${order._id}-${index}`}
+                      className={`lookup-order-item ${item.productType === 'BraceletDesign' ? 'lookup-order-item--design' : ''}`}
+                    >
+                      {item.productType === 'BraceletDesign' && renderBraceletPreview(item)}
+                      <div className={`lookup-order-item__main ${item.productType === 'BraceletDesign' ? 'lookup-order-item__main--design' : ''}`}>
+                        <span>{item.productType === 'BraceletDesign' ? 'Vòng tay thiết kế' : 'Hạt Charm lẻ'}</span>
+                        <span>Số lượng: {item.quantity}</span>
+                        <strong>{formatVnd(item.price * item.quantity)}</strong>
+                      </div>
+                      {item.productType === 'BraceletDesign' && (
+                        <p className="lookup-design-summary">
+                          Vòng tay được ghép từ {(getDesignCharms(item)).length} hạt charm
+                        </p>
+                      )}
                     </div>
                   ))}
                 </div>
