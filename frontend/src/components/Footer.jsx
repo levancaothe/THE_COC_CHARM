@@ -22,24 +22,6 @@ const socialLinks = [
       </svg>
     ),
   },
-  {
-    name: 'TikTok',
-    href: '#',
-    icon: (
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M14 3.5c.4 2.5 1.8 4.1 4 4.4V11c-1.5 0-2.8-.4-4-1.2V17a5.5 5.5 0 1 1-5.5-5.5c.2 0 .4 0 .5.1V15a2.5 2.5 0 1 0 1.8 2.4V3.5H14z" fill="currentColor" />
-      </svg>
-    ),
-  },
-  {
-    name: 'LinkedIn',
-    href: '#',
-    icon: (
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M6.5 9H3v12h3.5V9zM4.75 3.5A2.25 2.25 0 1 0 4.75 8a2.25 2.25 0 0 0 0-4.5zM21 21h-3.5v-6.1c0-1.5-.5-2.5-1.8-2.5-1 0-1.6.7-1.9 1.3-.1.2-.1.5-.1.8V21h-3.5V9H14v1.7c.5-.8 1.5-1.9 3.6-1.9 2.6 0 4.4 1.7 4.4 5.3V21z" fill="currentColor" />
-      </svg>
-    ),
-  },
 ];
 
 const Footer = () => {
@@ -74,21 +56,23 @@ const Footer = () => {
         </div>
 
         <div className="footer-column">
-          <h3>Kết Nối Với Chúng Tôi</h3>
-          <div className="footer-socials" aria-label="Kênh mạng xã hội">
-            {socialLinks.map((social) => (
-              <a
-                key={social.name}
-                className="footer-social-link"
-                href={social.href}
-                target="_blank"
-                rel="noreferrer"
-                aria-label={social.name}
-                title={social.name}
-              >
-                {social.icon}
-              </a>
-            ))}
+          <div className="footer-social-head">
+            <h3>Kết Nối Với Chúng Tôi</h3>
+            <div className="footer-socials" aria-label="Kênh mạng xã hội">
+              {socialLinks.map((social) => (
+                <a
+                  key={social.name}
+                  className="footer-social-link"
+                  href={social.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={social.name}
+                  title={social.name}
+                >
+                  {social.icon}
+                </a>
+              ))}
+            </div>
           </div>
         </div>
       </div>
