@@ -72,7 +72,7 @@ export const DesignerToolbar = ({ onSave, onAddToCart, onBuyNow, onDownload, onC
           onClick={onAddToCart}
           disabled={disabled}
         >
-          {disabled ? 'Đang xử lý...' : 'Lưu vào giỏ hàng'}
+          {disabled ? 'Đang xử lý...' : 'Thêm vào giỏ hàng'}
         </button>
       </div>
     </div>
