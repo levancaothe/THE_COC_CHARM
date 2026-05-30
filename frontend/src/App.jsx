@@ -10,6 +10,7 @@ import CartPage from './pages/CartPage';
 import OrdersPage from './pages/OrdersPage';
 import AdminDashboard from './pages/AdminDashboard';
 import GuidePage from './pages/GuidePage';
+import AboutUsPage from './pages/AboutUsPage';
 import { CartProvider } from './context/CartContext';
 
 function App() {
@@ -26,6 +27,8 @@ function App() {
               <Route path="/orders" element={<OrdersPage />} />
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/cart" element={<CartPage />} />
+              <Route path="/about-us" element={<AboutUsPage />} />
+              <Route path="/policy" element={<GuidePage />} />
               <Route path="/about" element={<GuidePage />} />
             </Routes>
           </Layout>

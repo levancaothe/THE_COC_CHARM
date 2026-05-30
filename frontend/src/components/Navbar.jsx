@@ -25,16 +25,19 @@ const Navbar = () => {
             <NavLink to="/charms">Sản phẩm</NavLink>
           </li>
           <li>
-            <NavLink to="/about">Hướng dẫn</NavLink>
+            <NavLink to="/about-us">About us</NavLink>
+          </li>
+          <li>
+            <NavLink to="/policy">Chính sách</NavLink>
           </li>
           <li>
             <NavLink to="/orders">Tra cứu</NavLink>
           </li>
           <li>
-            <NavLink to="/my-designs">Mẫu của tôi</NavLink>
+            <NavLink to="/designer">Thiết kế ngay</NavLink>
           </li>
           <li>
-            <NavLink to="/designer">Thiết kế ngay</NavLink>
+            <NavLink to="/my-designs">Mẫu của tôi</NavLink>
           </li>
         </ul>
         <div className="nav-actions">
