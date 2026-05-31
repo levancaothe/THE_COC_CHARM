@@ -169,7 +169,7 @@ const CartPage = () => {
         },
       };
 
-      const response = await api.post("/api/orders", orderPayload);
+      const response = await api.post("/orders", orderPayload);
       console.log("TRẢ VỀ TỪ BACKEND:", response);
       // 🟢 REDIRECT TO PAYOS IF THEY CHOSE CHUYỂN KHOẢN
       if (paymentMethod === "PayOS" && response.data.checkoutUrl) {
