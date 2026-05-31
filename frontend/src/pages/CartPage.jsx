@@ -457,34 +457,6 @@ const CartPage = () => {
                           Chuyển khoản ngân hàng (Quét mã QR tự động)
                         </strong>
                       </label>
-
-                      <label
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "flex-start",
-                          gap: "12px",
-                          cursor: "pointer",
-                        }}
-                      >
-                        <input
-                          type="radio"
-                          value="Cash"
-                          checked={paymentMethod === "Cash"}
-                          onChange={(e) => setPaymentMethod(e.target.value)}
-                          // 🟢 THIS STYLE OVERRIDES THE GLOBAL STRETCHING
-                          style={{
-                            width: "20px",
-                            height: "20px",
-                            margin: 0,
-                            flexShrink: 0,
-                            cursor: "pointer",
-                          }}
-                        />
-                        <strong style={{ textAlign: "left", margin: 0 }}>
-                          Thanh toán bằng tiền mặt (COD)
-                        </strong>
-                      </label>
                     </div>
 
                     <div className="payment-box">
@@ -501,19 +473,6 @@ const CartPage = () => {
                           toàn để quét mã QR ngay sau khi nhấn xác nhận. Trạng
                           thái đơn hàng sẽ được hệ thống cập nhật hoàn toàn tự
                           động!
-                        </p>
-                      )}
-
-                      {paymentMethod === "Cash" && (
-                        <p
-                          style={{
-                            margin: 0,
-                            lineHeight: "1.5",
-                            textAlign: "left",
-                          }}
-                        >
-                          Bạn có thể thanh toán bằng tiền mặt trực tiếp cho nhân
-                          viên giao hàng khi nhận được sản phẩm.
                         </p>
                       )}
                     </div>
