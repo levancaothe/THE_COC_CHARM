@@ -5,7 +5,7 @@ import "./Footer.css";
 const socialLinks = [
   {
     name: 'Facebook',
-    href: '#',
+    href: 'https://www.facebook.com/profile.php?id=61590667133720',
     icon: (
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M14 8.5V7c0-.8.5-1.5 1.6-1.5H18V2h-2.8C12.4 2 11 3.6 11 6.3v2.2H8v3.5h3V22h3.5v-10h2.8l.7-3.5H14z" fill="currentColor" />
@@ -65,7 +65,7 @@ const Footer = () => {
                   className="footer-social-link"
                   href={social.href}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   aria-label={social.name}
                   title={social.name}
                 >
