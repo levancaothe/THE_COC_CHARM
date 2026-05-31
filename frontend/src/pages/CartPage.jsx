@@ -214,33 +214,6 @@ const CartPage = () => {
             <h2>Giỏ hàng của bạn đang trống</h2>
             <p>Hãy chọn cho mình những hạt charm phù hợp nhất.</p>
             <Link to="/charms">Bắt đầu mua sắm</Link>
-            {/* 🟢 TEMPORARY TEST BUTTON START */}
-            <button
-              style={{
-                marginTop: "20px",
-                padding: "10px 20px",
-                background: "red",
-                color: "white",
-                border: "none",
-                borderRadius: "5px",
-                cursor: "pointer",
-              }}
-              onClick={() => {
-                addToCart({
-                  _id: "6a0ec9483b3144031a54413b", // 🟢 A valid 24-character MongoDB ID!
-                  type: "charm",
-                  name: "Hạt Charm Test PayOS",
-                  price: 50000,
-                  image: "https://via.placeholder.com/150",
-                  stock: 100,
-                  quantity: 1,
-                  selected: true,
-                });
-              }}
-            >
-              🛠 Bơm Data Ảo Để Test PayOS
-            </button>
-            {/* 🟢 TEMPORARY TEST BUTTON END */}
           </div>
         ) : (
           <div className="cart-wrap">
