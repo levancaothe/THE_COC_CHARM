@@ -1,6 +1,12 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const orderSchema = new mongoose.Schema({
+  // 🟢 ADDED: PayOS absolutely requires a unique numeric orderCode (max 53 bits)
+  orderCode: {
+    type: Number,
+    required: true,
+    unique: true,
+  },
   items: [
     {
       product: {
@@ -10,28 +16,32 @@ const orderSchema = new mongoose.Schema({
       productType: {
         type: String,
         required: true,
-        enum: ['Charm', 'BraceletDesign']
+        enum: ["Charm", "BraceletDesign"],
       },
-      designCharms: [{
-        type: String,
-      }],
-      designCharmDetails: [{
-        type: mongoose.Schema.Types.Mixed,
-      }],
+      designCharms: [
+        {
+          type: String,
+        },
+      ],
+      designCharmDetails: [
+        {
+          type: mongoose.Schema.Types.Mixed,
+        },
+      ],
       quantity: {
         type: Number,
         required: true,
-        min: 1
+        min: 1,
       },
       price: {
         type: Number,
-        required: true
-      }
-    }
+        required: true,
+      },
+    },
   ],
   totalPrice: {
     type: Number,
-    required: true
+    required: true,
   },
   customerInfo: {
     name: { type: String, required: true },
@@ -41,32 +51,36 @@ const orderSchema = new mongoose.Schema({
     addressLine: { type: String },
     district: { type: String },
     city: { type: String },
-    note: { type: String }
+    note: { type: String },
   },
   paymentInfo: {
     method: {
       type: String,
-      enum: ['BankTransfer'],
-      default: 'BankTransfer'
+      // 🟢 ADDED 'PayOS' so the database allows it
+      enum: ["BankTransfer", "PayOS"],
+      default: "BankTransfer",
     },
     status: {
       type: String,
-      enum: ['PendingTransfer', 'TransferConfirmed'],
-      default: 'TransferConfirmed'
+      // 🟢 ADDED 'Unpaid' and 'Paid' to handle automatic webhook updates
+      enum: ["PendingTransfer", "TransferConfirmed", "Unpaid", "Paid"],
+      default: "Unpaid",
     },
     bankName: { type: String },
     accountNumber: { type: String },
-    accountHolder: { type: String }
+    accountHolder: { type: String },
+    // 🟢 ADDED: To store the PayOS transaction reference string
+    transactionId: { type: String },
   },
   status: {
     type: String,
-    enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'],
-    default: 'Pending'
+    enum: ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"],
+    default: "Pending",
   },
   createdAt: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 });
 
-module.exports = mongoose.model('Order', orderSchema);
+module.exports = mongoose.model("Order", orderSchema);
