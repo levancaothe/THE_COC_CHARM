@@ -61,7 +61,7 @@ const CartPage = () => {
       // 2. 🟢 Tell backend to mark this order as Cancelled in the database
       const updateOrderToCancelled = async () => {
         try {
-          await api.put("/cancel-payos-order", { orderCode: orderCode });
+          await api.put("/orders/cancel-payos-order", { orderCode: orderCode });
           console.log(`Đơn hàng #${orderCode} đã cập nhật thành Cancelled.`);
         } catch (err) {
           console.error("Lỗi khi cập nhật trạng thái hủy đơn hàng:", err);
