@@ -211,15 +211,71 @@ const DesignerPage = () => {
         ? Math.min(cap, Math.max(0, Number(defaultCharm.stock)))
         : cap;
 
-      const initialCharms = Array.from({ length: safeCapacity }).map(() => ({
-        ...defaultCharm,
-        instanceId: Math.random().toString(36).substr(2, 9),
-        isDefault: true
-      }));
+      const initialCharms = Array.from({ length: safeCapacity }).map(() =>
+        ({
+          ...defaultCharm,
+          instanceId: Math.random().toString(36).substr(2, 9),
+          isDefault: true
+        })
+      );
       setSelectedCharms(initialCharms);
+      return safeCapacity;
     } else {
       setSelectedCharms([]);
+      return 0;
     }
+  };
+
+  const resizeBraceletToCapacity = (nextCapacity, mat = material) => {
+    const desiredCapacity = Math.max(1, Math.floor(Number(nextCapacity) || 1));
+    const defaultCharm = baseCharmOptions.find((charm) => charm._id === mat) || baseCharmOptions[0];
+    const currentCapacity = selectedCharms.length;
+
+    if (desiredCapacity === currentCapacity) {
+      return currentCapacity;
+    }
+
+    if (desiredCapacity < currentCapacity) {
+      setSelectedCharms((prevCharms) => prevCharms.slice(0, desiredCapacity));
+      return desiredCapacity;
+    }
+
+    if (!defaultCharm) {
+      alert('Chưa có charm cơ bản trong cơ sở dữ liệu để mở rộng vòng.');
+      return 0;
+    }
+
+    if (currentCapacity === 0) {
+      return fillWithDefaultCharms(desiredCapacity, mat);
+    }
+
+    const defaultCharmUsage = selectedCharms.filter(
+      (charm) => charm?.isDefault || charm?._id === defaultCharm._id
+    ).length;
+    const stock = Number(defaultCharm.stock);
+    const remainingStock = Number.isFinite(stock)
+      ? Math.max(0, stock - defaultCharmUsage)
+      : Infinity;
+    const additionalNeeded = desiredCapacity - currentCapacity;
+
+    if (Number.isFinite(remainingStock) && additionalNeeded > remainingStock) {
+      alert(
+        `Chỉ còn ${remainingStock} hạt "${defaultCharm.name}" khả dụng để mở rộng vòng.`
+      );
+      return 0;
+    }
+
+    setSelectedCharms((prevCharms) => [
+      ...prevCharms,
+      ...Array.from({ length: additionalNeeded }).map(() =>
+        ({
+          ...defaultCharm,
+          instanceId: Math.random().toString(36).substr(2, 9),
+          isDefault: true
+        })
+      )
+    ]);
+    return desiredCapacity;
   };
 
   const handleWristSizeChange = (e) => {
@@ -233,16 +289,10 @@ const DesignerPage = () => {
   };
 
   const handleStartDesign = () => {
-    const defaultCharm = baseCharmOptions.find((charm) => charm._id === material) || baseCharmOptions[0];
-    const stock = Number(defaultCharm?.stock);
-
-    if (defaultCharm && Number.isFinite(stock) && stock < tempCapacity) {
-      alert(`Chỉ còn ${stock} hạt "${defaultCharm.name}" khả dụng, không đủ để tạo vòng ${tempCapacity} hạt.`);
-      return;
+    const nextCapacity = resizeBraceletToCapacity(tempCapacity, material);
+    if (nextCapacity > 0) {
+      setCapacity(nextCapacity);
     }
-
-    setCapacity(tempCapacity);
-    fillWithDefaultCharms(tempCapacity, material);
   };
 
   const addCharm = (charm) => {
