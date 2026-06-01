@@ -50,6 +50,17 @@ const CartPage = () => {
   };
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get("cancel") === "true") {
+      alert("Bạn đã hủy thanh toán đơn hàng!");
+
+      // 🟢 CLEANUP MAGIC: This wipes the URL parameters without reloading the page
+      window.history.replaceState(null, "", window.location.pathname);
+    }
+  }, []);
+
+  useEffect(() => {
     if (
       location.state?.focusCheckout &&
       checkoutRef.current &&
