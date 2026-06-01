@@ -267,4 +267,39 @@ router.post("/webhook", async (req, res) => {
   }
 });
 
+// 🟢 ROUTE TO UPDATE STATUS WHEN USER CANCELS PAYMENT
+router.put("/cancel-payos-order", async (req, res) => {
+  try {
+    const { orderCode } = req.body;
+
+    if (!orderCode) {
+      return res.status(400).json({ message: "Thiếu mã đơn hàng (orderCode)" });
+    }
+
+    // Find the order using the numeric orderCode passed from PayOS
+    const updatedOrder = await Order.findOneAndUpdate(
+      { orderCode: Number(orderCode) },
+      {
+        $set: {
+          status: "Cancelled", // Main Order status
+          "paymentInfo.status": "Cancelled", // Payment detail status
+        },
+      },
+      { new: true }, // Returns the updated document
+    );
+
+    if (!updatedOrder) {
+      return res.status(404).json({ message: "Không tìm thấy đơn hàng" });
+    }
+
+    return res.status(200).json({
+      message: "Đơn hàng đã được chuyển sang trạng thái Hủy thành công.",
+      order: updatedOrder,
+    });
+  } catch (error) {
+    console.error("Lỗi khi hủy đơn hàng PayOS:", error);
+    return res.status(500).json({ message: "Lỗi hệ thống nội bộ" });
+  }
+});
+
 module.exports = router;

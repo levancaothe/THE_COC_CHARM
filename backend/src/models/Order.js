@@ -62,14 +62,18 @@ const orderSchema = new mongoose.Schema({
     },
     status: {
       type: String,
-      // 🟢 ADDED 'Unpaid' and 'Paid' to handle automatic webhook updates
-      enum: ["PendingTransfer", "TransferConfirmed", "Unpaid", "Paid"],
+      enum: [
+        "PendingTransfer",
+        "TransferConfirmed",
+        "Unpaid",
+        "Paid",
+        "Cancelled",
+      ],
       default: "Unpaid",
     },
     bankName: { type: String },
     accountNumber: { type: String },
     accountHolder: { type: String },
-    // 🟢 ADDED: To store the PayOS transaction reference string
     transactionId: { type: String },
   },
   status: {

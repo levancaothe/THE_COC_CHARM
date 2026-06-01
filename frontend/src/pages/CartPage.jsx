@@ -51,11 +51,26 @@ const CartPage = () => {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
+    const isCancelled = params.get("cancel") === "true";
+    const orderCode = params.get("orderCode"); // 🟢 Grabs the orderCode from PayOS URL (e.g., 7200)
 
-    if (params.get("cancel") === "true") {
+    if (isCancelled && orderCode) {
+      // 1. Alert the user
       alert("Bạn đã hủy thanh toán đơn hàng!");
 
-      // 🟢 CLEANUP MAGIC: This wipes the URL parameters without reloading the page
+      // 2. 🟢 Tell backend to mark this order as Cancelled in the database
+      const updateOrderToCancelled = async () => {
+        try {
+          await api.put("/cancel-payos-order", { orderCode: orderCode });
+          console.log(`Đơn hàng #${orderCode} đã cập nhật thành Cancelled.`);
+        } catch (err) {
+          console.error("Lỗi khi cập nhật trạng thái hủy đơn hàng:", err);
+        }
+      };
+
+      updateOrderToCancelled();
+
+      // 3. Clean up the messy URL parameters
       window.history.replaceState(null, "", window.location.pathname);
     }
   }, []);
