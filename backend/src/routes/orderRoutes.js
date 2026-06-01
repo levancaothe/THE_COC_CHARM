@@ -163,7 +163,10 @@ router.post("/", async (req, res) => {
     let checkoutUrl = null;
     if (order.paymentInfo && order.paymentInfo.method === "PayOS") {
       try {
-        const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+        const clientUrl =
+          process.env.CLIENT_URL ||
+          req.headers.origin ||
+          "http://localhost:5173";
         const body = {
           orderCode: order.orderCode,
           amount: order.totalPrice,
