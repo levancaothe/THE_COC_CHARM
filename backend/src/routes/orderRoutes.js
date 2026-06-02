@@ -267,37 +267,64 @@ router.post("/webhook", async (req, res) => {
   }
 });
 
-// 🟢 ROUTE TO UPDATE STATUS WHEN USER CANCELS PAYMENT
-router.put("/cancel-payos-order", async (req, res) => {
+// 🟢 CHANGED TO router.delete
+router.delete("/cancel-payos-order", async (req, res) => {
   try {
-    const { orderCode } = req.body;
+    const { orderCode } = req.body; // Received safely via Axios' { data } block
 
     if (!orderCode) {
       return res.status(400).json({ message: "Thiếu mã đơn hàng (orderCode)" });
     }
 
-    // Find the order using the numeric orderCode passed from PayOS
-    const updatedOrder = await Order.findOneAndUpdate(
-      { orderCode: Number(orderCode) },
-      {
-        $set: {
-          status: "Cancelled", // Main Order status
-          "paymentInfo.status": "Cancelled", // Payment detail status
-        },
-      },
-      { new: true }, // Returns the updated document
-    );
+    // 1. Find and DELETE the order immediately
+    const deletedOrder = await Order.findOneAndDelete({
+      orderCode: Number(orderCode),
+    });
 
-    if (!updatedOrder) {
+    if (!deletedOrder) {
       return res.status(404).json({ message: "Không tìm thấy đơn hàng" });
     }
 
+    // 2. RESTORE THE INVENTORY STOCK
+    const charmsToRestore = new Map();
+    if (deletedOrder.items && Array.isArray(deletedOrder.items)) {
+      deletedOrder.items.forEach((item) => {
+        const qty = item.quantity || 1;
+        if (item.productType === "Charm" && item.product) {
+          charmsToRestore.set(
+            item.product,
+            (charmsToRestore.get(item.product) || 0) + qty,
+          );
+        } else if (
+          item.productType === "BraceletDesign" &&
+          Array.isArray(item.designCharms)
+        ) {
+          item.designCharms.forEach((charmId) => {
+            if (charmId)
+              charmsToRestore.set(
+                charmId,
+                (charmsToRestore.get(charmId) || 0) + qty,
+              );
+          });
+        }
+      });
+    }
+
+    if (charmsToRestore.size > 0) {
+      const restorePromises = [];
+      for (const [charmId, qty] of charmsToRestore.entries()) {
+        restorePromises.push(
+          Charm.updateOne({ _id: charmId }, { $inc: { stock: qty } }),
+        );
+      }
+      await Promise.all(restorePromises);
+    }
+
     return res.status(200).json({
-      message: "Đơn hàng đã được chuyển sang trạng thái Hủy thành công.",
-      order: updatedOrder,
+      message: "Đơn hàng đã được xóa và hoàn trả tồn kho thành công.",
     });
   } catch (error) {
-    console.error("Lỗi khi hủy đơn hàng PayOS:", error);
+    console.error("Lỗi khi xóa đơn hàng PayOS:", error);
     return res.status(500).json({ message: "Lỗi hệ thống nội bộ" });
   }
 });

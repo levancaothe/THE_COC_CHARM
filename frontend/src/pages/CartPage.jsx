@@ -58,13 +58,18 @@ const CartPage = () => {
       // 1. Alert the user
       alert("Bạn đã hủy thanh toán đơn hàng!");
 
-      // 2. 🟢 Tell backend to mark this order as Cancelled in the database
       const updateOrderToCancelled = async () => {
         try {
-          await api.put("/orders/cancel-payos-order", { orderCode: orderCode });
-          console.log(`Đơn hàng #${orderCode} đã cập nhật thành Cancelled.`);
+          // 🟢 CORRECT SYNTAX FOR AXIOS DELETE: Use the { data: ... } wrapper
+          await api.delete("/orders/cancel-payos-order", {
+            data: { orderCode: orderCode },
+          });
+
+          console.log(
+            `Đơn hàng #${orderCode} đã bị xóa hoàn toàn khỏi hệ thống.`,
+          );
         } catch (err) {
-          console.error("Lỗi khi cập nhật trạng thái hủy đơn hàng:", err);
+          console.error("Lỗi khi xóa đơn hàng:", err);
         }
       };
 
