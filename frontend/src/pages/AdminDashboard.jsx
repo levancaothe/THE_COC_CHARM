@@ -320,6 +320,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (token && activeTab === "orders") fetchOrders(1);
     if (token && activeTab === "charms") fetchCharms(1);
+    if (token && activeTab === "collections") fetchCollections();
   }, [activeTab, token]);
   /* eslint-enable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps */
 
@@ -512,6 +513,59 @@ export default function AdminDashboard() {
       );
     } finally {
       setUpdatingOrderStatus(false);
+    }
+  };
+
+  // --- COLLECTION FUNCTIONS ---
+
+  // 1. Fetch Collections from Backend
+  const fetchCollections = async () => {
+    try {
+      // Assuming your api prefix handles the /api part
+      const response = await api.get("/collections");
+      setCollections(response.data.collections || []);
+      setTotalCollections(response.data.total || 0);
+    } catch (error) {
+      console.error("Lỗi khi tải bộ sưu tập:", error);
+    }
+  };
+
+  // 2. Create or Update Collection
+  const handleSaveCollection = async (collectionData) => {
+    try {
+      if (editingCollection && editingCollection._id) {
+        // UPDATE (PUT request)
+        await api.put(`/collections/${editingCollection._id}`, collectionData);
+        alert("Cập nhật thành công!");
+      } else {
+        // CREATE (POST request)
+        await api.post("/collections", collectionData);
+        alert("Thêm mới thành công!");
+      }
+      setShowCollectionModal(false);
+      setEditingCollection(null);
+      fetchCollections(); // Refresh the table
+    } catch (error) {
+      console.error("Lỗi khi lưu:", error);
+      alert("Có lỗi xảy ra khi lưu dữ liệu!");
+    }
+  };
+
+  // 3. Delete Collection
+  const handleDeleteCollection = async (id) => {
+    if (
+      window.confirm(
+        "Bạn có chắc chắn muốn xóa bộ sưu tập này không? Hành động này không thể hoàn tác.",
+      )
+    ) {
+      try {
+        await api.delete(`/collections/${id}`);
+        alert("Đã xóa thành công!");
+        fetchCollections(); // Refresh the table
+      } catch (error) {
+        console.error("Lỗi khi xóa:", error);
+        alert("Có lỗi xảy ra khi xóa!");
+      }
     }
   };
 
@@ -957,7 +1011,9 @@ export default function AdminDashboard() {
                                   </button>
                                   <button
                                     className="btn-icon btn-delete"
-                                    onClick={() => handleDeleteCharm(charm._id)}
+                                    onClick={() =>
+                                      handleDeleteCollection(col._id)
+                                    }
                                     title="Xóa"
                                   >
                                     🗑️
@@ -1285,14 +1341,11 @@ export default function AdminDashboard() {
           }}
         />
       )}
+
       {showCollectionModal && (
         <CollectionModal
           collection={editingCollection}
-          onSave={(data) => {
-            console.log("Dữ liệu lưu tạm thời (chưa có backend):", data);
-            alert("Front-end hoạt động tốt! Chờ nối Backend.");
-            setShowCollectionModal(false);
-          }}
+          onSave={handleSaveCollection}
           onClose={() => {
             setShowCollectionModal(false);
             setEditingCollection(null);
