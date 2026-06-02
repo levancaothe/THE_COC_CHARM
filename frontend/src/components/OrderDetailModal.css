@@ -87,6 +87,7 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   width: fit-content;
+  align-self: center;
 }
 
 /* Soft Orange Tones: Unpaid & Pending transfers */
