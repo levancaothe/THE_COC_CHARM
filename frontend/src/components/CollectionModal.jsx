@@ -46,7 +46,6 @@ export default function CollectionModal({ collection, onSave, onClose }) {
                 setFormData({ ...formData, image: e.target.value })
               }
               placeholder="https://..."
-              required
             />
           </div>
 
