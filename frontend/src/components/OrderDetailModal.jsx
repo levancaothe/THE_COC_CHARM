@@ -98,8 +98,18 @@ export default function OrderDetailModal({
     );
   };
 
-  // 🟢 Extract the payment status safely
-  const paymentStatus = order.paymentInfo?.status || "Unpaid";
+  const PAYMENT_STATUS_CONFIG = {
+    Unpaid: { text: "Chưa thanh toán", className: "badge-unpaid" },
+    PendingTransfer: { text: "Chờ chuyển khoản", className: "badge-pending" },
+    TransferConfirmed: { text: "Đã xác nhận CK", className: "badge-paid" },
+    Paid: { text: "Đã thanh toán", className: "badge-paid" },
+    Cancelled: { text: "Đã hủy", className: "badge-cancelled" },
+  };
+
+  const currentPayment = PAYMENT_STATUS_CONFIG[order.paymentInfo?.status] || {
+    text: "Chưa thanh toán",
+    className: "badge-unpaid",
+  };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -151,11 +161,11 @@ export default function OrderDetailModal({
                 <span className="detail-label">Mã đơn:</span>
                 <span className="detail-value order-id">{order._id}</span>
               </div>
-              {/* 🟢 CHANGED: Now displays Payment Status instead of general Order Status */}
               <div className="detail-item">
-                <span className="detail-label">TT Thanh toán:</span>
-                <span className={`badge badge-${paymentStatus.toLowerCase()}`}>
-                  {paymentStatus}
+                <span className="detail-label">Trạng Thái Thanh toán:</span>
+                {/* 🟢 Dynamically apply the beautiful pastel classes */}
+                <span className={`badge ${currentPayment.className}`}>
+                  {currentPayment.text}
                 </span>
               </div>
               <div className="detail-item">
