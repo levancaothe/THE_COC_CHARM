@@ -342,9 +342,9 @@
 .tabs-header {
   display: flex;
   flex-wrap: nowrap; /* This strictly forces them onto one line */
-  gap: 12px; /* Adjust spacing between tabs if needed */
+  gap: 1px; /* Adjust spacing between tabs if needed */
   width: 100%;
-  overflow-x: auto; /* Allows horizontal scroll on very small screens instead of breaking */
+  overflow-x: auto;
 }
 
 .tab-btn {
@@ -361,9 +361,9 @@
   font: inherit;
   font-size: 14px;
   font-weight: 800;
+  flex: 1; /* Makes all 4 tabs equal width */
+  white-space: nowrap; /* Prevents the text inside the button from stacking */
   cursor: pointer;
-  flex: 1;
-  white-space: nowrap;
   transition:
     background 0.18s ease,
     color 0.18s ease,
