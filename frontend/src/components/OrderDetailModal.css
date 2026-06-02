@@ -75,6 +75,43 @@
   word-break: break-all;
 }
 
+/* --- 🟢 PAYMENT STATUS BADGE STYLES ADDED HERE --- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  width: fit-content;
+}
+
+/* Soft Orange Tones: Unpaid & Pending transfers */
+.badge-unpaid,
+.badge-pending {
+  background-color: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #ffedd5;
+}
+
+/* Soft Green Tones: Completed Payments */
+.badge-paid {
+  background-color: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #dcfce7;
+}
+
+/* Soft Red Tones: Cancelled Payments */
+.badge-cancelled {
+  background-color: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fee2e2;
+}
+/* ------------------------------------------------ */
+
 .order-items-list {
   display: grid;
   gap: 12px;
