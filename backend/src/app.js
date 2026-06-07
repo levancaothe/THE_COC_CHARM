@@ -9,7 +9,7 @@ const adminRoutes = require("./routes/adminRoutes");
 const aiRoutes = require("./routes/aiRoutes");
 const collectionRoutes = require("./routes/collectionRoutes");
 const { notFound, errorHandler } = require("./middleware/errorMiddleware");
-
+const discountRoutes = require("./routes/discountRoutes");
 const app = express();
 
 app.use(cors());
@@ -24,6 +24,7 @@ app.use("/api/proxy", proxyRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/collections", collectionRoutes);
+app.use("/api/discounts", discountRoutes);
 app.get("/", (req, res) => {
   res.send("Charm Bracelet API is running...");
 });
