@@ -349,12 +349,22 @@
   white-space: nowrap; /* Stops text inside the tabs from stacking */
 }
 
+.tabs-header button {
+  flex: 1; /* THIS IS THE FIX: Forces every button to stretch and share the width equally */
+  text-align: center;
+  padding: 15px 10px;
+  background: none;
+  border: none;
+  font-weight: bold;
+  white-space: nowrap; /* Stops text from wrapping on small screens */
+  cursor: pointer;
+}
+
 /* Add this rule to target the actual buttons/tabs inside the header */
 .tabs-header > * {
   flex-shrink: 0; /* This is the magic line! It stops tabs from squishing */
 }
 
-/* Optional: Hides the ugly scrollbar but keeps the ability to scroll by swiping/dragging */
 .tabs-header::-webkit-scrollbar {
   display: none;
 }
