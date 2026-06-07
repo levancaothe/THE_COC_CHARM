@@ -14,7 +14,7 @@ const socialLinks = [
   },
   {
     name: 'Instagram',
-    href: '#',
+    href: 'https://www.instagram.com/thecoccharm',
     icon: (
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M7 2.5h10A4.5 4.5 0 0 1 21.5 7v10A4.5 4.5 0 0 1 17 21.5H7A4.5 4.5 0 0 1 2.5 17V7A4.5 4.5 0 0 1 7 2.5zm0 2A2.5 2.5 0 0 0 4.5 7v10A2.5 2.5 0 0 0 7 19.5h10A2.5 2.5 0 0 0 19.5 17V7A2.5 2.5 0 0 0 17 4.5H7z" fill="currentColor" />
