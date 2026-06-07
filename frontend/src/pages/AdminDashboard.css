@@ -332,6 +332,7 @@
 }
 
 .tabs-section {
+  /* It's okay to keep overflow: hidden here for the rounded corners */
   overflow: hidden;
   border: 1px solid var(--admin-border);
   border-radius: 10px;
@@ -341,10 +342,21 @@
 
 .tabs-header {
   display: flex;
-  flex-wrap: nowrap; /* This strictly forces them onto one line */
-  gap: 1px; /* Adjust spacing between tabs if needed */
+  flex-wrap: nowrap;
+  gap: 1px;
   width: 100%;
-  overflow-x: auto;
+  overflow-x: auto; /* Allows scrolling if the screen is small */
+  white-space: nowrap; /* Stops text inside the tabs from stacking */
+}
+
+/* Add this rule to target the actual buttons/tabs inside the header */
+.tabs-header > * {
+  flex-shrink: 0; /* This is the magic line! It stops tabs from squishing */
+}
+
+/* Optional: Hides the ugly scrollbar but keeps the ability to scroll by swiping/dragging */
+.tabs-header::-webkit-scrollbar {
+  display: none;
 }
 
 .tab-btn {
