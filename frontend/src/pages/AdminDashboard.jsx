@@ -312,23 +312,33 @@ export default function AdminDashboard() {
   const handleRefreshData = async () => {
     setLoading(true);
     try {
-      const statsRes = await api.get('/admin/stats', { headers: { Authorization: `Bearer ${token}` } });
+      const statsRes = await api.get("/admin/stats", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setStats(statsRes.data);
-      
-      if (activeTab === 'orders') {
-        const res = await api.get('/admin/orders', { headers: { Authorization: `Bearer ${token}` }, params: filters });
+
+      if (activeTab === "orders") {
+        const res = await api.get("/admin/orders", {
+          headers: { Authorization: `Bearer ${token}` },
+          params: filters,
+        });
         setOrders(res.data.orders || []);
         setTotalOrders(res.data.total || 0);
-      } else if (activeTab === 'charms') {
-        const res = await api.get('/admin/charms', { headers: { Authorization: `Bearer ${token}` }, params: charmFilters });
+      } else if (activeTab === "charms") {
+        const res = await api.get("/admin/charms", {
+          headers: { Authorization: `Bearer ${token}` },
+          params: charmFilters,
+        });
         setCharms(res.data.charms || []);
         setTotalCharms(res.data.total || 0);
-      } else if (activeTab === 'categories') {
-        const res = await api.get('/admin/categories', { headers: { Authorization: `Bearer ${token}` } });
+      } else if (activeTab === "categories") {
+        const res = await api.get("/admin/categories", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         setCategories(res.data.categories || []);
       }
     } catch (err) {
-      alert(err.response?.data?.message || 'Không thể làm mới dữ liệu');
+      alert(err.response?.data?.message || "Không thể làm mới dữ liệu");
     } finally {
       setLoading(false);
     }
@@ -573,6 +583,25 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error("Lỗi khi lưu:", error);
       alert("Có lỗi xảy ra khi lưu dữ liệu!");
+    }
+  };
+
+  const handleDeleteCollection = async (id) => {
+    // Always good to double-check with the admin before deleting!
+    if (!window.confirm("Bạn có chắc chắn muốn xóa bộ sưu tập này không?"))
+      return;
+
+    try {
+      // Send the DELETE request to your backend
+      await api.delete(`/collections/${id}`);
+
+      alert("Đã xóa thành công!");
+
+      // Refresh the table so the deleted item disappears
+      fetchCollections();
+    } catch (error) {
+      console.error("Lỗi khi xóa:", error);
+      alert("Không thể xóa bộ sưu tập. Vui lòng thử lại!");
     }
   };
 
@@ -1293,8 +1322,8 @@ export default function AdminDashboard() {
                                   <button
                                     className="btn-icon btn-delete"
                                     onClick={() =>
-                                      console.log("Delete collection", col._id)
-                                    } // Placeholder for backend
+                                      handleDeleteCollection(collection._id)
+                                    }
                                     title="Xóa"
                                   >
                                     🗑️
