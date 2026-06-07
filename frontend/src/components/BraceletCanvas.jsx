@@ -40,6 +40,7 @@ const PlacedCharm = ({ charm, index, onRemove, onReplace, moveCharmInSequence, e
         opacity: isDragging ? 0.3 : 1,
         cursor: 'grab',
         padding: '0',
+        margin: '0 -1px',
         transition: 'all 0.2s ease',
         transform: isOverCharm ? 'scale(1.1) translateY(-5px)' : 'scale(1)',
         zIndex: isOverCharm ? 10 : 2
@@ -48,10 +49,7 @@ const PlacedCharm = ({ charm, index, onRemove, onReplace, moveCharmInSequence, e
       <div style={{
         width: '55px',
         height: '45px',
-        background: exportMode ? 'transparent' : 'linear-gradient(to bottom, #f9f9f9 0%, #e0e0e0 50%, #c0c0c0 100%)',
-        border: exportMode ? 'none' : '1px solid #999',
-        borderRight: exportMode ? 'none' : '1.5px solid #666',
-        boxShadow: exportMode ? 'none' : 'inset 0 1px 0 rgba(255,255,255,0.8), 0 3px 6px rgba(0,0,0,0.1)',
+        background: 'transparent',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -65,17 +63,10 @@ const PlacedCharm = ({ charm, index, onRemove, onReplace, moveCharmInSequence, e
           style={{ 
             width: '100%', 
             height: '100%', 
-            objectFit: 'cover',
+            objectFit: 'contain',
             display: 'block'
           }} 
         />
-        
-        <div style={{ 
-          position: 'absolute', 
-          inset: 0, 
-          border: exportMode ? 'none' : '1px solid rgba(255,255,255,0.2)', 
-          pointerEvents: 'none' 
-        }}></div>
       </div>
     </div>
   );
