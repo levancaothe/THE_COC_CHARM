@@ -48,13 +48,12 @@ export default function CollectionModal({ collection, onSave, onClose }) {
         setCategories(catRes.data.data);
 
         // Auto-select first base material for setup
-        const baseOptions = charmsRes.data.data.filter(
-          (c) =>
-            c.name.toLowerCase().includes("cơ bản") ||
-            c.name.toLowerCase().includes("mặc định"),
+        const baseOptions = charmsRes.data.data.filter((c) =>
+          c.name.toLowerCase().includes("bạc trơn"),
         );
+
         if (baseOptions.length > 0 && !material) {
-          setMaterial(charmsRes.data.data[0]._id);
+          setMaterial(baseOptions[0]._id);
         }
       } catch (error) {
         console.error("Lỗi khi tải dữ liệu charm:", error);
@@ -250,12 +249,14 @@ export default function CollectionModal({ collection, onSave, onClose }) {
                   <option value="" disabled>
                     -- Chọn dây cơ bản --
                   </option>
-                  {/* We removed the filter here so it shows ALL charms */}
-                  {availableCharms.map((c) => (
-                    <option key={c._id} value={c._id}>
-                      {c.name}
-                    </option>
-                  ))}
+                  {/* We put the filter back! Now it only looks for your base materials */}
+                  {availableCharms
+                    .filter((c) => c.name.toLowerCase().includes("bạc trơn"))
+                    .map((c) => (
+                      <option key={c._id} value={c._id}>
+                        {c.name}
+                      </option>
+                    ))}
                 </select>
               </div>
               <button
