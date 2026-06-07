@@ -332,27 +332,49 @@
 }
 
 .tabs-section {
+  /* It's okay to keep overflow: hidden here for the rounded corners */
   overflow: hidden;
-  border: 1px solid var(--admin-border, #eaeaea);
+  border: 1px solid var(--admin-border);
   border-radius: 10px;
-  background: var(--admin-panel, #fff);
-  box-shadow: var(--admin-shadow, 0 4px 6px rgba(0, 0, 0, 0.05));
+  background: var(--admin-panel);
+  box-shadow: var(--admin-shadow);
 }
 
 .tabs-header {
   display: flex;
-  flex-wrap: nowrap; /* This strictly forces them onto one line */
-  gap: 1px; /* Adjust spacing between tabs if needed */
+  flex-wrap: nowrap;
+  gap: 1px;
   width: 100%;
-  overflow-x: auto;
+  overflow-x: auto; /* Allows scrolling if the screen is small */
+  white-space: nowrap; /* Stops text inside the tabs from stacking */
 }
 
-/* This replaces both your old button and > * rules */
+.tabs-header button {
+  flex: 1; /* THIS IS THE FIX: Forces every button to stretch and share the width equally */
+  text-align: center;
+  padding: 15px 10px;
+  background: none;
+  border: none;
+  font-weight: bold;
+  white-space: nowrap; /* Stops text from wrapping on small screens */
+  cursor: pointer;
+}
+
+/* Add this rule to target the actual buttons/tabs inside the header */
+
+.tabs-header > * {
+  flex-shrink: 0; /* This is the magic line! It stops tabs from squishing */
+}
+
+.tabs-header::-webkit-scrollbar {
+  display: none;
+}
+
 .tab-btn {
   display: flex;
   align-items: center;
-  justify-content: center; /* Centers the text and the badge nicely */
-  gap: 10px;
+  justify-content: space-between;
+  gap: 12px;
   min-height: 60px;
   padding: 0 20px;
   border: 0;
@@ -362,8 +384,8 @@
   font: inherit;
   font-size: 14px;
   font-weight: 800;
-  flex: 1; /* Magic line: Forces all tabs to equally share 100% of the width! */
-  white-space: nowrap;
+  flex: 1; /* Makes all 4 tabs equal width */
+  white-space: nowrap; /* Prevents the text inside the button from stacking */
   cursor: pointer;
   transition:
     background 0.18s ease,
