@@ -54,7 +54,7 @@ export default function CollectionModal({ collection, onSave, onClose }) {
             c.name.toLowerCase().includes("mặc định"),
         );
         if (baseOptions.length > 0 && !material) {
-          setMaterial(baseOptions[0]._id);
+          setMaterial(charmsRes.data.data[0]._id);
         }
       } catch (error) {
         console.error("Lỗi khi tải dữ liệu charm:", error);
@@ -240,18 +240,22 @@ export default function CollectionModal({ collection, onSave, onClose }) {
                 <select
                   value={material}
                   onChange={(e) => setMaterial(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "8px",
+                    borderRadius: "4px",
+                    border: "1px solid #ccc",
+                  }}
                 >
-                  {availableCharms
-                    .filter(
-                      (c) =>
-                        c.name.toLowerCase().includes("cơ bản") ||
-                        c.name.toLowerCase().includes("mặc định"),
-                    )
-                    .map((c) => (
-                      <option key={c._id} value={c._id}>
-                        {c.name}
-                      </option>
-                    ))}
+                  <option value="" disabled>
+                    -- Chọn dây cơ bản --
+                  </option>
+                  {/* We removed the filter here so it shows ALL charms */}
+                  {availableCharms.map((c) => (
+                    <option key={c._id} value={c._id}>
+                      {c.name}
+                    </option>
+                  ))}
                 </select>
               </div>
               <button
