@@ -3,7 +3,7 @@ import OrderDetailModal from "../components/OrderDetailModal";
 import CollectionModal from "../components/CollectionModal";
 import api from "../services/api";
 import "./AdminDashboard.css";
-import AdminDiscounts from "../components/AdminDiscounts";
+import DiscountModal from "../components/DiscountModal";
 const formatVND = (value) =>
   `${new Intl.NumberFormat("vi-VN", {
     maximumFractionDigits: 0,
@@ -225,6 +225,10 @@ export default function AdminDashboard() {
   });
   const [editingCollection, setEditingCollection] = useState(null);
   const [showCollectionModal, setShowCollectionModal] = useState(false);
+
+  const [discounts, setDiscounts] = useState([]);
+  const [showDiscountModal, setShowDiscountModal] = useState(false);
+  const [editingDiscount, setEditingDiscount] = useState(null);
 
   const handleScroll = useCallback(() => {
     setShowScrollTop(window.scrollY > 300);
@@ -1339,10 +1343,89 @@ export default function AdminDashboard() {
                       Cài đặt các sự kiện giảm giá toàn trang theo phần trăm.
                     </p>
                   </div>
+                  {/* Assuming you don't need a search bar for discounts right now, just the add button */}
+                  <button
+                    className="btn btn-success"
+                    onClick={() => {
+                      setEditingDiscount(null);
+                      setShowDiscountModal(true);
+                    }}
+                  >
+                    + Thêm Sự Kiện
+                  </button>
                 </div>
 
-                {/* This pulls in the entire interface we built in the other file! */}
-                <AdminDiscounts />
+                {loading ? (
+                  <div className="loading">Đang tải...</div>
+                ) : (
+                  <>
+                    <div className="table-container">
+                      <table className="data-table admin-table">
+                        <thead>
+                          <tr>
+                            <th>#</th>
+                            <th>Tên Sự Kiện</th>
+                            <th>Giảm giá (%)</th>
+                            <th>Bắt đầu</th>
+                            <th>Kết thúc</th>
+                            <th>Thao Tác</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {discounts && discounts.length > 0 ? (
+                            discounts.map((discount, idx) => (
+                              <tr key={discount._id || idx}>
+                                <td className="text-center">{idx + 1}</td>
+                                <td>
+                                  <strong>{discount.name}</strong>
+                                </td>
+                                <td>{discount.percentage}%</td>
+                                {/* Formatting dates nicely for display */}
+                                <td>
+                                  {new Date(
+                                    discount.startDate,
+                                  ).toLocaleDateString("vi-VN")}
+                                </td>
+                                <td>
+                                  {new Date(
+                                    discount.endDate,
+                                  ).toLocaleDateString("vi-VN")}
+                                </td>
+                                <td className="actions-cell">
+                                  <button
+                                    className="btn-icon btn-edit"
+                                    onClick={() => {
+                                      setEditingDiscount(discount);
+                                      setShowDiscountModal(true);
+                                    }}
+                                    title="Chỉnh sửa"
+                                  >
+                                    ✏️
+                                  </button>
+                                  <button
+                                    className="btn-icon btn-delete"
+                                    onClick={() =>
+                                      handleDeleteDiscount(discount._id)
+                                    }
+                                    title="Xóa"
+                                  >
+                                    🗑️
+                                  </button>
+                                </td>
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td colSpan="6" className="text-center">
+                                Chưa có sự kiện nào. Hãy thêm sự kiện mới!
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </div>
@@ -1403,6 +1486,16 @@ export default function AdminDashboard() {
           onClose={() => {
             setShowCollectionModal(false);
             setEditingCollection(null);
+          }}
+        />
+      )}
+      {showDiscountModal && (
+        <DiscountModal
+          discount={editingDiscount}
+          onSave={handleSaveDiscount}
+          onClose={() => {
+            setShowDiscountModal(false);
+            setEditingDiscount(null);
           }}
         />
       )}
