@@ -1,143 +1,163 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import api from "../services/api";
 
-const AdminDiscounts = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+export default function AdminDiscounts() {
+  const [events, setEvents] = useState([]);
+  const [formData, setFormData] = useState({
+    name: "",
+    discountPercent: "",
+    startDate: "",
+    endDate: "",
+  });
+
+  const fetchEvents = async () => {
+    try {
+      const res = await api.get("/discounts");
+      setEvents(res.data);
+    } catch (error) {
+      console.error("Lỗi tải sự kiện:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await api.post("/discounts", formData);
+      alert("Tạo sự kiện thành công!");
+      fetchEvents();
+      setFormData({
+        name: "",
+        discountPercent: "",
+        startDate: "",
+        endDate: "",
+      });
+    } catch (error) {
+      alert("Lỗi khi tạo sự kiện!");
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Xóa sự kiện này?")) return;
+    try {
+      await api.delete(`/discounts/${id}`);
+      fetchEvents();
+    } catch (error) {
+      alert("Lỗi khi xóa!");
+    }
+  };
 
   return (
-    <div className="admin-tab-content">
-      {/* HEADER & ADD BUTTON */}
+    <div>
+      <h2>Quản Lý Khuyến Mãi</h2>
+
       <div
-        className="tab-header"
         style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
+          background: "#f9f9f9",
+          padding: "20px",
+          borderRadius: "8px",
           marginBottom: "20px",
         }}
       >
-        <h3>Quản lý Khuyến Mãi</h3>
-        <button
-          className="btn btn-primary"
-          onClick={() => setIsModalOpen(true)}
+        <h3>Tạo Sự Kiện Mới</h3>
+        <form
+          onSubmit={handleSubmit}
+          style={{
+            display: "flex",
+            gap: "15px",
+            alignItems: "flex-end",
+            flexWrap: "wrap",
+          }}
         >
-          + Thêm Sự Kiện
-        </button>
+          <div>
+            <label>Tên Sự Kiện</label> <br />
+            <input
+              type="text"
+              required
+              value={formData.name}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
+              placeholder="VD: Black Friday"
+            />
+          </div>
+          <div>
+            <label>Phần trăm giảm (%)</label> <br />
+            <input
+              type="number"
+              required
+              min="1"
+              max="100"
+              value={formData.discountPercent}
+              onChange={(e) =>
+                setFormData({ ...formData, discountPercent: e.target.value })
+              }
+            />
+          </div>
+          <div>
+            <label>Ngày bắt đầu</label> <br />
+            <input
+              type="date"
+              required
+              value={formData.startDate}
+              onChange={(e) =>
+                setFormData({ ...formData, startDate: e.target.value })
+              }
+            />
+          </div>
+          <div>
+            <label>Ngày kết thúc</label> <br />
+            <input
+              type="date"
+              required
+              value={formData.endDate}
+              onChange={(e) =>
+                setFormData({ ...formData, endDate: e.target.value })
+              }
+            />
+          </div>
+          <button type="submit" className="btn btn-primary">
+            Thêm Sự Kiện
+          </button>
+        </form>
       </div>
 
-      {/* MAIN TABLE */}
-      <div className="table-container">
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>Tên Sự Kiện</th>
-              <th>Giảm giá</th>
-              <th>Bắt đầu</th>
-              <th>Kết thúc</th>
-              <th>Hành động</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td colSpan="5" style={{ textAlign: "center" }}>
-                Chưa có sự kiện nào
+      <table
+        className="admin-table"
+        style={{ width: "100%", textAlign: "left", borderCollapse: "collapse" }}
+      >
+        <thead>
+          <tr style={{ borderBottom: "2px solid #ddd" }}>
+            <th>Tên Sự Kiện</th>
+            <th>Giảm giá</th>
+            <th>Bắt đầu</th>
+            <th>Kết thúc</th>
+            <th>Hành động</th>
+          </tr>
+        </thead>
+        <tbody>
+          {events.map((event) => (
+            <tr key={event._id} style={{ borderBottom: "1px solid #ddd" }}>
+              <td>{event.name}</td>
+              <td>{event.discountPercent}%</td>
+              <td>{new Date(event.startDate).toLocaleDateString("vi-VN")}</td>
+              <td>{new Date(event.endDate).toLocaleDateString("vi-VN")}</td>
+              <td>
+                <button
+                  onClick={() => handleDelete(event._id)}
+                  className="btn btn-danger"
+                  style={{ padding: "5px 10px" }}
+                >
+                  🗑️ Xóa
+                </button>
               </td>
             </tr>
-          </tbody>
-        </table>
-      </div>
-
-      {/* THE MODAL OVERLAY */}
-      {isModalOpen && (
-        <div className="modal-overlay">
-          <div
-            className="modal-content"
-            style={{
-              background: "var(--bg-surface, #fff)",
-              position: "relative",
-            }}
-          >
-            {/* Close 'X' Button */}
-            <button
-              onClick={() => setIsModalOpen(false)}
-              style={{
-                position: "absolute",
-                top: "15px",
-                right: "15px",
-                background: "none",
-                border: "none",
-                fontSize: "1.5rem",
-                cursor: "pointer",
-                color: "var(--text-muted)",
-              }}
-            >
-              ×
-            </button>
-
-            <h3 style={{ marginTop: 0, marginBottom: "20px" }}>
-              Tạo Sự Kiện Mới
-            </h3>
-
-            {/* The Form */}
-            <form style={{ textAlign: "left" }}>
-              <div className="form-group" style={{ marginBottom: "15px" }}>
-                <label>Tên Sự Kiện</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="VD: Black Friday"
-                  style={{ width: "100%", padding: "8px", marginTop: "5px" }}
-                />
-              </div>
-
-              <div className="form-group" style={{ marginBottom: "15px" }}>
-                <label>Phần trăm giảm (%)</label>
-                <input
-                  type="number"
-                  className="form-control"
-                  style={{ width: "100%", padding: "8px", marginTop: "5px" }}
-                />
-              </div>
-
-              <div
-                style={{ display: "flex", gap: "10px", marginBottom: "20px" }}
-              >
-                <div className="form-group" style={{ flex: 1 }}>
-                  <label>Ngày bắt đầu</label>
-                  <input
-                    type="date"
-                    className="form-control"
-                    style={{ width: "100%", padding: "8px", marginTop: "5px" }}
-                  />
-                </div>
-                <div className="form-group" style={{ flex: 1 }}>
-                  <label>Ngày kết thúc</label>
-                  <input
-                    type="date"
-                    className="form-control"
-                    style={{ width: "100%", padding: "8px", marginTop: "5px" }}
-                  />
-                </div>
-              </div>
-
-              {/* ACTION BUTTONS USING YOUR CSS */}
-              <div className="modal-actions">
-                <button
-                  type="button"
-                  className="btn-cancel"
-                  onClick={() => setIsModalOpen(false)}
-                >
-                  Hủy
-                </button>
-                <button type="button" className="btn-confirm">
-                  Thêm Sự Kiện
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+          ))}
+        </tbody>
+      </table>
     </div>
   );
-};
-
-export default AdminDiscounts;
+}
