@@ -6,6 +6,12 @@ const collectionSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    charms: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Charm",
+      },
+    ],
     image: {
       type: String,
     },
