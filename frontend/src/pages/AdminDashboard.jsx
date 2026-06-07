@@ -555,6 +555,57 @@ export default function AdminDashboard() {
     }
   };
 
+  // --- DISCOUNT MANAGEMENT HANDLERS ---
+
+  // Handle Saving (Both Create and Update)
+  const handleSaveDiscount = async (discountData) => {
+    try {
+      if (editingDiscount) {
+        // UPDATE EXISTING DISCOUNT
+        // TODO: Replace with your actual API call (e.g., axios.put(`/api/discounts/${editingDiscount._id}`, discountData))
+
+        // Local state update (so you see it instantly)
+        setDiscounts(
+          discounts.map((d) =>
+            d._id === editingDiscount._id ? { ...d, ...discountData } : d,
+          ),
+        );
+      } else {
+        // CREATE NEW DISCOUNT
+        // TODO: Replace with your actual API call (e.g., axios.post('/api/discounts', discountData))
+
+        // Mocking a new ID for local state so the table doesn't crash
+        const newDiscount = { ...discountData, _id: Date.now().toString() };
+        setDiscounts([...discounts, newDiscount]);
+      }
+
+      // Close modal and clear editing state
+      setShowDiscountModal(false);
+      setEditingDiscount(null);
+    } catch (error) {
+      console.error("Lỗi khi lưu khuyến mãi (Error saving discount):", error);
+      alert("Có lỗi xảy ra khi lưu sự kiện!");
+    }
+  };
+
+  // Handle Deleting
+  const handleDeleteDiscount = async (id) => {
+    // Always good to double-check before deleting!
+    if (window.confirm("Bạn có chắc chắn muốn xóa sự kiện này?")) {
+      try {
+        // TODO: Replace with your actual API call (e.g., axios.delete(`/api/discounts/${id}`))
+
+        // Remove from local state
+        setDiscounts(discounts.filter((d) => d._id !== id));
+      } catch (error) {
+        console.error(
+          "Lỗi khi xóa khuyến mãi (Error deleting discount):",
+          error,
+        );
+      }
+    }
+  };
+
   // --- COLLECTION FUNCTIONS ---
 
   // 1. Fetch Collections from Backend
