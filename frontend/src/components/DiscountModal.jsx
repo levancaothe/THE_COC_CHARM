@@ -128,11 +128,7 @@ const DiscountModal = ({ discount, onSave, onClose }) => {
             <button type="button" className="btn-cancel" onClick={onClose}>
               Hủy
             </button>
-            <button
-              type="submit"
-              className="btn-confirm"
-              style={{ background: discount ? "#2ecc71" : "#ff4757" }}
-            >
+            <button type="submit" className="btn btn-primary">
               {discount ? "Cập nhật" : "Thêm Sự Kiện"}
             </button>
           </div>

@@ -1430,7 +1430,7 @@ export default function AdminDashboard() {
                                 <td>
                                   <strong>{discount.name}</strong>
                                 </td>
-                                <td>{discount.percentage}%</td>
+                                <td>{discount.discountPercent}%</td>
                                 {/* Formatting dates nicely for display */}
                                 <td>
                                   {new Date(
