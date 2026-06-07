@@ -3,7 +3,7 @@ import OrderDetailModal from "../components/OrderDetailModal";
 import CollectionModal from "../components/CollectionModal";
 import api from "../services/api";
 import "./AdminDashboard.css";
-
+import AdminDiscounts from "../components/AdminDiscounts";
 const formatVND = (value) =>
   `${new Intl.NumberFormat("vi-VN", {
     maximumFractionDigits: 0,
@@ -780,6 +780,12 @@ export default function AdminDashboard() {
               <span>Bộ Sưu Tập</span>
               <strong>{totalCollections || stats?.designsCount || 0}</strong>
             </button>
+            <button
+              className={`menu-item ${activeTab === "discounts" ? "active" : ""}`}
+              onClick={() => setActiveTab("discounts")}
+            >
+              🏷️ Khuyến Mãi
+            </button>
           </div>
 
           <div className="tab-content">
@@ -1322,6 +1328,21 @@ export default function AdminDashboard() {
                     </div>
                   </>
                 )}
+              </div>
+            )}
+            {activeTab === "discounts" && (
+              <div className="discounts-tab">
+                <div className="tab-actions">
+                  <div>
+                    <h3>Quản lý Khuyến Mãi</h3>
+                    <p>
+                      Cài đặt các sự kiện giảm giá toàn trang theo phần trăm.
+                    </p>
+                  </div>
+                </div>
+
+                {/* This pulls in the entire interface we built in the other file! */}
+                <AdminDiscounts />
               </div>
             )}
           </div>
