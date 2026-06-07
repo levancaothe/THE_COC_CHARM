@@ -332,7 +332,6 @@
 }
 
 .tabs-section {
-  /* It's okay to keep overflow: hidden here for the rounded corners */
   overflow: hidden;
   border: 1px solid var(--admin-border);
   border-radius: 10px;
@@ -341,33 +340,10 @@
 }
 
 .tabs-header {
-  display: flex;
-  flex-wrap: nowrap;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1px;
-  width: 100%;
-  overflow-x: auto; /* Allows scrolling if the screen is small */
-  white-space: nowrap; /* Stops text inside the tabs from stacking */
-}
-
-.tabs-header button {
-  flex: 1; /* THIS IS THE FIX: Forces every button to stretch and share the width equally */
-  text-align: center;
-  padding: 15px 10px;
-  background: none;
-  border: none;
-  font-weight: bold;
-  white-space: nowrap; /* Stops text from wrapping on small screens */
-  cursor: pointer;
-}
-
-/* Add this rule to target the actual buttons/tabs inside the header */
-
-.tabs-header > * {
-  flex-shrink: 0; /* This is the magic line! It stops tabs from squishing */
-}
-
-.tabs-header::-webkit-scrollbar {
-  display: none;
+  background: var(--admin-border);
 }
 
 .tab-btn {
@@ -384,8 +360,6 @@
   font: inherit;
   font-size: 14px;
   font-weight: 800;
-  flex: 1; /* Makes all 4 tabs equal width */
-  white-space: nowrap; /* Prevents the text inside the button from stacking */
   cursor: pointer;
   transition:
     background 0.18s ease,
