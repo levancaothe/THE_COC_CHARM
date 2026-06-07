@@ -494,6 +494,12 @@
     grid-template-columns: 32px 80px 1fr 52px;
   }
 
+  .item-image img,
+  .design-preview {
+    width: 80px;
+    height: 80px;
+  }
+
   .item-details {
     grid-column: 3;
   }

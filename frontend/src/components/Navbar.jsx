@@ -1,4 +1,4 @@
-import react from "react";
+import React, { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import logo from "../assets/ic.png";
@@ -7,37 +7,47 @@ import "./Navbar.css";
 const Navbar = () => {
   const { totalItems } = useCart();
   const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <nav className="navbar glass">
       <div className="container nav-container">
-        <Link to="/" className="logo-container">
+        <Link to="/" className="logo-container" onClick={() => setMenuOpen(false)}>
           <img src={logo} alt="The Cóc Charm" className="navbar-logo" />
           <span className="logo-text">The Cóc Charm</span>
         </Link>
-        <ul className="nav-links">
+        <button
+          className={`menu-toggle ${menuOpen ? "active" : ""}`}
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Toggle navigation menu"
+        >
+          <span className="bar"></span>
+          <span className="bar"></span>
+          <span className="bar"></span>
+        </button>
+        <ul className={`nav-links ${menuOpen ? "open" : ""}`}>
           <li>
-            <NavLink to="/" end>
+            <NavLink to="/" end onClick={() => setMenuOpen(false)}>
               Trang chủ
             </NavLink>
           </li>
           <li>
-            <NavLink to="/charms">Sản phẩm</NavLink>
+            <NavLink to="/charms" onClick={() => setMenuOpen(false)}>Sản phẩm</NavLink>
           </li>
           <li>
-            <NavLink to="/about-us">About us</NavLink>
+            <NavLink to="/about-us" onClick={() => setMenuOpen(false)}>About us</NavLink>
           </li>
           <li>
-            <NavLink to="/policy">Chính sách</NavLink>
+            <NavLink to="/policy" onClick={() => setMenuOpen(false)}>Chính sách</NavLink>
           </li>
           <li>
-            <NavLink to="/orders">Tra cứu</NavLink>
+            <NavLink to="/orders" onClick={() => setMenuOpen(false)}>Tra cứu</NavLink>
           </li>
           <li>
-            <NavLink to="/designer">Thiết kế ngay</NavLink>
+            <NavLink to="/designer" onClick={() => setMenuOpen(false)}>Thiết kế ngay</NavLink>
           </li>
           <li>
-            <NavLink to="/my-designs">Mẫu của tôi</NavLink>
+            <NavLink to="/my-designs" onClick={() => setMenuOpen(false)}>Mẫu của tôi</NavLink>
           </li>
         </ul>
         <div className="nav-actions">
