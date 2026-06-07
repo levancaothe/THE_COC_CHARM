@@ -1301,7 +1301,7 @@ export default function AdminDashboard() {
                                   <button
                                     className="btn-icon btn-delete"
                                     onClick={() =>
-                                      handleDeleteCollection(collection._id)
+                                      handleDeleteCollection(col._id)
                                     }
                                     title="Xóa"
                                   >
