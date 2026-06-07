@@ -47,7 +47,7 @@ const PlacedCharm = ({ charm, index, onRemove, onReplace, moveCharmInSequence, e
       }}
     >
       <div style={{
-        width: '55px',
+        width: '45px',
         height: '45px',
         background: 'transparent',
         display: 'flex',
