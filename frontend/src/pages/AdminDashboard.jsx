@@ -586,25 +586,6 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleDeleteCollection = async (id) => {
-    // Always good to double-check with the admin before deleting!
-    if (!window.confirm("Bạn có chắc chắn muốn xóa bộ sưu tập này không?"))
-      return;
-
-    try {
-      // Send the DELETE request to your backend
-      await api.delete(`/collections/${id}`);
-
-      alert("Đã xóa thành công!");
-
-      // Refresh the table so the deleted item disappears
-      fetchCollections();
-    } catch (error) {
-      console.error("Lỗi khi xóa:", error);
-      alert("Không thể xóa bộ sưu tập. Vui lòng thử lại!");
-    }
-  };
-
   // 3. Delete Collection
   const handleDeleteCollection = async (id) => {
     if (
@@ -1065,9 +1046,7 @@ export default function AdminDashboard() {
                                   </button>
                                   <button
                                     className="btn-icon btn-delete"
-                                    onClick={() =>
-                                      handleDeleteCollection(col._id)
-                                    }
+                                    onClick={() => handleDeleteCharm(col._id)}
                                     title="Xóa"
                                   >
                                     🗑️
