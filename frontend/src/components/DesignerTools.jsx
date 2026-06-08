@@ -1,28 +1,84 @@
 import React from 'react';
 
-export const PriceSummary = ({ totalPrice, count }) => {
+export const PriceSummary = ({ selectedCharms = [], selectedBaseCharm }) => {
   const formatPrice = (value) => `${new Intl.NumberFormat('vi-VN').format(value || 0)} VND`;
-  const unitPrice = count > 0 ? Math.round(totalPrice / count) : 0;
+
+  // 1. Identify which charms are base/default charms
+  const baseCharmId = selectedBaseCharm?._id;
+  const baseCharms = selectedCharms.filter(
+    (c) => c.isDefault || (baseCharmId && c._id === baseCharmId)
+  );
+  const baseCharmCount = baseCharms.length;
+  const baseCharmUnitPrice = selectedBaseCharm?.price || (baseCharms[0]?.price || 0);
+  const baseCharmTotal = baseCharmCount * baseCharmUnitPrice;
+
+  // 2. Identify and group custom/theme charms
+  const customCharms = selectedCharms.filter(
+    (c) => !c.isDefault && !(baseCharmId && c._id === baseCharmId)
+  );
+
+  const groupedCustomCharms = customCharms.reduce((acc, charm) => {
+    const key = charm._id;
+    if (!acc[key]) {
+      acc[key] = {
+        name: charm.name,
+        price: charm.price || 0,
+        count: 0,
+      };
+    }
+    acc[key].count += 1;
+    return acc;
+  }, {});
+
+  const customCharmRows = Object.values(groupedCustomCharms);
+
+  // 3. Calculate overall total
+  const overallTotal = baseCharmTotal + customCharms.reduce((sum, c) => sum + (c.price || 0), 0);
 
   return (
     <div className="designer-summary">
+      {/* Header Row */}
       <div className="designer-summary-grid designer-summary-grid--head">
-        <span>Vòng Bạc Khóa Tròn</span>
-        <span>Số lượng</span>
-        <span>Giá</span>
-        <span>Tổng cộng</span>
+        <span>SẢN PHẨM</span>
+        <span>SL</span>
+        <span>GIÁ</span>
+        <span style={{ textAlign: 'right' }}>TỔNG</span>
       </div>
-      <div className="designer-summary-grid">
-        <span>Vòng cơ bản</span>
-        <span>1</span>
-        <span>{formatPrice(totalPrice - unitPrice * count)}</span>
-        <strong>{formatPrice(totalPrice)}</strong>
-      </div>
-      <div className="designer-summary-grid">
-        <span>Số lượng Charm</span>
-        <span>{count}</span>
-        <span>{formatPrice(unitPrice)}</span>
+
+      {/* Base Charm Row */}
+      {baseCharmCount > 0 && (
+        <div className="designer-summary-grid">
+          <span>{selectedBaseCharm?.name || "Trơn Bạc (Charm gốc)"}</span>
+          <span>{baseCharmCount}</span>
+          <span>{formatPrice(baseCharmUnitPrice)}</span>
+          <strong style={{ fontSize: '0.92rem', fontWeight: 'bold' }}>{formatPrice(baseCharmTotal)}</strong>
+        </div>
+      )}
+
+      {/* Custom Charm Rows */}
+      {customCharmRows.map((item, idx) => (
+        <div className="designer-summary-grid" key={idx}>
+          <span>{item.name}</span>
+          <span>{item.count}</span>
+          <span>{formatPrice(item.price)}</span>
+          <strong style={{ fontSize: '0.92rem', fontWeight: 'bold' }}>{formatPrice(item.count * item.price)}</strong>
+        </div>
+      ))}
+
+      {/* Total Row */}
+      <div 
+        className="designer-summary-grid" 
+        style={{ 
+          borderTop: '2.5px solid #0a2e4f', 
+          marginTop: '14px', 
+          paddingTop: '14px',
+          fontWeight: 'bold'
+        }}
+      >
+        <span style={{ textTransform: 'uppercase', fontSize: '0.92rem', fontWeight: 900 }}>TỔNG CỘNG</span>
         <span />
+        <span />
+        <strong style={{ fontSize: '1.15rem', color: '#d95c14', textAlign: 'right' }}>{formatPrice(overallTotal)}</strong>
       </div>
     </div>
   );
