@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useCart } from "../context/CartContext";
 import api from "../services/api";
 import "./CollectionsPage.css";
+import "./MyDesignsPage.css";
+import comingSoonImg from "../assets/coming_soon.jpg";
 
 const CollectionsPage = () => {
   const [collections, setCollections] = useState([]);
@@ -65,64 +67,103 @@ const CollectionsPage = () => {
       ) : collections.length === 0 ? (
         <div className="empty-state">Hiện tại chưa có mẫu vòng nào.</div>
       ) : (
-        <div className="collections-grid">
+        <div className="my-designs-grid" style={{ marginTop: "24px" }}>
           {collections.map((item) => {
             const isComingSoon = item.status === "coming soon";
 
             return (
-              <div key={item._id} className="collection-card">
-                {/* CARD IMAGE CONTAINER */}
-                <div className="card-image" style={{ position: "relative" }}>
-                  {isComingSoon ? (
-                    // Placeholder box instead of item image
+              <article key={item._id} className="my-design-card">
+                {isComingSoon ? (
+                  <>
+                    <div className="my-design-card__head" style={{ borderBottom: "none", paddingBottom: 0 }}>
+                      <div>
+                        <h2 style={{ margin: 0 }}>{item.name}</h2>
+                      </div>
+                    </div>
+
                     <div
-                      className="coming-soon-placeholder"
+                      className="my-design-preview coming-soon-preview"
+                      aria-label={`Preview ${item.name}`}
                       style={{
-                        width: "100%",
-                        aspectRatio: "1/1",
+                        padding: 0,
+                        overflow: "hidden",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
                         backgroundColor: "#f5f5f7",
-                        color: "#86868b",
-                        fontWeight: "700",
-                        fontSize: "1.1rem",
-                        letterSpacing: "1.5px",
-                        textTransform: "uppercase",
+                        height: "260px",
+                        border: "none",
                       }}
                     >
-                      Sắp ra mắt
+                      <img
+                        src={comingSoonImg}
+                        alt="Sắp ra mắt"
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                          display: "block",
+                          borderRadius: "4px",
+                        }}
+                      />
                     </div>
-                  ) : (
-                    <img src={item.image} alt={item.name} />
-                  )}
-                </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="my-design-card__head">
+                      <div>
+                        <h2>{item.name}</h2>
+                        <p
+                          style={{
+                            fontSize: "0.85rem",
+                            color: "#4b647c",
+                            margin: "4px 0 0",
+                            display: "-webkit-box",
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: "vertical",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {item.description || "Bộ sưu tập thiết kế sẵn"}
+                        </p>
+                      </div>
+                      <span>{item.charms?.length || 0} hạt</span>
+                    </div>
 
-                {/* CARD INFO CONTAINER */}
-                <div className="card-info">
-                  <h3>{item.name}</h3>
-                  <p className="description">{item.description}</p>
-                  <p className="price">{formatVND(item.price)}</p>
+                    <div className="my-design-preview" aria-label={`Preview ${item.name}`}>
+                      <div className="my-design-band">
+                        {(item.charms || []).map((c, index) => {
+                          const charmObj = c.charm || c;
+                          return (
+                            <img
+                              key={`${charmObj?._id || index}`}
+                              src={charmObj?.image}
+                              alt=""
+                            />
+                          );
+                        })}
+                      </div>
+                    </div>
 
-                  {/* ADD TO CART ACTION BUTTON */}
-                  <button
-                    className={`btn-add-cart ${isComingSoon ? "disabled" : ""}`}
-                    onClick={() => handleAddToCart(item)}
-                    disabled={isComingSoon}
-                    style={
-                      isComingSoon
-                        ? {
-                            backgroundColor: "#d2d2d7",
-                            color: "#86868b",
-                            cursor: "not-allowed",
-                          }
-                        : {}
-                    }
-                  >
-                    {isComingSoon ? "Sắp ra mắt" : "Thêm vào giỏ"}
-                  </button>
-                </div>
-              </div>
+                    <div className="my-design-card__foot">
+                      <strong>{formatVND(item.price)}</strong>
+                      <div className="my-design-actions">
+                        <button
+                          className="my-design-add"
+                          type="button"
+                          onClick={() => handleAddToCart(item)}
+                          style={{
+                            flex: "1",
+                          }}
+                        >
+                          Thêm vào giỏ hàng
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </article>
             );
           })}
         </div>

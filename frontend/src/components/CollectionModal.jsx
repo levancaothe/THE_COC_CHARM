@@ -20,15 +20,32 @@ export default function CollectionModal({ collection, onSave, onClose }) {
   // --- 2. DESIGNER STATE ---
   const [availableCharms, setAvailableCharms] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [selectedCharms, setSelectedCharms] = useState(
-    collection?.charms || [],
-  );
+
+  const normalizeEditCharm = (entry) => {
+    const charm = entry?.charm || entry;
+    if (!charm) return null;
+    return {
+      ...charm,
+      instanceId: Math.random().toString(36).substr(2, 9),
+      isDefault: false,
+    };
+  };
+
+  const initialEditCharms = useMemo(() => {
+    return collection?.charms
+      ? collection.charms.map(normalizeEditCharm).filter(Boolean)
+      : [];
+  }, [collection]);
+
+  const [selectedCharms, setSelectedCharms] = useState(initialEditCharms);
 
   // Setup logic: If editing, skip setup. If new, start at null.
   const [capacity, setCapacity] = useState(
-    collection?.charms ? collection.charms.length : null,
+    collection?.charms ? initialEditCharms.length : null,
   );
-  const [tempCapacity, setTempCapacity] = useState(10);
+  const [tempCapacity, setTempCapacity] = useState(
+    collection?.charms ? initialEditCharms.length || 1 : 10,
+  );
   const [wristSize, setWristSize] = useState("");
   const [material, setMaterial] = useState("");
 
@@ -37,31 +54,124 @@ export default function CollectionModal({ collection, onSave, onClose }) {
 
   const calculatedPrice = usePriceCalculator(selectedCharms);
 
+  const baseCharmKeywords = [
+    "cơ bản",
+    "co ban",
+    "basic",
+    "base",
+    "mặc định",
+    "mac dinh",
+    "default",
+  ];
+  const normalizeText = (value = "") =>
+    value
+      .toString()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+  const getCategoryName = (charm) => {
+    if (typeof charm?.category === "object" && charm?.category?.name) {
+      return charm.category.name;
+    }
+
+    const categoryId = charm?.category?._id || charm?.category;
+    return (
+      categories.find((category) => category._id === categoryId)?.name || ""
+    );
+  };
+  const isBaseCharm = (charm) => {
+    const charmName = normalizeText(charm?.name);
+    const categoryName = normalizeText(getCategoryName(charm));
+    return baseCharmKeywords.some((keyword) => {
+      const normalizedKeyword = normalizeText(keyword);
+      return (
+        charmName.includes(normalizedKeyword) ||
+        categoryName.includes(normalizedKeyword)
+      );
+    });
+  };
+
+  const baseCharmOptions = useMemo(
+    () => availableCharms.filter(isBaseCharm),
+    [availableCharms, categories],
+  );
+  const selectedBaseCharm = useMemo(
+    () =>
+      baseCharmOptions.find((charm) => charm._id === material) ||
+      baseCharmOptions[0] ||
+      null,
+    [baseCharmOptions, material],
+  );
+
+  const basePrice =
+    (selectedBaseCharm?.price || 0) * (Number(tempCapacity) || 0);
+
+  const getCharmUsageCount = (charmId, charms = selectedCharms) =>
+    charms.filter((charm) => charm?._id === charmId).length;
+
+  const selectedCharmCounts = useMemo(() => {
+    return selectedCharms.reduce((counts, charm) => {
+      if (!charm?._id) return counts;
+      counts[charm._id] = (counts[charm._id] || 0) + 1;
+      return counts;
+    }, {});
+  }, [selectedCharms]);
+
+  const canAddCharm = (charm, previewCharms = selectedCharms) => {
+    if (!charm?._id) return false;
+
+    const stock = Number(charm.stock);
+    if (Number.isFinite(stock) && stock <= 0) return false;
+
+    const defaultCharmIndex = previewCharms.findIndex(
+      (current) =>
+        current?.isDefault ||
+        (selectedBaseCharm && current?._id === selectedBaseCharm._id),
+    );
+
+    const currentCount = getCharmUsageCount(charm._id, previewCharms);
+    const replacingSameCharm =
+      defaultCharmIndex !== -1 &&
+      previewCharms[defaultCharmIndex]?._id === charm._id;
+
+    if (
+      Number.isFinite(stock) &&
+      !replacingSameCharm &&
+      currentCount >= stock
+    ) {
+      return false;
+    }
+
+    return true;
+  };
+
   // --- 3. FETCH INVENTORY ---
   useEffect(() => {
     const fetchInventory = async () => {
       try {
         const [charmsRes, catRes] = await Promise.all([
-          api.get("/charms?limit=100"),
+          api.get("/charms?limit=1000"),
           api.get("/categories"),
         ]);
         setAvailableCharms(charmsRes.data.data);
         setCategories(catRes.data.data);
-
-        // Auto-select first base material for setup
-        const baseOptions = charmsRes.data.data.filter((c) =>
-          c.name.toLowerCase().includes("bạc trơn"),
-        );
-
-        if (baseOptions.length > 0 && !material) {
-          setMaterial(baseOptions[0]._id);
-        }
       } catch (error) {
         console.error("Lỗi khi tải dữ liệu charm:", error);
       }
     };
     fetchInventory();
   }, []);
+
+  useEffect(() => {
+    if (baseCharmOptions.length === 0) return;
+
+    const isSelectedMaterialValid = baseCharmOptions.some(
+      (charm) => charm._id === material,
+    );
+    if (!isSelectedMaterialValid) {
+      setMaterial(baseCharmOptions[0]._id);
+    }
+  }, [baseCharmOptions, material]);
 
   // Set the price input automatically when calculated price changes,
   // but allow admin to override it if they want a discount.
@@ -72,72 +182,166 @@ export default function CollectionModal({ collection, onSave, onClose }) {
   }, [calculatedPrice]);
 
   // --- 4. DESIGNER LOGIC ---
-  const handleWristSizeChange = (e) => {
-    const size = e.target.value;
-    setWristSize(size);
-    const parsedSize = parseFloat(size);
-    if (!isNaN(parsedSize) && parsedSize > 0) {
-      setTempCapacity(Math.round(parsedSize / 0.9));
-    }
-  };
+  const fillWithDefaultCharms = (cap, mat) => {
+    const defaultCharm =
+      baseCharmOptions.find((charm) => charm._id === mat) ||
+      baseCharmOptions[0];
 
-  const handleStartDesign = () => {
-    setCapacity(tempCapacity);
-    const defaultCharm = availableCharms.find((c) => c._id === material);
-    if (defaultCharm && selectedCharms.length === 0) {
-      const initialCharms = Array.from({ length: tempCapacity }).map(() => ({
+    if (defaultCharm) {
+      const safeCapacity = Number.isFinite(Number(defaultCharm.stock))
+        ? Math.min(cap, Math.max(0, Number(defaultCharm.stock)))
+        : cap;
+
+      const initialCharms = Array.from({ length: safeCapacity }).map(() => ({
         ...defaultCharm,
         instanceId: Math.random().toString(36).substr(2, 9),
         isDefault: true,
       }));
       setSelectedCharms(initialCharms);
+      return safeCapacity;
+    } else {
+      setSelectedCharms([]);
+      return 0;
+    }
+  };
+
+  const resizeBraceletToCapacity = (nextCapacity, mat = material) => {
+    const desiredCapacity = Math.max(1, Math.floor(Number(nextCapacity) || 1));
+    const defaultCharm =
+      baseCharmOptions.find((charm) => charm._id === mat) ||
+      baseCharmOptions[0];
+    const currentCapacity = selectedCharms.length;
+
+    if (desiredCapacity === currentCapacity) {
+      return currentCapacity;
+    }
+
+    if (desiredCapacity < currentCapacity) {
+      setSelectedCharms((prevCharms) => prevCharms.slice(0, desiredCapacity));
+      return desiredCapacity;
+    }
+
+    if (!defaultCharm) {
+      alert("Chưa có charm cơ bản trong cơ sở dữ liệu để mở rộng vòng.");
+      return 0;
+    }
+
+    if (currentCapacity === 0) {
+      return fillWithDefaultCharms(desiredCapacity, mat);
+    }
+
+    const defaultCharmUsage = selectedCharms.filter(
+      (charm) => charm?.isDefault || charm?._id === defaultCharm._id,
+    ).length;
+    const stock = Number(defaultCharm.stock);
+    const remainingStock = Number.isFinite(stock)
+      ? Math.max(0, stock - defaultCharmUsage)
+      : Infinity;
+    const additionalNeeded = desiredCapacity - currentCapacity;
+
+    if (Number.isFinite(remainingStock) && additionalNeeded > remainingStock) {
+      alert(
+        `Chỉ còn ${remainingStock} hạt "${defaultCharm.name}" khả dụng để mở rộng vòng.`,
+      );
+      return 0;
+    }
+
+    setSelectedCharms((prevCharms) => [
+      ...prevCharms,
+      ...Array.from({ length: additionalNeeded }).map(() => ({
+        ...defaultCharm,
+        instanceId: Math.random().toString(36).substr(2, 9),
+        isDefault: true,
+      })),
+    ]);
+    return desiredCapacity;
+  };
+
+  const handleWristSizeChange = (e) => {
+    const size = e.target.value;
+    setWristSize(size);
+    const parsedSize = parseFloat(size);
+    if (!isNaN(parsedSize) && parsedSize > 0) {
+      const recommendedCharms = Math.round(parsedSize / 0.9);
+      setTempCapacity(recommendedCharms);
+    }
+  };
+
+  const handleStartDesign = () => {
+    const nextCapacity = resizeBraceletToCapacity(tempCapacity, material);
+    if (nextCapacity > 0) {
+      setCapacity(nextCapacity);
     }
   };
 
   const addCharm = (charm) => {
-    setSelectedCharms((prev) => {
-      const defaultIndex = prev.findIndex((c) => c.isDefault);
+    setSelectedCharms((prevCharms) => {
       const newCharmInstance = {
         ...charm,
         instanceId: Math.random().toString(36).substr(2, 9),
       };
 
-      if (defaultIndex !== -1) {
-        const next = [...prev];
-        next[defaultIndex] = newCharmInstance;
-        return next;
+      if (!canAddCharm(charm, prevCharms)) {
+        alert(`"${charm.name}" đã hết hoặc không đủ số lượng khả dụng.`);
+        return prevCharms;
       }
-      if (prev.length < capacity) return [...prev, newCharmInstance];
-      alert("Đã đạt tối đa số lượng hạt!");
-      return prev;
+
+      const defaultCharmIndex = prevCharms.findIndex(
+        (c) =>
+          c.isDefault || (selectedBaseCharm && c._id === selectedBaseCharm._id),
+      );
+
+      if (defaultCharmIndex !== -1) {
+        const newCharms = [...prevCharms];
+        newCharms[defaultCharmIndex] = newCharmInstance;
+        return newCharms;
+      }
+
+      if (prevCharms.length >= capacity) {
+        alert(`Vòng tay này chỉ chứa được tối đa ${capacity} hạt charm!`);
+        return prevCharms;
+      }
+      return [...prevCharms, newCharmInstance];
     });
   };
 
   const moveCharmInSequence = (dragIndex, hoverIndex) => {
-    setSelectedCharms((prev) => {
-      const next = [...prev];
-      const dragged = next[dragIndex];
-      next.splice(dragIndex, 1);
-      next.splice(hoverIndex, 0, dragged);
-      return next;
+    setSelectedCharms((prevCharms) => {
+      const newCharms = [...prevCharms];
+      const dragCharm = newCharms[dragIndex];
+      newCharms.splice(dragIndex, 1);
+      newCharms.splice(hoverIndex, 0, dragCharm);
+      return newCharms;
     });
   };
 
   const removeCharm = (index) => {
-    setSelectedCharms((prev) => {
-      const next = [...prev];
-      const defaultCharm =
-        availableCharms.find((c) => c._id === material) || availableCharms[0];
+    setSelectedCharms((prevCharms) => {
+      const newCharms = [...prevCharms];
+      const defaultCharm = selectedBaseCharm || baseCharmOptions[0];
+
       if (defaultCharm) {
-        next[index] = {
+        newCharms[index] = {
           ...defaultCharm,
           instanceId: Math.random().toString(36).substr(2, 9),
           isDefault: true,
         };
       } else {
-        next.splice(index, 1);
+        newCharms.splice(index, 1);
       }
-      return next;
+
+      return newCharms;
+    });
+  };
+
+  const replaceCharm = (index, newCharm) => {
+    setSelectedCharms((prevCharms) => {
+      const updatedCharms = [...prevCharms];
+      updatedCharms[index] = {
+        ...newCharm,
+        instanceId: Math.random().toString(36).substr(2, 9),
+      };
+      return updatedCharms;
     });
   };
 
@@ -209,64 +413,124 @@ export default function CollectionModal({ collection, onSave, onClose }) {
 
         {/* SETUP PHASE */}
         {capacity === null ? (
-          <div style={{ padding: "40px", textAlign: "center", margin: "auto" }}>
-            <h2>Thiết lập vòng cơ bản</h2>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flex: 1,
+              backgroundColor: "#f5f8fb",
+              padding: "40px 24px",
+            }}
+          >
             <div
               style={{
-                maxWidth: "400px",
-                margin: "20px auto",
-                textAlign: "left",
+                background: "linear-gradient(90deg, #d95c14 0 33%, #b75a1c 33% 66%, #0a2e4f 66% 100%) top left / 100% 6px no-repeat, #fff",
+                border: "1.5px solid #d95c14",
+                color: "#0a2e4f",
+                maxWidth: "500px",
+                width: "100%",
+                padding: "36px 48px",
+                borderRadius: "4px",
+                boxShadow: "0 10px 30px rgba(10, 46, 79, 0.08)",
+                textAlign: "center",
               }}
             >
-              <div className="form-group">
-                <label>Chu vi tay (cm) - Tùy chọn</label>
-                <input
-                  type="number"
-                  value={wristSize}
-                  onChange={handleWristSizeChange}
-                  placeholder="VD: 16"
-                />
-              </div>
-              <div className="form-group">
-                <label>Số lượng hạt (Capacity)</label>
-                <input
-                  type="number"
-                  value={tempCapacity}
-                  onChange={(e) => setTempCapacity(Number(e.target.value))}
-                />
-              </div>
-              <div className="form-group">
-                <label>Chất liệu dây cơ bản</label>
-                <select
-                  value={material}
-                  onChange={(e) => setMaterial(e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: "8px",
-                    borderRadius: "4px",
-                    border: "1px solid #ccc",
-                  }}
-                >
-                  <option value="" disabled>
-                    -- Chọn dây cơ bản --
-                  </option>
-                  {/* We put the filter back! Now it only looks for your base materials */}
-                  {availableCharms
-                    .filter((c) => c.name.toLowerCase().includes("bạc trơn"))
-                    .map((c) => (
-                      <option key={c._id} value={c._id}>
-                        {c.name}
+              <h2
+                style={{
+                  color: "#0a2e4f",
+                  fontFamily: "var(--serif)",
+                  fontSize: "1.7rem",
+                  marginBottom: "20px",
+                  fontWeight: "bold",
+                }}
+              >
+                Thiết lập vòng cơ bản
+              </h2>
+              <div style={{ textAlign: "left" }}>
+                <div className="form-group">
+                  <label style={{ color: "#4b647c", fontWeight: 700, fontSize: "12px", textTransform: "uppercase" }}>Chu vi tay (cm) - Tùy chọn</label>
+                  <input
+                    type="number"
+                    value={wristSize}
+                    onChange={handleWristSizeChange}
+                    placeholder="VD: 16"
+                    style={{
+                      border: "1.5px solid #d95c14",
+                      borderRadius: "0",
+                      height: "40px",
+                      fontSize: "14px",
+                    }}
+                  />
+                </div>
+                <div className="form-group">
+                  <label style={{ color: "#4b647c", fontWeight: 700, fontSize: "12px", textTransform: "uppercase" }}>Số lượng hạt (Capacity)</label>
+                  <input
+                    type="number"
+                    value={tempCapacity}
+                    onChange={(e) => setTempCapacity(Number(e.target.value))}
+                    style={{
+                      border: "1.5px solid #d95c14",
+                      borderRadius: "0",
+                      height: "40px",
+                      fontSize: "14px",
+                    }}
+                  />
+                </div>
+                <div className="form-group">
+                  <label style={{ color: "#4b647c", fontWeight: 700, fontSize: "12px", textTransform: "uppercase" }}>Chất liệu dây cơ bản</label>
+                  <select
+                    value={material}
+                    onChange={(e) => setMaterial(e.target.value)}
+                    style={{
+                      width: "100%",
+                      height: "40px",
+                      padding: "0 12px",
+                      borderRadius: "0",
+                      border: "1.5px solid #d95c14",
+                      background: "#fff",
+                      color: "#0a2e4f",
+                      outline: "none",
+                      fontSize: "14px",
+                    }}
+                    disabled={baseCharmOptions.length === 0}
+                  >
+                    <option value="" disabled>
+                      -- Chọn dây cơ bản --
+                    </option>
+                    {baseCharmOptions.map((charm) => (
+                      <option key={charm._id} value={charm._id}>
+                        {charm.name} (
+                        {new Intl.NumberFormat("vi-VN", {
+                          style: "currency",
+                          currency: "VND",
+                          currencyDisplay: "code",
+                        }).format((charm.price || 0) * (Number(tempCapacity) || 0))}
+                        )
                       </option>
                     ))}
-                </select>
+                  </select>
+                </div>
+                <button
+                  type="button"
+                  className="btn"
+                  style={{
+                    width: "100%",
+                    marginTop: "24px",
+                    background: "#d95c14",
+                    color: "#fff",
+                    fontWeight: 900,
+                    textTransform: "uppercase",
+                    height: "44px",
+                    borderRadius: "0",
+                    border: "none",
+                    cursor: "pointer",
+                  }}
+                  onClick={handleStartDesign}
+                >
+                  Bắt đầu thiết kế
+                </button>
               </div>
-              <button
-                className="btn btn-primary"
-                style={{ width: "100%", marginTop: "20px" }}
-                onClick={handleStartDesign}
-              >
-                Bắt đầu kéo thả
-              </button>
             </div>
           </div>
         ) : (
@@ -301,12 +565,50 @@ export default function CollectionModal({ collection, onSave, onClose }) {
                     marginBottom: "20px",
                   }}
                 >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      marginBottom: "12px",
+                      padding: "10px 14px",
+                      background: "#fff4ee",
+                      borderLeft: "4px solid #d95c14",
+                      borderRadius: "2px",
+                    }}
+                  >
+                    <p style={{ margin: 0, color: "#0a2e4f", fontWeight: "600", fontSize: "0.95rem" }}>
+                      Sức chứa:{" "}
+                      <strong style={{ color: "#d95c14", fontSize: "1.1rem" }}>
+                        {selectedCharms.length} / {capacity}
+                      </strong>{" "}
+                      hạt charm
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setCapacity(null)}
+                      style={{
+                        fontSize: "0.82rem",
+                        color: "#d95c14",
+                        fontWeight: "800",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.03em",
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        textDecoration: "underline",
+                      }}
+                    >
+                      Thay đổi số lượng
+                    </button>
+                  </div>
                   <BraceletCanvas
                     ref={designRef}
                     selectedCharms={selectedCharms}
                     onAddCharm={addCharm}
                     moveCharmInSequence={moveCharmInSequence}
                     onRemoveCharm={removeCharm}
+                    onReplaceCharm={replaceCharm}
                     exportMode={isSaving} // Hides UI elements during screenshot
                   />
                 </div>
@@ -314,11 +616,13 @@ export default function CollectionModal({ collection, onSave, onClose }) {
                 <div
                   style={{ borderTop: "1px solid #eee", paddingTop: "20px" }}
                 >
-                  <h4>Chọn Charm:</h4>
+                  <h4 style={{ color: "var(--admin-text)", marginBottom: "15px", fontFamily: "var(--heading)", fontSize: "1.1rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                    Chọn Charm để thiết kế:
+                  </h4>
                   <CharmSidebar
                     charms={availableCharms}
                     categories={categories}
-                    selectedCharmCounts={{}} // Keep empty for admin bypass, or calculate if needed
+                    selectedCharmCounts={selectedCharmCounts}
                     onCharmClick={addCharm}
                   />
                 </div>
@@ -363,9 +667,8 @@ export default function CollectionModal({ collection, onSave, onClose }) {
                     }
                     required
                   />
-                  <small style={{ color: "gray" }}>
-                    Giá nguyên liệu đang là: {calculatedPrice.toLocaleString()}{" "}
-                    VND
+                  <small style={{ color: "#d95c14", fontWeight: "600", marginTop: "4px", display: "block" }}>
+                    Giá nguyên liệu ước tính: {calculatedPrice.toLocaleString()} VND
                   </small>
                 </div>
 
@@ -378,10 +681,8 @@ export default function CollectionModal({ collection, onSave, onClose }) {
                       setFormData({ ...formData, description: e.target.value })
                     }
                     style={{
-                      width: "100%",
-                      padding: "8px",
-                      borderRadius: "4px",
-                      border: "1px solid #ccc",
+                      resize: "vertical",
+                      minHeight: "100px",
                     }}
                   />
                 </div>
@@ -394,10 +695,6 @@ export default function CollectionModal({ collection, onSave, onClose }) {
                       setFormData({ ...formData, status: e.target.value })
                     }
                     style={{
-                      width: "100%",
-                      padding: "8px",
-                      borderRadius: "4px",
-                      border: "1px solid #ccc",
                       marginTop: "5px",
                     }}
                   >
