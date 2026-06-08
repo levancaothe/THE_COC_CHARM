@@ -1,37 +1,37 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
-import html2canvas from 'html2canvas';
-import { useLocation, useNavigate } from 'react-router-dom';
-import api from '../services/api';
-import CharmSidebar from '../components/CharmSidebar';
-import BraceletCanvas from '../components/BraceletCanvas';
-import { PriceSummary, DesignerToolbar } from '../components/DesignerTools';
-import { usePriceCalculator } from '../hooks/usePriceCalculator';
-import { useCart } from '../context/CartContext';
-import './DesignerPage.css';
+import React, { useState, useEffect, useMemo, useRef } from "react";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import html2canvas from "html2canvas";
+import { useLocation, useNavigate } from "react-router-dom";
+import api from "../services/api";
+import CharmSidebar from "../components/CharmSidebar";
+import BraceletCanvas from "../components/BraceletCanvas";
+import { PriceSummary, DesignerToolbar } from "../components/DesignerTools";
+import { usePriceCalculator } from "../hooks/usePriceCalculator";
+import { useCart } from "../context/CartContext";
+import "./DesignerPage.css";
 
-const SAVED_DESIGNS_KEY = 'charmify_saved_designs';
+const SAVED_DESIGNS_KEY = "charmify_saved_designs";
 
 const readSavedDesigns = () => {
-  if (typeof window === 'undefined') return [];
+  if (typeof window === "undefined") return [];
   try {
     const raw = window.localStorage.getItem(SAVED_DESIGNS_KEY);
     const parsed = raw ? JSON.parse(raw) : [];
     return Array.isArray(parsed) ? parsed : [];
   } catch (error) {
-    console.error('Error reading saved designs:', error);
+    console.error("Error reading saved designs:", error);
     return [];
   }
 };
 
 const writeSavedDesigns = (designs) => {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
 
   try {
     window.localStorage.setItem(SAVED_DESIGNS_KEY, JSON.stringify(designs));
   } catch (error) {
-    console.error('Error saving designs:', error);
+    console.error("Error saving designs:", error);
   }
 };
 
@@ -44,10 +44,11 @@ const stripCharmMeta = (charm) => {
 const buildStoredCharmEntry = (charm) => ({
   charm: stripCharmMeta(charm),
   x: 0,
-  y: 0
+  y: 0,
 });
 
-const createDesignId = () => `design-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+const createDesignId = () =>
+  `design-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
 const DesignerPage = () => {
   const [availableCharms, setAvailableCharms] = useState([]);
@@ -55,77 +56,101 @@ const DesignerPage = () => {
   const location = useLocation();
   const editDesign = location.state?.editDesign || null;
   const returnTo = location.state?.returnTo || null;
+
   const normalizeEditCharm = (entry) => {
     const charm = entry?.charm || entry;
     if (!charm) return null;
     return {
       ...charm,
       instanceId: Math.random().toString(36).substr(2, 9),
-      isDefault: false
+      isDefault: false,
     };
   };
 
-  const initialEditCharms = editDesign?.charms
-    ? editDesign.charms.map(normalizeEditCharm).filter(Boolean)
-    : [];
+  const initialEditCharms = useMemo(() => {
+    return editDesign?.charms
+      ? editDesign.charms.map(normalizeEditCharm).filter(Boolean)
+      : [];
+  }, [editDesign]);
 
-  const [selectedCharms, setSelectedCharms] = useState(
-    initialEditCharms
-  );
-  const [capacity, setCapacity] = useState(
-    editDesign
-      ? (initialEditCharms.length || 1)
-      : null
-  ); // Số lượng hạt tối đa
+  const [selectedCharms, setSelectedCharms] = useState(initialEditCharms);
+
+  // FIX: Always start with null so the user is forced to choose wrist size / capacity first
+  const [capacity, setCapacity] = useState(null);
+
   const [tempCapacity, setTempCapacity] = useState(
-    editDesign
-      ? (initialEditCharms.length || 1)
-      : 10
-  ); // Giá trị tạm thời trong input
-  const [wristSize, setWristSize] = useState(
-    ''
-  ); // Chu vi tay
-  const [material, setMaterial] = useState(
-    ''
-  ); // Id charm cơ bản dùng làm dây
+    editDesign ? initialEditCharms.length || 1 : 10,
+  );
+  const [wristSize, setWristSize] = useState("");
+  const [material, setMaterial] = useState("");
   const [designName, setDesignName] = useState(
-    editDesign?.name || 'Thiết kế của tôi'
+    editDesign?.name || "Thiết kế của tôi",
   );
   const [isSaving, setIsSaving] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-  const [editingDesignId, setEditingDesignId] = useState(editDesign?._id || null);
-  const [editingSource, setEditingSource] = useState(location.state?.source || null);
+  const [editingDesignId, setEditingDesignId] = useState(
+    editDesign?._id || null,
+  );
+  const [editingSource, setEditingSource] = useState(
+    location.state?.source || null,
+  );
   const designRef = useRef(null);
   const navigate = useNavigate();
 
   const totalPrice = usePriceCalculator(selectedCharms);
-  const formatVnd = (value) => `${new Intl.NumberFormat('vi-VN').format(value || 0)} VND`;
+  const formatVnd = (value) =>
+    `${new Intl.NumberFormat("vi-VN").format(value || 0)} VND`;
 
-  const baseCharmKeywords = ['cơ bản', 'co ban', 'basic', 'base', 'mặc định', 'mac dinh', 'default'];
-  const normalizeText = (value = '') => value.toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const baseCharmKeywords = [
+    "cơ bản",
+    "co ban",
+    "basic",
+    "base",
+    "mặc định",
+    "mac dinh",
+    "default",
+  ];
+  const normalizeText = (value = "") =>
+    value
+      .toString()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
   const getCategoryName = (charm) => {
-    if (typeof charm?.category === 'object' && charm?.category?.name) {
+    if (typeof charm?.category === "object" && charm?.category?.name) {
       return charm.category.name;
     }
 
     const categoryId = charm?.category?._id || charm?.category;
-    return categories.find((category) => category._id === categoryId)?.name || '';
+    return (
+      categories.find((category) => category._id === categoryId)?.name || ""
+    );
   };
   const isBaseCharm = (charm) => {
     const charmName = normalizeText(charm?.name);
     const categoryName = normalizeText(getCategoryName(charm));
     return baseCharmKeywords.some((keyword) => {
       const normalizedKeyword = normalizeText(keyword);
-      return charmName.includes(normalizedKeyword) || categoryName.includes(normalizedKeyword);
+      return (
+        charmName.includes(normalizedKeyword) ||
+        categoryName.includes(normalizedKeyword)
+      );
     });
   };
 
-  const baseCharmOptions = useMemo(() => availableCharms.filter(isBaseCharm), [availableCharms, categories]);
-  const selectedBaseCharm = useMemo(
-    () => baseCharmOptions.find((charm) => charm._id === material) || baseCharmOptions[0] || null,
-    [baseCharmOptions, material]
+  const baseCharmOptions = useMemo(
+    () => availableCharms.filter(isBaseCharm),
+    [availableCharms, categories],
   );
-  const basePrice = (selectedBaseCharm?.price || 0) * (Number(tempCapacity) || 0);
+  const selectedBaseCharm = useMemo(
+    () =>
+      baseCharmOptions.find((charm) => charm._id === material) ||
+      baseCharmOptions[0] ||
+      null,
+    [baseCharmOptions, material],
+  );
+  const basePrice =
+    (selectedBaseCharm?.price || 0) * (Number(tempCapacity) || 0);
   const getCharmUsageCount = (charmId, charms = selectedCharms) =>
     charms.filter((charm) => charm?._id === charmId).length;
   const selectedCharmCounts = useMemo(() => {
@@ -142,15 +167,22 @@ const DesignerPage = () => {
     const stock = Number(charm.stock);
     if (Number.isFinite(stock) && stock <= 0) return false;
 
-    const defaultCharmIndex = previewCharms.findIndex((current) =>
-      current?.isDefault ||
-      (selectedBaseCharm && current?._id === selectedBaseCharm._id)
+    const defaultCharmIndex = previewCharms.findIndex(
+      (current) =>
+        current?.isDefault ||
+        (selectedBaseCharm && current?._id === selectedBaseCharm._id),
     );
 
     const currentCount = getCharmUsageCount(charm._id, previewCharms);
-    const replacingSameCharm = defaultCharmIndex !== -1 && previewCharms[defaultCharmIndex]?._id === charm._id;
+    const replacingSameCharm =
+      defaultCharmIndex !== -1 &&
+      previewCharms[defaultCharmIndex]?._id === charm._id;
 
-    if (Number.isFinite(stock) && !replacingSameCharm && currentCount >= stock) {
+    if (
+      Number.isFinite(stock) &&
+      !replacingSameCharm &&
+      currentCount >= stock
+    ) {
       return false;
     }
 
@@ -160,14 +192,13 @@ const DesignerPage = () => {
   const fetchCharmsAndCategories = async () => {
     try {
       const [charmsRes, catRes] = await Promise.all([
-        api.get('/charms?limit=1000'),  // Tăng từ 100 lên 1000 để load hết charm
-        api.get('/categories')
+        api.get("/charms?limit=1000"),
+        api.get("/categories"),
       ]);
       setAvailableCharms(charmsRes.data.data);
       setCategories(catRes.data.data);
-      console.log(`Loaded ${charmsRes.data.data.length} charms and ${catRes.data.data.length} categories`);
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error("Error fetching data:", error);
     }
   };
 
@@ -180,45 +211,51 @@ const DesignerPage = () => {
       fetchCharmsAndCategories();
     };
 
-    window.addEventListener('inventory-updated', handleInventoryUpdate);
-    return () => window.removeEventListener('inventory-updated', handleInventoryUpdate);
+    window.addEventListener("inventory-updated", handleInventoryUpdate);
+    return () =>
+      window.removeEventListener("inventory-updated", handleInventoryUpdate);
   }, []);
 
+  // FIX: Set values but do NOT touch the `capacity` state here to allow setup view first
   useEffect(() => {
-    if (!editDesign || initialEditCharms.length === 0) return;
+    if (!editDesign) return;
 
     setEditingDesignId(editDesign._id || null);
     setEditingSource(location.state?.source || null);
-    setSelectedCharms(initialEditCharms);
-    setCapacity(initialEditCharms.length);
-    setTempCapacity(initialEditCharms.length);
-    setDesignName(editDesign.name || 'Thiết kế của tôi');
-  }, [editDesign]);
+    setDesignName(editDesign.name || "Thiết kế của tôi");
+
+    if (initialEditCharms.length > 0) {
+      setSelectedCharms(initialEditCharms);
+      setTempCapacity(initialEditCharms.length);
+    }
+  }, [editDesign, initialEditCharms]);
 
   useEffect(() => {
     if (baseCharmOptions.length === 0) return;
 
-    const isSelectedMaterialValid = baseCharmOptions.some((charm) => charm._id === material);
+    const isSelectedMaterialValid = baseCharmOptions.some(
+      (charm) => charm._id === material,
+    );
     if (!isSelectedMaterialValid) {
       setMaterial(baseCharmOptions[0]._id);
     }
   }, [baseCharmOptions, material]);
 
   const fillWithDefaultCharms = (cap, mat) => {
-    const defaultCharm = baseCharmOptions.find((charm) => charm._id === mat) || baseCharmOptions[0];
+    const defaultCharm =
+      baseCharmOptions.find((charm) => charm._id === mat) ||
+      baseCharmOptions[0];
 
     if (defaultCharm) {
       const safeCapacity = Number.isFinite(Number(defaultCharm.stock))
         ? Math.min(cap, Math.max(0, Number(defaultCharm.stock)))
         : cap;
 
-      const initialCharms = Array.from({ length: safeCapacity }).map(() =>
-      ({
+      const initialCharms = Array.from({ length: safeCapacity }).map(() => ({
         ...defaultCharm,
         instanceId: Math.random().toString(36).substr(2, 9),
-        isDefault: true
-      })
-      );
+        isDefault: true,
+      }));
       setSelectedCharms(initialCharms);
       return safeCapacity;
     } else {
@@ -229,7 +266,9 @@ const DesignerPage = () => {
 
   const resizeBraceletToCapacity = (nextCapacity, mat = material) => {
     const desiredCapacity = Math.max(1, Math.floor(Number(nextCapacity) || 1));
-    const defaultCharm = baseCharmOptions.find((charm) => charm._id === mat) || baseCharmOptions[0];
+    const defaultCharm =
+      baseCharmOptions.find((charm) => charm._id === mat) ||
+      baseCharmOptions[0];
     const currentCapacity = selectedCharms.length;
 
     if (desiredCapacity === currentCapacity) {
@@ -242,7 +281,7 @@ const DesignerPage = () => {
     }
 
     if (!defaultCharm) {
-      alert('Chưa có charm cơ bản trong cơ sở dữ liệu để mở rộng vòng.');
+      alert("Chưa có charm cơ bản trong cơ sở dữ liệu để mở rộng vòng.");
       return 0;
     }
 
@@ -251,7 +290,7 @@ const DesignerPage = () => {
     }
 
     const defaultCharmUsage = selectedCharms.filter(
-      (charm) => charm?.isDefault || charm?._id === defaultCharm._id
+      (charm) => charm?.isDefault || charm?._id === defaultCharm._id,
     ).length;
     const stock = Number(defaultCharm.stock);
     const remainingStock = Number.isFinite(stock)
@@ -261,20 +300,18 @@ const DesignerPage = () => {
 
     if (Number.isFinite(remainingStock) && additionalNeeded > remainingStock) {
       alert(
-        `Chỉ còn ${remainingStock} hạt "${defaultCharm.name}" khả dụng để mở rộng vòng.`
+        `Chỉ còn ${remainingStock} hạt "${defaultCharm.name}" khả dụng để mở rộng vòng.`,
       );
       return 0;
     }
 
     setSelectedCharms((prevCharms) => [
       ...prevCharms,
-      ...Array.from({ length: additionalNeeded }).map(() =>
-      ({
+      ...Array.from({ length: additionalNeeded }).map(() => ({
         ...defaultCharm,
         instanceId: Math.random().toString(36).substr(2, 9),
-        isDefault: true
-      })
-      )
+        isDefault: true,
+      })),
     ]);
     return desiredCapacity;
   };
@@ -308,9 +345,9 @@ const DesignerPage = () => {
         return prevCharms;
       }
 
-      const defaultCharmIndex = prevCharms.findIndex(c =>
-        c.isDefault ||
-        (selectedBaseCharm && c._id === selectedBaseCharm._id)
+      const defaultCharmIndex = prevCharms.findIndex(
+        (c) =>
+          c.isDefault || (selectedBaseCharm && c._id === selectedBaseCharm._id),
       );
 
       if (defaultCharmIndex !== -1) {
@@ -340,15 +377,13 @@ const DesignerPage = () => {
   const removeCharm = (index) => {
     setSelectedCharms((prevCharms) => {
       const newCharms = [...prevCharms];
-
-      // Hoàn trả lại hạt mặc định khi xóa hạt sự kiện
       const defaultCharm = selectedBaseCharm || baseCharmOptions[0];
 
       if (defaultCharm) {
         newCharms[index] = {
           ...defaultCharm,
           instanceId: Math.random().toString(36).substr(2, 9),
-          isDefault: true
+          isDefault: true,
         };
       } else {
         newCharms.splice(index, 1);
@@ -372,52 +407,60 @@ const DesignerPage = () => {
   const { addToCart, updateCartItem } = useCart();
 
   const handleDownload = async () => {
-    if (selectedCharms.length === 0) return alert('Hãy thêm ít nhất 1 charm để tải ảnh!');
+    if (selectedCharms.length === 0)
+      return alert("Hãy thêm ít nhất 1 charm để tải ảnh!");
     if (!designRef.current) return;
 
     try {
       setIsExporting(true);
-      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      await new Promise((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(resolve)),
+      );
 
       const canvas = await html2canvas(designRef.current, {
         useCORS: true,
-        backgroundColor: '#ffffff',
-        scale: 2 // Higher quality
+        backgroundColor: "#ffffff",
+        scale: 2,
       });
-      const image = canvas.toDataURL('image/png');
-      const link = document.createElement('a');
+      const image = canvas.toDataURL("image/png");
+      const link = document.createElement("a");
       link.href = image;
-      link.download = `${designName || 'design'}.png`;
+      link.download = `${designName || "design"}.png`;
       link.click();
     } catch (error) {
-      console.error('Lỗi khi tạo ảnh:', error);
-      alert('Không thể tạo ảnh thiết kế. Vui lòng thử lại.');
+      console.error("Lỗi khi tạo ảnh:", error);
+      alert("Không thể tạo ảnh thiết kế. Vui lòng thử lại.");
     } finally {
       setIsExporting(false);
     }
   };
 
   const buildDesignPayload = (isSaved) => ({
-    name: designName || `Thiết kế vòng (${selectedCharms.length}/${capacity} hạt)`,
+    name:
+      designName || `Thiết kế vòng (${selectedCharms.length}/${capacity} hạt)`,
     charms: selectedCharms.map(buildStoredCharmEntry),
     totalPrice,
-    isSaved
+    isSaved,
   });
 
   const saveDesignToLibrary = (design, existingId = null) => {
     const savedDesigns = readSavedDesigns();
     const timestamp = new Date().toISOString();
-    const existingDesign = savedDesigns.find((item) => item._id === (existingId || design._id));
+    const existingDesign = savedDesigns.find(
+      (item) => item._id === (existingId || design._id),
+    );
     const nextDesign = {
       ...design,
       _id: existingId || design._id || createDesignId(),
       isSaved: true,
       createdAt: design.createdAt || existingDesign?.createdAt || timestamp,
-      updatedAt: timestamp
+      updatedAt: timestamp,
     };
 
     const nextDesigns = savedDesigns.some((item) => item._id === nextDesign._id)
-      ? savedDesigns.map((item) => (item._id === nextDesign._id ? nextDesign : item))
+      ? savedDesigns.map((item) =>
+          item._id === nextDesign._id ? nextDesign : item,
+        )
       : [nextDesign, ...savedDesigns];
 
     writeSavedDesigns(nextDesigns);
@@ -430,60 +473,62 @@ const DesignerPage = () => {
     updateCartAfter = false,
     showAlert = true,
     useExistingId = false,
-    navigateBack = false
+    navigateBack = false,
   } = {}) => {
-    if (selectedCharms.length === 0) return alert('Hãy thêm ít nhất 1 charm!');
+    if (selectedCharms.length === 0) return alert("Hãy thêm ít nhất 1 charm!");
     if (isSaving) return;
 
     setIsSaving(true);
     try {
       const designData = buildDesignPayload(isSaved);
-
-      const existingId = useExistingId && editingDesignId ? editingDesignId : null;
+      const existingId =
+        useExistingId && editingDesignId ? editingDesignId : null;
       const designRecord = isSaved
         ? saveDesignToLibrary(designData, existingId)
         : {
-          ...designData,
-          _id: existingId || createDesignId(),
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        };
+            ...designData,
+            _id: existingId || createDesignId(),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
 
       const cartDesign = {
         _id: designRecord._id,
         name: designRecord.name,
         price: designRecord.totalPrice ?? totalPrice,
         charms: selectedCharms.map(stripCharmMeta),
-        isSaved: designRecord.isSaved ?? false
+        isSaved: designRecord.isSaved ?? false,
       };
 
       if (isSaved) {
         setEditingDesignId(designRecord._id);
-        setEditingSource('designs');
+        setEditingSource("designs");
       }
 
       if (updateCartAfter) {
-        updateCartItem(cartDesign, 'design');
+        updateCartItem(cartDesign, "design");
       }
 
       if (addToCartAfter) {
-        addToCart(cartDesign, 'design');
+        addToCart(cartDesign, "design");
       }
 
       if (showAlert) {
         const successMessage = addToCartAfter
-          ? 'Đã thêm thiết kế vào giỏ hàng!'
-          : (editingDesignId ? 'Đã cập nhật mẫu thành công!' : 'Đã lưu thiết kế vào "Thiết kế của tôi" thành công!');
+          ? "Đã thêm thiết kế vào giỏ hàng!"
+          : editingDesignId
+            ? "Đã cập nhật mẫu thành công!"
+            : 'Đã lưu thiết kế vào "Thiết kế của tôi" thành công!';
         alert(successMessage);
       }
 
       if (navigateBack && editingDesignId && returnTo) {
-        navigate(returnTo, { state: { focusCheckout: returnTo === '/cart' } });
+        navigate(returnTo, { state: { focusCheckout: returnTo === "/cart" } });
       }
       return true;
     } catch (error) {
       if (showAlert) {
-        alert('Lỗi khi lưu thiết kế');
+        alert("Lỗi khi lưu thiết kế");
       }
       return false;
     } finally {
@@ -494,10 +539,10 @@ const DesignerPage = () => {
   const persistDesignToCart = async ({ showAlert = true } = {}) => {
     return persistDesign({
       isSaved: false,
-      addToCartAfter: editingSource !== 'cart',
-      updateCartAfter: editingSource === 'cart',
+      addToCartAfter: editingSource !== "cart",
+      updateCartAfter: editingSource === "cart",
       showAlert,
-      useExistingId: editingSource === 'cart'
+      useExistingId: editingSource === "cart",
     });
   };
 
@@ -508,20 +553,24 @@ const DesignerPage = () => {
   const handleBuyNow = async () => {
     const success = await persistDesignToCart({ showAlert: false });
     if (success) {
-      navigate('/cart', { state: { focusCheckout: true } });
+      navigate("/cart", { state: { focusCheckout: true } });
     }
   };
 
   if (capacity === null) {
     return (
       <div className="designer-start fade-in">
-        <section className="designer-start-card" aria-labelledby="designer-start-title">
+        <section
+          className="designer-start-card"
+          aria-labelledby="designer-start-title"
+        >
           <h1 id="designer-start-title">
             Chào mừng bạn đến với
             <span>không gian thiết kế</span>
           </h1>
           <p className="designer-start-intro">
-            Vui lòng nhập chu vi cổ tay hoặc chọn số lượng hạt charm (mắt xích) bạn muốn thiết kế.
+            Vui lòng nhập chu vi cổ tay hoặc chọn số lượng hạt charm (mắt xích)
+            bạn muốn thiết kế.
           </p>
 
           <div className="designer-start-form">
@@ -537,7 +586,8 @@ const DesignerPage = () => {
             />
             {wristSize && parseFloat(wristSize) > 0 && (
               <p className="designer-hint">
-                Gợi ý: Cổ tay {wristSize}cm nên dùng khoảng {Math.round(parseFloat(wristSize) / 0.9)} hạt.
+                Gợi ý: Cổ tay {wristSize}cm nên dùng khoảng{" "}
+                {Math.round(parseFloat(wristSize) / 0.9)} hạt.
               </p>
             )}
 
@@ -552,7 +602,9 @@ const DesignerPage = () => {
               placeholder="VD: 10"
             />
 
-            <label htmlFor="bracelet-material">Chất liệu dây (từ bộ charm cơ bản):</label>
+            <label htmlFor="bracelet-material">
+              Chất liệu dây (từ bộ charm cơ bản):
+            </label>
             <select
               id="bracelet-material"
               value={material}
@@ -562,11 +614,17 @@ const DesignerPage = () => {
               {baseCharmOptions.length > 0 ? (
                 baseCharmOptions.map((charm) => (
                   <option key={charm._id} value={charm._id}>
-                    {charm.name} ({formatVnd((charm.price || 0) * (Number(tempCapacity) || 0))})
+                    {charm.name} (
+                    {formatVnd(
+                      (charm.price || 0) * (Number(tempCapacity) || 0),
+                    )}
+                    )
                   </option>
                 ))
               ) : (
-                <option value="">Chưa có charm cơ bản trong cơ sở dữ liệu</option>
+                <option value="">
+                  Chưa có charm cơ bản trong cơ sở dữ liệu
+                </option>
               )}
             </select>
             {selectedBaseCharm && (
@@ -585,16 +643,58 @@ const DesignerPage = () => {
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className="designer-page container fade-in" style={{ padding: '40px 0' }}>
-        <header style={{ marginBottom: '40px', textAlign: 'center' }}>
-          <h1 style={{ fontSize: '2.5rem', background: 'var(--gold-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            Trình Thiết Kế Vòng Tay
+      <div
+        className="designer-page container fade-in"
+        style={{ padding: "40px 0" }}
+      >
+        <header style={{ marginBottom: "40px", textAlign: "center" }}>
+          <h1
+            style={{
+              fontSize: "2.5rem",
+              background: "var(--gold-gradient)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+          >
+            Trình Thiết Kế Vòng Tây
           </h1>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', alignItems: 'center', marginTop: '10px' }}>
-            <p style={{ color: 'var(--text-muted)' }}>Sức chứa: <strong>{selectedCharms.length} / {capacity}</strong> hạt charm</p>
-            <button onClick={() => setCapacity(null)} style={{ fontSize: '0.8rem', color: 'var(--primary-gold)', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}>Đổi số lượng</button>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              gap: "20px",
+              alignItems: "center",
+              marginTop: "10px",
+            }}
+          >
+            <p style={{ color: "var(--text-muted)" }}>
+              Sức chứa:{" "}
+              <strong>
+                {selectedCharms.length} / {capacity}
+              </strong>{" "}
+              hạt charm
+            </p>
+            <button
+              onClick={() => setCapacity(null)}
+              style={{
+                fontSize: "0.8rem",
+                color: "var(--primary-gold)",
+                textDecoration: "underline",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+              }}
+            >
+              Đổi số lượng
+            </button>
           </div>
-          <div style={{ marginTop: '20px', maxWidth: '400px', margin: '20px auto 0' }}>
+          <div
+            style={{
+              marginTop: "20px",
+              maxWidth: "400px",
+              margin: "20px auto 0",
+            }}
+          >
             <input
               type="text"
               placeholder="Đặt tên cho thiết kế của bạn..."
@@ -602,14 +702,14 @@ const DesignerPage = () => {
               onChange={(e) => setDesignName(e.target.value)}
               className="glass"
               style={{
-                width: '100%',
-                padding: '12px 20px',
-                borderRadius: 'var(--radius-md)',
-                border: '1px solid rgba(212, 175, 55, 0.3)',
-                fontSize: '1.1rem',
-                textAlign: 'center',
-                color: 'var(--text-main)',
-                outline: 'none'
+                width: "100%",
+                padding: "12px 20px",
+                borderRadius: "var(--radius-md)",
+                border: "1px solid rgba(212, 175, 55, 0.3)",
+                fontSize: "1.1rem",
+                textAlign: "center",
+                color: "var(--text-main)",
+                outline: "none",
               }}
             />
           </div>
@@ -628,16 +728,21 @@ const DesignerPage = () => {
         </div>
 
         <div className="designer-checkout-panel">
-          <PriceSummary selectedCharms={selectedCharms} selectedBaseCharm={selectedBaseCharm} />
+          <PriceSummary
+            selectedCharms={selectedCharms}
+            selectedBaseCharm={selectedBaseCharm}
+          />
           <DesignerToolbar
-            onSave={() => persistDesign({
-              isSaved: true,
-              addToCartAfter: false,
-              updateCartAfter: editingSource === 'cart',
-              showAlert: true,
-              useExistingId: !!editingDesignId,
-              navigateBack: true
-            })}
+            onSave={() =>
+              persistDesign({
+                isSaved: true,
+                addToCartAfter: false,
+                updateCartAfter: editingSource === "cart",
+                showAlert: true,
+                useExistingId: !!editingDesignId,
+                navigateBack: true,
+              })
+            }
             onAddToCart={handleAddToCart}
             onBuyNow={handleBuyNow}
             onDownload={handleDownload}

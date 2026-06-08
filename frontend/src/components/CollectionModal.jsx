@@ -14,6 +14,7 @@ export default function CollectionModal({ collection, onSave, onClose }) {
     image: collection?.image || "",
     price: collection?.price || "",
     description: collection?.description || "",
+    status: collection?.status || "available",
   });
 
   // --- 2. DESIGNER STATE ---
@@ -290,7 +291,16 @@ export default function CollectionModal({ collection, onSave, onClose }) {
               }}
             >
               <DndProvider backend={HTML5Backend}>
-                <div style={{ marginBottom: "20px" }}>
+                <div
+                  style={{
+                    position: "sticky",
+                    top: 0,
+                    zIndex: 10,
+                    backgroundColor: "#ffffff", // Crucial: prevents charms from bleeding through underneath
+                    paddingTop: "5px", // Optional: adds a tiny bit of breathing room at the top
+                    marginBottom: "20px",
+                  }}
+                >
                   <BraceletCanvas
                     ref={designRef}
                     selectedCharms={selectedCharms}
@@ -374,6 +384,28 @@ export default function CollectionModal({ collection, onSave, onClose }) {
                       border: "1px solid #ccc",
                     }}
                   />
+                </div>
+
+                <div className="form-group" style={{ marginTop: "15px" }}>
+                  <label>Trạng thái (Status)</label>
+                  <select
+                    value={formData.status}
+                    onChange={(e) =>
+                      setFormData({ ...formData, status: e.target.value })
+                    }
+                    style={{
+                      width: "100%",
+                      padding: "8px",
+                      borderRadius: "4px",
+                      border: "1px solid #ccc",
+                      marginTop: "5px",
+                    }}
+                  >
+                    <option value="available">Đang bán (Available)</option>
+                    <option value="coming soon">
+                      Sắp ra mắt (Coming Soon)
+                    </option>
+                  </select>
                 </div>
 
                 <div

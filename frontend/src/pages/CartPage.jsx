@@ -44,6 +44,7 @@ const CartPage = () => {
     [cartItems],
   );
   const hasSelectedItems = selectedItems.length > 0;
+
   const getCanIncreaseQuantity = (item) => {
     const maxQuantity = getItemMaxQuantity(item);
     return !Number.isFinite(maxQuantity) || item.quantity < maxQuantity;
@@ -52,15 +53,13 @@ const CartPage = () => {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const isCancelled = params.get("cancel") === "true";
-    const orderCode = params.get("orderCode"); // 🟢 Grabs the orderCode from PayOS URL (e.g., 7200)
+    const orderCode = params.get("orderCode");
 
     if (isCancelled && orderCode) {
-      // 1. Alert the user
       alert("Bạn đã hủy thanh toán đơn hàng!");
 
       const updateOrderToCancelled = async () => {
         try {
-          // 🟢 CORRECT SYNTAX FOR AXIOS DELETE: Use the { data: ... } wrapper
           await api.delete("/orders/cancel-payos-order", {
             data: { orderCode: orderCode },
           });
@@ -74,8 +73,6 @@ const CartPage = () => {
       };
 
       updateOrderToCancelled();
-
-      // 3. Clean up the messy URL parameters
       window.history.replaceState(null, "", window.location.pathname);
     }
   }, []);
@@ -108,7 +105,8 @@ const CartPage = () => {
     items.forEach((item) => {
       const quantity = Math.max(1, Number(item.quantity) || 1);
 
-      if (item.type === "design") {
+      // Account for both custom designs and pre-built collections modifying charm inventory
+      if (item.type === "design" || item.type === "collection") {
         (item.charms || []).forEach((charm) => {
           const charmId = String(charm?._id ?? charm?.charm?._id ?? "");
           if (!charmId) return;
@@ -170,15 +168,22 @@ const CartPage = () => {
       const orderPayload = {
         items: selectedItems.map((item) => ({
           product: String(item._id),
-          productType: item.type === "design" ? "BraceletDesign" : "Charm",
-          designCharms:
+          productType:
             item.type === "design"
+              ? "BraceletDesign"
+              : item.type === "collection"
+                ? "Collection"
+                : "Charm",
+          designCharms:
+            item.type === "design" || item.type === "collection"
               ? (item.charms || []).map((charm) =>
                   String(charm?._id ?? charm?.charm?._id ?? ""),
                 )
               : [],
           designCharmDetails:
-            item.type === "design" ? buildDesignCharmDetails(item) : [],
+            item.type === "design" || item.type === "collection"
+              ? buildDesignCharmDetails(item)
+              : [],
           quantity: item.quantity,
           price: item.price,
         })),
@@ -202,13 +207,12 @@ const CartPage = () => {
 
       const response = await api.post("/orders", orderPayload);
       console.log("TRẢ VỀ TỪ BACKEND:", response);
-      // 🟢 REDIRECT TO PAYOS IF THEY CHOSE CHUYỂN KHOẢN
+
       if (paymentMethod === "PayOS" && response.data.checkoutUrl) {
         window.location.href = response.data.checkoutUrl;
         return;
       }
 
-      // If it's Cash, continue normally
       window.dispatchEvent(new Event("inventory-updated"));
       setShowSuccessModal(true);
 
@@ -263,6 +267,7 @@ const CartPage = () => {
                   </div>
 
                   <div className="item-image">
+                    {/* Render mini charms for designs, but use cover image for collections & charms */}
                     {item.type === "design" && item.charms ? (
                       <div className="design-preview">
                         {item.charms.map((charm, index) => (
@@ -289,7 +294,9 @@ const CartPage = () => {
                     <span className="item-type">
                       {item.type === "design"
                         ? "Vòng tay thiết kế"
-                        : "Hạt Charm lẻ"}
+                        : item.type === "collection"
+                          ? "Bộ sưu tập"
+                          : "Hạt Charm lẻ"}
                     </span>
                     <h3>{item.name}</h3>
                     <p className="item-price-unit">{formatVnd(item.price)}</p>
@@ -326,7 +333,8 @@ const CartPage = () => {
                   </div>
 
                   <div className="item-actions">
-                    {item.type === "design" && (
+                    {/* 🌟 NOW CHECKS FOR BOTH DESIGN AND COLLECTION */}
+                    {(item.type === "design" || item.type === "collection") && (
                       <button
                         className="btn-edit"
                         type="button"
@@ -336,8 +344,9 @@ const CartPage = () => {
                               editDesign: {
                                 _id: item._id,
                                 name: item.name,
+                                // Normalizes charms mapping regardless of how they are structured
                                 charms: (item.charms || []).map((charm) => ({
-                                  charm,
+                                  charm: charm?.charm || charm,
                                 })),
                                 totalPrice: item.price,
                                 isSaved: item.isSaved ?? false,
@@ -449,7 +458,6 @@ const CartPage = () => {
                     />
                   </fieldset>
 
-                  {/* 🟢 THE CLEAN 2-OPTION PAYMENT SECTION WITH FIXED CSS */}
                   <fieldset>
                     <legend>Phương thức thanh toán</legend>
 
@@ -475,7 +483,6 @@ const CartPage = () => {
                           value="PayOS"
                           checked={paymentMethod === "PayOS"}
                           onChange={(e) => setPaymentMethod(e.target.value)}
-                          // 🟢 THIS STYLE OVERRIDES THE GLOBAL STRETCHING
                           style={{
                             width: "20px",
                             height: "20px",

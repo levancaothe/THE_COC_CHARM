@@ -23,6 +23,11 @@ const collectionSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    status: {
+      type: String,
+      enum: ["coming soon", "available"],
+      default: "available", // Automatically sets this if you don't provide one
+    },
   },
   {
     timestamps: true,

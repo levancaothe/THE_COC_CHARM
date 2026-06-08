@@ -4,11 +4,18 @@ const Collection = require("../models/Collection");
 // Import your Cloudinary utility! (Adjust the path if necessary based on your folder structure)
 const { uploadImageToCloudinary } = require("../utils/cloudinary");
 
-// 1. GET all collections (For your table)
+// 1. GET all collections (For your table & storefront)
 router.get("/", async (req, res) => {
   try {
+    // Check if the request asked for a specific status (e.g., /api/collections?status=available)
+    // If no status is provided in the query, it fetches everything (perfect for Admin Dashboard)
+    const filter = {};
+    if (req.query.status) {
+      filter.status = req.query.status;
+    }
+
     // Populate the charms so the frontend gets the full charm data, not just IDs
-    const collections = await Collection.find()
+    const collections = await Collection.find(filter)
       .populate("charms")
       .sort({ createdAt: -1 });
 
@@ -25,13 +32,15 @@ router.get("/", async (req, res) => {
 router.post("/", async (req, res) => {
   try {
     let collectionData = { ...req.body };
+    // collectionData.status is automatically included here.
+    // If the frontend didn't send a status, Mongoose will auto-apply the "available" default.
 
     // If the frontend sends an image (like a Base64 screenshot), upload it first
     if (collectionData.image) {
       const uploadedUrl = await uploadImageToCloudinary(collectionData.image, {
-        folder: "the_coc_charm/collections", // Keeps your Cloudinary organized
+        folder: "the_coc_charm/collections",
       });
-      collectionData.image = uploadedUrl; // Replace the massive Base64 string with the neat URL
+      collectionData.image = uploadedUrl;
     }
 
     const newCollection = new Collection(collectionData);
@@ -39,6 +48,12 @@ router.post("/", async (req, res) => {
     res.status(201).json(savedCollection);
   } catch (error) {
     console.error("Create collection error:", error);
+    // If the frontend sends a status like "sold out", Mongoose will block it and we catch it here
+    if (error.name === "ValidationError") {
+      return res
+        .status(400)
+        .json({ message: "Dữ liệu không hợp lệ (Kiểm tra lại status)", error });
+    }
     res.status(400).json({ message: "Không thể tạo mẫu mới", error });
   }
 });
@@ -49,7 +64,6 @@ router.put("/:id", async (req, res) => {
     let updateData = { ...req.body };
 
     // If the admin uploaded a NEW image/screenshot, upload it.
-    // (Your isCloudinaryUrl check in cloudinary.js will safely skip this if it's already a Cloudinary link)
     if (updateData.image) {
       const uploadedUrl = await uploadImageToCloudinary(updateData.image, {
         folder: "the_coc_charm/collections",
@@ -60,11 +74,19 @@ router.put("/:id", async (req, res) => {
     const updatedCollection = await Collection.findByIdAndUpdate(
       req.params.id,
       updateData,
-      { new: true },
+      {
+        new: true,
+        runValidators: true, // IMPORTANT: This forces Mongoose to check the status enum during updates!
+      },
     );
     res.status(200).json(updatedCollection);
   } catch (error) {
     console.error("Update collection error:", error);
+    if (error.name === "ValidationError") {
+      return res
+        .status(400)
+        .json({ message: "Trạng thái (status) không hợp lệ", error });
+    }
     res.status(400).json({ message: "Lỗi khi cập nhật", error });
   }
 });

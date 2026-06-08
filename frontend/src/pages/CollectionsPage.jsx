@@ -18,7 +18,7 @@ const CollectionsPage = () => {
       } catch (error) {
         console.error("Lỗi khi tải bộ sưu tập:", error);
       } finally {
-        setLoading(false);
+        loading(false);
       }
     };
 
@@ -33,13 +33,16 @@ const CollectionsPage = () => {
   };
 
   const handleAddToCart = (collection) => {
-    // You may need to map the collection data to match your cart item structure
+    // Safety guard clause to protect backend/state data integrity
+    if (collection.status === "coming soon") return;
+
     addToCart({
       id: collection._id,
       name: collection.name,
       price: collection.price,
       image: collection.image,
       quantity: 1,
+      charms: collection.charms || [],
       type: "collection", // Helps distinguish from custom designs in the cart
     });
     alert("Đã thêm vào giỏ hàng!");
@@ -61,24 +64,65 @@ const CollectionsPage = () => {
         <div className="empty-state">Hiện tại chưa có mẫu vòng nào.</div>
       ) : (
         <div className="collections-grid">
-          {collections.map((item) => (
-            <div key={item._id} className="collection-card">
-              <div className="card-image">
-                <img src={item.image} alt={item.name} />
+          {collections.map((item) => {
+            const isComingSoon = item.status === "coming soon";
+
+            return (
+              <div key={item._id} className="collection-card">
+                {/* CARD IMAGE CONTAINER */}
+                <div className="card-image" style={{ position: "relative" }}>
+                  {isComingSoon ? (
+                    // Placeholder box instead of item image
+                    <div
+                      className="coming-soon-placeholder"
+                      style={{
+                        width: "100%",
+                        aspectRatio: "1/1",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        backgroundColor: "#f5f5f7",
+                        color: "#86868b",
+                        fontWeight: "700",
+                        fontSize: "1.1rem",
+                        letterSpacing: "1.5px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      Sắp ra mắt
+                    </div>
+                  ) : (
+                    <img src={item.image} alt={item.name} />
+                  )}
+                </div>
+
+                {/* CARD INFO CONTAINER */}
+                <div className="card-info">
+                  <h3>{item.name}</h3>
+                  <p className="description">{item.description}</p>
+                  <p className="price">{formatVND(item.price)}</p>
+
+                  {/* ADD TO CART ACTION BUTTON */}
+                  <button
+                    className={`btn-add-cart ${isComingSoon ? "disabled" : ""}`}
+                    onClick={() => handleAddToCart(item)}
+                    disabled={isComingSoon}
+                    style={
+                      isComingSoon
+                        ? {
+                            backgroundColor: "#d2d2d7",
+                            color: "#86868b",
+                            cursor: "not-allowed",
+                          }
+                        : {}
+                    }
+                  >
+                    {isComingSoon ? "Sắp ra mắt" : "Thêm vào giỏ"}
+                  </button>
+                </div>
               </div>
-              <div className="card-info">
-                <h3>{item.name}</h3>
-                <p className="description">{item.description}</p>
-                <p className="price">{formatVND(item.price)}</p>
-                <button
-                  className="btn-add-cart"
-                  onClick={() => handleAddToCart(item)}
-                >
-                  Thêm vào giỏ
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
