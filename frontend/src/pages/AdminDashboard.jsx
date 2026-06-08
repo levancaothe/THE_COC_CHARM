@@ -5,6 +5,7 @@ import api from "../services/api";
 import "./AdminDashboard.css";
 import "./MyDesignsPage.css";
 import DiscountModal from "../components/DiscountModal";
+import DiscountUsageModal from "../components/DiscountUsageModal";
 const formatVND = (value) =>
   `${new Intl.NumberFormat("vi-VN", {
     maximumFractionDigits: 0,
@@ -230,6 +231,8 @@ export default function AdminDashboard() {
   const [discounts, setDiscounts] = useState([]);
   const [showDiscountModal, setShowDiscountModal] = useState(false);
   const [editingDiscount, setEditingDiscount] = useState(null);
+  const [selectedDiscountForUsage, setSelectedDiscountForUsage] = useState(null);
+  const [showDiscountUsageModal, setShowDiscountUsageModal] = useState(false);
 
   const handleScroll = useCallback(() => {
     setShowScrollTop(window.scrollY > 300);
@@ -1491,7 +1494,17 @@ export default function AdminDashboard() {
                                     <span style={{ color: "#2a9d8f", fontWeight: "600" }}>Không giới hạn</span>
                                   )}
                                 </td>
-                                <td className="actions-cell">
+                                <td className="actions-cell" style={{ display: "flex", justifyContent: "center", gap: "6px" }}>
+                                  <button
+                                    className="btn-icon btn-view"
+                                    onClick={() => {
+                                      setSelectedDiscountForUsage(discount);
+                                      setShowDiscountUsageModal(true);
+                                    }}
+                                    title="Xem chi tiết người sử dụng"
+                                  >
+                                    👁️
+                                  </button>
                                   <button
                                     className="btn-icon btn-edit"
                                     onClick={() => {
@@ -1596,6 +1609,15 @@ export default function AdminDashboard() {
           onClose={() => {
             setShowDiscountModal(false);
             setEditingDiscount(null);
+          }}
+        />
+      )}
+      {showDiscountUsageModal && (
+        <DiscountUsageModal
+          discount={selectedDiscountForUsage}
+          onClose={() => {
+            setShowDiscountUsageModal(false);
+            setSelectedDiscountForUsage(null);
           }}
         />
       )}
