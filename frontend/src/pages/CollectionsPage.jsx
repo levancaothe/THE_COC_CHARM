@@ -39,6 +39,7 @@ const CollectionsPage = () => {
 
     addToCart({
       id: collection._id,
+      _id: collection._id,
       name: collection.name,
       price: collection.price,
       image: collection.image,
