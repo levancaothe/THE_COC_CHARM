@@ -201,7 +201,11 @@ export default function AdminDashboard() {
   // Charms state
   const [charms, setCharms] = useState([]);
   const [totalCharms, setTotalCharms] = useState(0);
-  const [charmFilters, setCharmFilters] = useState({ search: '', limit: 50, page: 1 });
+  const [charmFilters, setCharmFilters] = useState({
+    search: "",
+    limit: 50,
+    page: 1,
+  });
   const [editingCharm, setEditingCharm] = useState(null);
   const [showCharmModal, setShowCharmModal] = useState(false);
 
@@ -557,21 +561,24 @@ export default function AdminDashboard() {
   const handleSaveDiscount = async (discountData) => {
     try {
       if (editingDiscount) {
-        // UPDATE EXISTING DISCOUNT
-        // TODO: Replace with your actual API call (e.g., axios.put(`/api/discounts/${editingDiscount._id}`, discountData))
+        // 1. UPDATE EXISTING DISCOUNT IN DATABASE
+        await api.put(`/discounts/${editingDiscount._id}`, discountData);
 
-        // Local state update (so you see it instantly)
+        // Update local state so UI changes instantly
         setDiscounts(
           discounts.map((d) =>
             d._id === editingDiscount._id ? { ...d, ...discountData } : d,
           ),
         );
       } else {
-        // CREATE NEW DISCOUNT
-        // TODO: Replace with your actual API call (e.g., axios.post('/api/discounts', discountData))
+        // 2. CREATE NEW DISCOUNT IN DATABASE
+        const response = await api.post("/discounts", discountData);
 
-        // Mocking a new ID for local state so the table doesn't crash
-        const newDiscount = { ...discountData, _id: Date.now().toString() };
+        // Get the real data (with the real MongoDB _id) from the backend response
+        // Note: adjust 'response.data.data' based on exactly how your backend formats the response
+        const newDiscount =
+          response.data.data || response.data.discount || response.data;
+
         setDiscounts([...discounts, newDiscount]);
       }
 
@@ -586,10 +593,10 @@ export default function AdminDashboard() {
 
   // Handle Deleting
   const handleDeleteDiscount = async (id) => {
-    // Always good to double-check before deleting!
     if (window.confirm("Bạn có chắc chắn muốn xóa sự kiện này?")) {
       try {
-        // TODO: Replace with your actual API call (e.g., axios.delete(`/api/discounts/${id}`))
+        // 3. DELETE DISCOUNT FROM DATABASE
+        await api.delete(`/discounts/${id}`);
 
         // Remove from local state
         setDiscounts(discounts.filter((d) => d._id !== id));
@@ -598,6 +605,7 @@ export default function AdminDashboard() {
           "Lỗi khi xóa khuyến mãi (Error deleting discount):",
           error,
         );
+        alert("Lỗi khi xóa sự kiện!");
       }
     }
   };
@@ -832,10 +840,11 @@ export default function AdminDashboard() {
               <strong>{totalCollections || stats?.designsCount || 0}</strong>
             </button>
             <button
-              className={`menu-item ${activeTab === "discounts" ? "active" : ""}`}
+              className={`tab-btn ${activeTab === "discounts" ? "active" : ""}`}
               onClick={() => setActiveTab("discounts")}
             >
-              🏷️ Khuyến Mãi
+              <span>Khuyến Mãi</span>
+              <strong>%</strong>
             </button>
           </div>
 
