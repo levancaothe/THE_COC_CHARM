@@ -9,7 +9,8 @@
 
 .designer-start-card {
   background:
-    linear-gradient(90deg, #d95c14 0 33%, #b75a1c 33% 66%, #0a2e4f 66% 100%) top left / 100% 6px no-repeat,
+    linear-gradient(90deg, #d95c14 0 33%, #b75a1c 33% 66%, #0a2e4f 66% 100%) top
+      left / 100% 6px no-repeat,
     #fff;
   border: 1.5px solid #d95c14;
   color: #0a2e4f;
@@ -112,7 +113,9 @@
   padding: 0 26px;
   text-align: center;
   text-transform: uppercase;
-  transition: background 0.2s ease, transform 0.2s ease;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
 }
 
 .designer-start-button:hover {
@@ -151,16 +154,18 @@
   font-size: 0.92rem;
   padding: 18px 78px 22px;
   width: 100%;
-  position: sticky;
-  top: 102px;
-  z-index: 9;
+  position: relative;
+  margin-top: 16px;
 }
 
 .designer-summary-grid {
   align-items: center;
   display: grid;
   gap: 22px;
-  grid-template-columns: minmax(220px, 1.6fr) minmax(90px, 0.6fr) minmax(120px, 0.7fr) minmax(140px, 0.8fr);
+  grid-template-columns: minmax(220px, 1.6fr) minmax(90px, 0.6fr) minmax(
+      120px,
+      0.7fr
+    ) minmax(140px, 0.8fr);
   line-height: 1.35;
   text-align: center;
 }
@@ -216,7 +221,10 @@
   justify-content: center;
   line-height: 1;
   text-align: center;
-  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
   width: 100%;
   white-space: nowrap;
 }
@@ -328,6 +336,6 @@
   }
 
   .designer-summary {
-    top: 92px;
+    position: relative;
   }
 }
