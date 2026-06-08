@@ -1,17 +1,21 @@
-import { useEffect, useState, useCallback } from 'react';
-import OrderDetailModal from '../components/OrderDetailModal';
-import api from '../services/api';
-import './AdminDashboard.css';
-
-const formatVND = (value) => `${new Intl.NumberFormat('vi-VN', {
-  maximumFractionDigits: 0
-}).format(Number(value) || 0)} VND`;
+import { useEffect, useState, useCallback } from "react";
+import OrderDetailModal from "../components/OrderDetailModal";
+import CollectionModal from "../components/CollectionModal";
+import api from "../services/api";
+import "./AdminDashboard.css";
+import DiscountModal from "../components/DiscountModal";
+const formatVND = (value) =>
+  `${new Intl.NumberFormat("vi-VN", {
+    maximumFractionDigits: 0,
+  }).format(Number(value) || 0)} VND`;
 
 function StatCard({ title, value, icon, tone }) {
   return (
     <div className={`stat-card stat-card-${tone}`}>
       <div className="stat-icon">{icon}</div>
-      <div className={`stat-content ${tone === 'dark' ? 'stat-content-revenue' : ''}`}>
+      <div
+        className={`stat-content ${tone === "dark" ? "stat-content-revenue" : ""}`}
+      >
         <div className="stat-title">{title}</div>
         <div className="stat-value">{value}</div>
       </div>
@@ -21,11 +25,11 @@ function StatCard({ title, value, icon, tone }) {
 
 function CharmModal({ charm, categories, onSave, onClose }) {
   const [formData, setFormData] = useState({
-    name: charm?.name || '',
-    image: charm?.image || '',
-    price: charm?.price || '',
+    name: charm?.name || "",
+    image: charm?.image || "",
+    price: charm?.price || "",
     stock: charm?.stock || 0,
-    category: charm?.category?._id || charm?.category || ''
+    category: charm?.category?._id || charm?.category || "",
   });
 
   const handleSubmit = (e) => {
@@ -37,8 +41,10 @@ function CharmModal({ charm, categories, onSave, onClose }) {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h3>{charm ? 'Chỉnh Sửa Charm' : 'Thêm Charm Mới'}</h3>
-          <button className="modal-close" onClick={onClose}>×</button>
+          <h3>{charm ? "Chỉnh Sửa Charm" : "Thêm Charm Mới"}</h3>
+          <button className="modal-close" onClick={onClose}>
+            ×
+          </button>
         </div>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
@@ -46,7 +52,9 @@ function CharmModal({ charm, categories, onSave, onClose }) {
             <input
               type="text"
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
               required
             />
           </div>
@@ -55,7 +63,9 @@ function CharmModal({ charm, categories, onSave, onClose }) {
             <input
               type="text"
               value={formData.image}
-              onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, image: e.target.value })
+              }
               required
             />
           </div>
@@ -66,7 +76,9 @@ function CharmModal({ charm, categories, onSave, onClose }) {
               step="1000"
               min="0"
               value={formData.price}
-              onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, price: e.target.value })
+              }
               required
             />
           </div>
@@ -75,25 +87,39 @@ function CharmModal({ charm, categories, onSave, onClose }) {
             <input
               type="number"
               value={formData.stock}
-              onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, stock: e.target.value })
+              }
             />
           </div>
           <div className="form-group">
             <label>Danh Mục *</label>
             <select
               value={formData.category}
-              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, category: e.target.value })
+              }
               required
             >
               <option value="">-- Chọn danh mục --</option>
-              {categories.map(cat => (
-                <option key={cat._id} value={cat._id}>{cat.name}</option>
+              {categories.map((cat) => (
+                <option key={cat._id} value={cat._id}>
+                  {cat.name}
+                </option>
               ))}
             </select>
           </div>
           <div className="modal-actions">
-            <button type="button" className="btn btn-secondary" onClick={onClose}>Hủy</button>
-            <button type="submit" className="btn btn-primary">Lưu</button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={onClose}
+            >
+              Hủy
+            </button>
+            <button type="submit" className="btn btn-primary">
+              Lưu
+            </button>
           </div>
         </form>
       </div>
@@ -102,7 +128,7 @@ function CharmModal({ charm, categories, onSave, onClose }) {
 }
 
 function CategoryModal({ category, onSave, onClose }) {
-  const [name, setName] = useState(category?.name || '');
+  const [name, setName] = useState(category?.name || "");
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -111,10 +137,15 @@ function CategoryModal({ category, onSave, onClose }) {
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content modal-small" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="modal-content modal-small"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="modal-header">
-          <h3>{category ? 'Chỉnh Sửa Danh Mục' : 'Thêm Danh Mục Mới'}</h3>
-          <button className="modal-close" onClick={onClose}>×</button>
+          <h3>{category ? "Chỉnh Sửa Danh Mục" : "Thêm Danh Mục Mới"}</h3>
+          <button className="modal-close" onClick={onClose}>
+            ×
+          </button>
         </div>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
@@ -127,8 +158,16 @@ function CategoryModal({ category, onSave, onClose }) {
             />
           </div>
           <div className="modal-actions">
-            <button type="button" className="btn btn-secondary" onClick={onClose}>Hủy</button>
-            <button type="submit" className="btn btn-primary">Lưu</button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={onClose}
+            >
+              Hủy
+            </button>
+            <button type="submit" className="btn btn-primary">
+              Lưu
+            </button>
           </div>
         </form>
       </div>
@@ -137,18 +176,24 @@ function CategoryModal({ category, onSave, onClose }) {
 }
 
 export default function AdminDashboard() {
-  const [token, setToken] = useState(localStorage.getItem('adminJwt') || '');
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [token, setToken] = useState(localStorage.getItem("adminJwt") || "");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
-  const [activeTab, setActiveTab] = useState('orders');
+  const [activeTab, setActiveTab] = useState("orders");
 
   // Orders state
   const [orders, setOrders] = useState([]);
   const [totalOrders, setTotalOrders] = useState(0);
-  const [filters, setFilters] = useState({ status: '', startDate: '', endDate: '', limit: 10, page: 1 });
+  const [filters, setFilters] = useState({
+    status: "",
+    startDate: "",
+    endDate: "",
+    limit: 10,
+    page: 1,
+  });
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showOrderDetail, setShowOrderDetail] = useState(false);
   const [updatingOrderStatus, setUpdatingOrderStatus] = useState(false);
@@ -166,32 +211,49 @@ export default function AdminDashboard() {
   const [editingCategory, setEditingCategory] = useState(null);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
 
+  // Collections state
+  const [collections, setCollections] = useState([]);
+  const [totalCollections, setTotalCollections] = useState(0);
+  const [collectionFilters, setCollectionFilters] = useState({
+    search: "",
+    limit: 10,
+    page: 1,
+  });
+  const [editingCollection, setEditingCollection] = useState(null);
+  const [showCollectionModal, setShowCollectionModal] = useState(false);
+
+  const [discounts, setDiscounts] = useState([]);
+  const [showDiscountModal, setShowDiscountModal] = useState(false);
+  const [editingDiscount, setEditingDiscount] = useState(null);
+
   const handleScroll = useCallback(() => {
     setShowScrollTop(window.scrollY > 300);
   }, []);
 
   useEffect(() => {
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, [handleScroll]);
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   function logout() {
-    localStorage.removeItem('adminJwt');
-    localStorage.removeItem('adminRole');
-    setToken('');
+    localStorage.removeItem("adminJwt");
+    localStorage.removeItem("adminRole");
+    setToken("");
   }
 
   async function fetchStats() {
     setLoading(true);
     try {
-      const res = await api.get('/admin/stats', { headers: { Authorization: `Bearer ${token}` } });
+      const res = await api.get("/admin/stats", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setStats(res.data);
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to fetch stats');
+      alert(err.response?.data?.message || "Failed to fetch stats");
       logout();
     } finally {
       setLoading(false);
@@ -202,12 +264,15 @@ export default function AdminDashboard() {
     setLoading(true);
     try {
       const params = { ...filters, page };
-      const res = await api.get('/admin/orders', { headers: { Authorization: `Bearer ${token}` }, params });
+      const res = await api.get("/admin/orders", {
+        headers: { Authorization: `Bearer ${token}` },
+        params,
+      });
       setOrders(res.data.orders || []);
       setTotalOrders(res.data.total || 0);
-      setFilters(prev => ({ ...prev, page }));
+      setFilters((prev) => ({ ...prev, page }));
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to fetch orders');
+      alert(err.response?.data?.message || "Failed to fetch orders");
     } finally {
       setLoading(false);
     }
@@ -217,16 +282,16 @@ export default function AdminDashboard() {
     setLoading(true);
     try {
       const params = { ...nextFilters, page };
-      const res = await api.get('/admin/charms', { 
-        headers: { Authorization: `Bearer ${token}` }, 
-        params 
+      const res = await api.get("/admin/charms", {
+        headers: { Authorization: `Bearer ${token}` },
+        params,
       });
       setCharms(res.data.charms || []);
       setTotalCharms(res.data.total || 0);
-      setCharmFilters(prev => ({ ...prev, ...nextFilters, page }));
+      setCharmFilters((prev) => ({ ...prev, ...nextFilters, page }));
     } catch (err) {
-      console.error('Error fetching charms:', err);
-      alert(err.response?.data?.message || 'Failed to fetch charms');
+      console.error("Error fetching charms:", err);
+      alert(err.response?.data?.message || "Failed to fetch charms");
     } finally {
       setLoading(false);
     }
@@ -234,36 +299,46 @@ export default function AdminDashboard() {
 
   async function fetchCategories() {
     try {
-      const res = await api.get('/admin/categories', { 
-        headers: { Authorization: `Bearer ${token}` } 
+      const res = await api.get("/admin/categories", {
+        headers: { Authorization: `Bearer ${token}` },
       });
       setCategories(res.data.categories || []);
     } catch (err) {
-      console.error('Error fetching categories:', err);
-      alert(err.response?.data?.message || 'Failed to fetch categories');
+      console.error("Error fetching categories:", err);
+      alert(err.response?.data?.message || "Failed to fetch categories");
     }
   }
 
   const handleRefreshData = async () => {
     setLoading(true);
     try {
-      const statsRes = await api.get('/admin/stats', { headers: { Authorization: `Bearer ${token}` } });
+      const statsRes = await api.get("/admin/stats", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setStats(statsRes.data);
-      
-      if (activeTab === 'orders') {
-        const res = await api.get('/admin/orders', { headers: { Authorization: `Bearer ${token}` }, params: filters });
+
+      if (activeTab === "orders") {
+        const res = await api.get("/admin/orders", {
+          headers: { Authorization: `Bearer ${token}` },
+          params: filters,
+        });
         setOrders(res.data.orders || []);
         setTotalOrders(res.data.total || 0);
-      } else if (activeTab === 'charms') {
-        const res = await api.get('/admin/charms', { headers: { Authorization: `Bearer ${token}` }, params: charmFilters });
+      } else if (activeTab === "charms") {
+        const res = await api.get("/admin/charms", {
+          headers: { Authorization: `Bearer ${token}` },
+          params: charmFilters,
+        });
         setCharms(res.data.charms || []);
         setTotalCharms(res.data.total || 0);
-      } else if (activeTab === 'categories') {
-        const res = await api.get('/admin/categories', { headers: { Authorization: `Bearer ${token}` } });
+      } else if (activeTab === "categories") {
+        const res = await api.get("/admin/categories", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         setCategories(res.data.categories || []);
       }
     } catch (err) {
-      alert(err.response?.data?.message || 'Không thể làm mới dữ liệu');
+      alert(err.response?.data?.message || "Không thể làm mới dữ liệu");
     } finally {
       setLoading(false);
     }
@@ -278,26 +353,27 @@ export default function AdminDashboard() {
   }, [token]);
 
   useEffect(() => {
-    if (token && activeTab === 'orders') fetchOrders(1);
-    if (token && activeTab === 'charms') fetchCharms(1);
+    if (token && activeTab === "orders") fetchOrders(1);
+    if (token && activeTab === "charms") fetchCharms(1);
+    if (token && activeTab === "collections") fetchCollections();
   }, [activeTab, token]);
   /* eslint-enable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps */
 
   const handleLogin = async () => {
     if (!username || !password) {
-      alert('Please enter username and password');
+      alert("Please enter username and password");
       return;
     }
     try {
-      const res = await api.post('/admin/login', { username, password });
+      const res = await api.post("/admin/login", { username, password });
       const t = res.data.token;
-      localStorage.setItem('adminJwt', t);
-      localStorage.setItem('adminRole', res.data.role || 'admin');
+      localStorage.setItem("adminJwt", t);
+      localStorage.setItem("adminRole", res.data.role || "admin");
       setToken(t);
-      setUsername('');
-      setPassword('');
+      setUsername("");
+      setPassword("");
     } catch (err) {
-      alert(err.response?.data?.message || 'Login failed');
+      alert(err.response?.data?.message || "Login failed");
     }
   };
 
@@ -305,36 +381,36 @@ export default function AdminDashboard() {
     try {
       if (editingCharm) {
         await api.put(`/admin/charms/${editingCharm._id}`, formData, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         });
-        alert('Charm đã được cập nhật');
+        alert("Charm đã được cập nhật");
       } else {
-        await api.post('/admin/charms', formData, {
-          headers: { Authorization: `Bearer ${token}` }
+        await api.post("/admin/charms", formData, {
+          headers: { Authorization: `Bearer ${token}` },
         });
-        alert('Charm đã được thêm');
+        alert("Charm đã được thêm");
       }
       setShowCharmModal(false);
       setEditingCharm(null);
       fetchCharms(charmFilters.page);
       fetchStats();
     } catch (err) {
-      console.error('Error saving charm:', err);
-      alert(err.response?.data?.message || 'Failed to save charm');
+      console.error("Error saving charm:", err);
+      alert(err.response?.data?.message || "Failed to save charm");
     }
   };
 
   const handleDeleteCharm = async (id) => {
-    if (!window.confirm('Bạn có chắc muốn xóa charm này?')) return;
+    if (!window.confirm("Bạn có chắc muốn xóa charm này?")) return;
     try {
       await api.delete(`/admin/charms/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
-      alert('Charm đã được xóa');
+      alert("Charm đã được xóa");
       fetchCharms(charmFilters.page);
       fetchStats();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to delete charm');
+      alert(err.response?.data?.message || "Failed to delete charm");
     }
   };
 
@@ -345,7 +421,10 @@ export default function AdminDashboard() {
   };
 
   const handleCharmLimitChange = (e) => {
-    const nextFilters = { ...charmFilters, limit: Math.max(1, parseInt(e.target.value, 10) || 10) };
+    const nextFilters = {
+      ...charmFilters,
+      limit: Math.max(1, parseInt(e.target.value, 10) || 10),
+    };
     setCharmFilters(nextFilters);
     fetchCharms(1, nextFilters);
   };
@@ -359,64 +438,64 @@ export default function AdminDashboard() {
     try {
       if (editingCategory) {
         await api.put(`/admin/categories/${editingCategory._id}`, formData, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         });
-        alert('Danh mục đã được cập nhật');
+        alert("Danh mục đã được cập nhật");
       } else {
-        await api.post('/admin/categories', formData, {
-          headers: { Authorization: `Bearer ${token}` }
+        await api.post("/admin/categories", formData, {
+          headers: { Authorization: `Bearer ${token}` },
         });
-        alert('Danh mục đã được thêm');
+        alert("Danh mục đã được thêm");
       }
       setShowCategoryModal(false);
       setEditingCategory(null);
       fetchCategories();
       fetchStats();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to save category');
+      alert(err.response?.data?.message || "Failed to save category");
     }
   };
 
   const handleDeleteCategory = async (id) => {
-    if (!window.confirm('Bạn có chắc muốn xóa danh mục này?')) return;
+    if (!window.confirm("Bạn có chắc muốn xóa danh mục này?")) return;
     try {
       await api.delete(`/admin/categories/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
-      alert('Danh mục đã được xóa');
+      alert("Danh mục đã được xóa");
       fetchCategories();
       fetchStats();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to delete category');
+      alert(err.response?.data?.message || "Failed to delete category");
     }
   };
 
   const handleExportExcel = async () => {
     if (orders.length === 0) {
-      alert('Không có dữ liệu để export');
+      alert("Không có dữ liệu để export");
       return;
     }
 
     try {
-      const XLSX = await import('xlsx');
+      const XLSX = await import("xlsx");
 
       const excelData = orders.map((order, idx) => ({
-        'STT': (filters.page - 1) * filters.limit + idx + 1,
-        'Mã đơn hàng': order._id,
-        'Khách hàng': order.customerInfo?.name || 'N/A',
-        'Số điện thoại': order.customerInfo?.phone || 'N/A',
-        'Email': order.customerInfo?.email || 'N/A',
-        'Địa chỉ': order.customerInfo?.address || 'N/A',
-        'Tổng tiền (VND)': formatVND(order.totalPrice),
-        'Trạng thái': order.status,
-        'Ngày đặt': new Date(order.createdAt).toLocaleString('vi-VN')
+        STT: (filters.page - 1) * filters.limit + idx + 1,
+        "Mã đơn hàng": order._id,
+        "Khách hàng": order.customerInfo?.name || "N/A",
+        "Số điện thoại": order.customerInfo?.phone || "N/A",
+        Email: order.customerInfo?.email || "N/A",
+        "Địa chỉ": order.customerInfo?.address || "N/A",
+        "Tổng tiền (VND)": formatVND(order.totalPrice),
+        "Trạng thái": order.status,
+        "Ngày đặt": new Date(order.createdAt).toLocaleString("vi-VN"),
       }));
 
       const wb = XLSX.utils.book_new();
       const ws = XLSX.utils.json_to_sheet(excelData);
 
-      ws['!cols'] = [
-        { wch: 5 },  // STT
+      ws["!cols"] = [
+        { wch: 5 }, // STT
         { wch: 25 }, // Mã đơn hàng
         { wch: 20 }, // Khách hàng
         { wch: 15 }, // SĐT
@@ -424,18 +503,18 @@ export default function AdminDashboard() {
         { wch: 30 }, // Địa chỉ
         { wch: 12 }, // Tổng tiền
         { wch: 12 }, // Trạng thái
-        { wch: 20 }  // Ngày đặt
+        { wch: 20 }, // Ngày đặt
       ];
 
-      XLSX.utils.book_append_sheet(wb, ws, 'Đơn hàng');
+      XLSX.utils.book_append_sheet(wb, ws, "Đơn hàng");
 
-      const filename = `DonHang_${new Date().toISOString().split('T')[0]}.xlsx`;
+      const filename = `DonHang_${new Date().toISOString().split("T")[0]}.xlsx`;
 
       XLSX.writeFile(wb, filename);
       alert(`Đã export ${orders.length} đơn hàng ra file ${filename}`);
     } catch (error) {
-      console.error('Error exporting Excel:', error);
-      alert('Lỗi khi export Excel. Vui lòng cài đặt: npm install xlsx');
+      console.error("Error exporting Excel:", error);
+      alert("Lỗi khi export Excel. Vui lòng cài đặt: npm install xlsx");
     }
   };
 
@@ -449,33 +528,163 @@ export default function AdminDashboard() {
 
     setUpdatingOrderStatus(true);
     try {
-      const res = await api.put(`/admin/orders/${orderId}/status`, { status }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await api.put(
+        `/admin/orders/${orderId}/status`,
+        { status },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
 
       const updatedOrder = res.data.order;
       setSelectedOrder(updatedOrder);
-      setOrders((prev) => prev.map((order) => (order._id === orderId ? updatedOrder : order)));
-      alert('Đã cập nhật trạng thái đơn hàng');
+      setOrders((prev) =>
+        prev.map((order) => (order._id === orderId ? updatedOrder : order)),
+      );
+      alert("Đã cập nhật trạng thái đơn hàng");
     } catch (err) {
-      alert(err.response?.data?.message || 'Không thể cập nhật trạng thái đơn hàng');
+      alert(
+        err.response?.data?.message || "Không thể cập nhật trạng thái đơn hàng",
+      );
     } finally {
       setUpdatingOrderStatus(false);
     }
   };
 
-  const formatDate = (dateString) => new Date(dateString).toLocaleDateString('vi-VN', { 
-    year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' 
-  });
+  // --- DISCOUNT MANAGEMENT HANDLERS ---
 
-  const charmTotalPages = Math.max(1, Math.ceil(totalCharms / charmFilters.limit));
-  const categoryTotalPages = Math.max(1, Math.ceil(categories.length / categoryFilters.limit));
-  const categoryCurrentPage = Math.min(categoryFilters.page, categoryTotalPages);
-  const charmRangeStart = totalCharms ? (charmFilters.page - 1) * charmFilters.limit + 1 : 0;
-  const categoryRangeStart = categories.length ? (categoryCurrentPage - 1) * categoryFilters.limit + 1 : 0;
+  // Handle Saving (Both Create and Update)
+  const handleSaveDiscount = async (discountData) => {
+    try {
+      if (editingDiscount) {
+        // UPDATE EXISTING DISCOUNT
+        // TODO: Replace with your actual API call (e.g., axios.put(`/api/discounts/${editingDiscount._id}`, discountData))
+
+        // Local state update (so you see it instantly)
+        setDiscounts(
+          discounts.map((d) =>
+            d._id === editingDiscount._id ? { ...d, ...discountData } : d,
+          ),
+        );
+      } else {
+        // CREATE NEW DISCOUNT
+        // TODO: Replace with your actual API call (e.g., axios.post('/api/discounts', discountData))
+
+        // Mocking a new ID for local state so the table doesn't crash
+        const newDiscount = { ...discountData, _id: Date.now().toString() };
+        setDiscounts([...discounts, newDiscount]);
+      }
+
+      // Close modal and clear editing state
+      setShowDiscountModal(false);
+      setEditingDiscount(null);
+    } catch (error) {
+      console.error("Lỗi khi lưu khuyến mãi (Error saving discount):", error);
+      alert("Có lỗi xảy ra khi lưu sự kiện!");
+    }
+  };
+
+  // Handle Deleting
+  const handleDeleteDiscount = async (id) => {
+    // Always good to double-check before deleting!
+    if (window.confirm("Bạn có chắc chắn muốn xóa sự kiện này?")) {
+      try {
+        // TODO: Replace with your actual API call (e.g., axios.delete(`/api/discounts/${id}`))
+
+        // Remove from local state
+        setDiscounts(discounts.filter((d) => d._id !== id));
+      } catch (error) {
+        console.error(
+          "Lỗi khi xóa khuyến mãi (Error deleting discount):",
+          error,
+        );
+      }
+    }
+  };
+
+  // --- COLLECTION FUNCTIONS ---
+
+  // 1. Fetch Collections from Backend
+  const fetchCollections = async () => {
+    try {
+      // Assuming your api prefix handles the /api part
+      const response = await api.get("/collections");
+      setCollections(response.data.collections || []);
+      setTotalCollections(response.data.total || 0);
+    } catch (error) {
+      console.error("Lỗi khi tải bộ sưu tập:", error);
+    }
+  };
+
+  // 2. Create or Update Collection
+  const handleSaveCollection = async (collectionData) => {
+    try {
+      if (editingCollection && editingCollection._id) {
+        // UPDATE (PUT request)
+        await api.put(`/collections/${editingCollection._id}`, collectionData);
+        alert("Cập nhật thành công!");
+      } else {
+        // CREATE (POST request)
+        await api.post("/collections", collectionData);
+        alert("Thêm mới thành công!");
+      }
+      setShowCollectionModal(false);
+      setEditingCollection(null);
+      fetchCollections(); // Refresh the table
+    } catch (error) {
+      console.error("Lỗi khi lưu:", error);
+      alert("Có lỗi xảy ra khi lưu dữ liệu!");
+    }
+  };
+
+  // 3. Delete Collection
+  const handleDeleteCollection = async (id) => {
+    if (
+      window.confirm(
+        "Bạn có chắc chắn muốn xóa bộ sưu tập này không? Hành động này không thể hoàn tác.",
+      )
+    ) {
+      try {
+        await api.delete(`/collections/${id}`);
+        alert("Đã xóa thành công!");
+        fetchCollections(); // Refresh the table
+      } catch (error) {
+        console.error("Lỗi khi xóa:", error);
+        alert("Có lỗi xảy ra khi xóa!");
+      }
+    }
+  };
+
+  const formatDate = (dateString) =>
+    new Date(dateString).toLocaleDateString("vi-VN", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+  const charmTotalPages = Math.max(
+    1,
+    Math.ceil(totalCharms / charmFilters.limit),
+  );
+  const categoryTotalPages = Math.max(
+    1,
+    Math.ceil(categories.length / categoryFilters.limit),
+  );
+  const categoryCurrentPage = Math.min(
+    categoryFilters.page,
+    categoryTotalPages,
+  );
+  const charmRangeStart = totalCharms
+    ? (charmFilters.page - 1) * charmFilters.limit + 1
+    : 0;
+  const categoryRangeStart = categories.length
+    ? (categoryCurrentPage - 1) * categoryFilters.limit + 1
+    : 0;
   const categoryPageItems = categories.slice(
     (categoryCurrentPage - 1) * categoryFilters.limit,
-    categoryCurrentPage * categoryFilters.limit
+    categoryCurrentPage * categoryFilters.limit,
   );
 
   if (!token) {
@@ -492,12 +701,12 @@ export default function AdminDashboard() {
             </div>
             <div className="form-group">
               <label>Username</label>
-              <input 
+              <input
                 type="text"
                 placeholder="Nhập tài khoản"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+                onKeyDown={(e) => e.key === "Enter" && handleLogin()}
               />
             </div>
             <div className="form-group">
@@ -507,10 +716,12 @@ export default function AdminDashboard() {
                 placeholder="Nhập mật khẩu"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+                onKeyDown={(e) => e.key === "Enter" && handleLogin()}
               />
             </div>
-            <button className="btn btn-primary btn-login" onClick={handleLogin}>Đăng Nhập</button>
+            <button className="btn btn-primary btn-login" onClick={handleLogin}>
+              Đăng Nhập
+            </button>
           </div>
         </div>
       </div>
@@ -529,7 +740,9 @@ export default function AdminDashboard() {
           </div>
           <div className="header-actions">
             <span className="admin-status">Đang hoạt động</span>
-            <button className="btn btn-danger" onClick={logout}>Đăng Xuất</button>
+            <button className="btn btn-danger" onClick={logout}>
+              Đăng Xuất
+            </button>
           </div>
         </div>
       </header>
@@ -540,7 +753,11 @@ export default function AdminDashboard() {
             <p className="admin-eyebrow">Tổng quan vận hành</p>
             <h2>Quản lý đơn hàng, charms và danh mục</h2>
           </div>
-          <button className="btn btn-primary" onClick={handleRefreshData} disabled={loading}>
+          <button
+            className="btn btn-primary"
+            onClick={fetchStats}
+            disabled={loading}
+          >
             Làm mới dữ liệu
           </button>
         </section>
@@ -548,58 +765,105 @@ export default function AdminDashboard() {
         <section className="stats-section">
           <div className="section-heading">
             <h2>Thống Kê Chung</h2>
-            <span>{loading ? 'Đang đồng bộ...' : 'Dữ liệu mới nhất'}</span>
+            <span>{loading ? "Đang đồng bộ..." : "Dữ liệu mới nhất"}</span>
           </div>
           <div className="stats-grid">
-            <StatCard title="Charms" value={stats?.charmsCount ?? '...'} icon="◇" tone="blue" />
-            <StatCard title="Danh Mục" value={stats?.categoriesCount ?? '...'} icon="▦" tone="amber" />
-            <StatCard title="Thiết Kế" value={stats?.designsCount ?? '...'} icon="✦" tone="pink" />
-            <StatCard title="Đơn Hàng" value={stats?.ordersCount ?? '...'} icon="▣" tone="green" />
-            <StatCard title="Doanh Thu" value={stats ? formatVND(stats.totalRevenue) : '...'} icon="VND" tone="dark" />
+            <StatCard
+              title="Charms"
+              value={stats?.charmsCount ?? "..."}
+              icon="◇"
+              tone="blue"
+            />
+            <StatCard
+              title="Danh Mục"
+              value={stats?.categoriesCount ?? "..."}
+              icon="▦"
+              tone="amber"
+            />
+            <StatCard
+              title="Thiết Kế"
+              value={stats?.designsCount ?? "..."}
+              icon="✦"
+              tone="pink"
+            />
+            <StatCard
+              title="Đơn Hàng"
+              value={stats?.ordersCount ?? "..."}
+              icon="▣"
+              tone="green"
+            />
+            <StatCard
+              title="Doanh Thu"
+              value={stats ? formatVND(stats.totalRevenue) : "..."}
+              icon="VND"
+              tone="dark"
+            />
           </div>
         </section>
 
         <section className="tabs-section">
           <div className="tabs-header">
-            <button 
-              className={`tab-btn ${activeTab === 'orders' ? 'active' : ''}`}
-              onClick={() => setActiveTab('orders')}
+            <button
+              className={`tab-btn ${activeTab === "orders" ? "active" : ""}`}
+              onClick={() => setActiveTab("orders")}
             >
               <span>Đơn Hàng</span>
               <strong>{totalOrders}</strong>
             </button>
-            <button 
-              className={`tab-btn ${activeTab === 'charms' ? 'active' : ''}`}
-              onClick={() => setActiveTab('charms')}
+            <button
+              className={`tab-btn ${activeTab === "charms" ? "active" : ""}`}
+              onClick={() => setActiveTab("charms")}
             >
               <span>Charms</span>
               <strong>{totalCharms || stats?.charmsCount || 0}</strong>
             </button>
-            <button 
-              className={`tab-btn ${activeTab === 'categories' ? 'active' : ''}`}
-              onClick={() => setActiveTab('categories')}
+            <button
+              className={`tab-btn ${activeTab === "categories" ? "active" : ""}`}
+              onClick={() => setActiveTab("categories")}
             >
               <span>Danh Mục</span>
               <strong>{categories.length}</strong>
             </button>
+            <button
+              className={`tab-btn ${activeTab === "collections" ? "active" : ""}`}
+              onClick={() => setActiveTab("collections")}
+            >
+              <span>Bộ Sưu Tập</span>
+              <strong>{totalCollections || stats?.designsCount || 0}</strong>
+            </button>
+            <button
+              className={`menu-item ${activeTab === "discounts" ? "active" : ""}`}
+              onClick={() => setActiveTab("discounts")}
+            >
+              🏷️ Khuyến Mãi
+            </button>
           </div>
 
           <div className="tab-content">
-            {activeTab === 'orders' && (
+            {activeTab === "orders" && (
               <div className="orders-tab">
                 <div className="content-title">
                   <div>
                     <h3>Danh sách đơn hàng</h3>
                     <p>Lọc và theo dõi đơn hàng theo trạng thái, thời gian.</p>
                   </div>
-                  <button className="btn btn-success btn-export" onClick={handleExportExcel} disabled={loading || orders.length === 0}>
+                  <button
+                    className="btn btn-success btn-export"
+                    onClick={handleExportExcel}
+                    disabled={loading || orders.length === 0}
+                  >
                     Export to Excel
                   </button>
                 </div>
                 <div className="filters-container">
                   <div className="filter-group">
                     <label>Trạng Thái</label>
-                    <select value={filters.status} onChange={(e) => setFilters({ ...filters, status: e.target.value })}>
+                    <select
+                      value={filters.status}
+                      onChange={(e) =>
+                        setFilters({ ...filters, status: e.target.value })
+                      }
+                    >
                       <option value="">Tất Cả</option>
                       <option value="Pending">Pending</option>
                       <option value="Processing">Processing</option>
@@ -613,7 +877,9 @@ export default function AdminDashboard() {
                     <input
                       type="date"
                       value={filters.startDate}
-                      onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
+                      onChange={(e) =>
+                        setFilters({ ...filters, startDate: e.target.value })
+                      }
                     />
                   </div>
                   <div className="filter-group">
@@ -621,7 +887,9 @@ export default function AdminDashboard() {
                     <input
                       type="date"
                       value={filters.endDate}
-                      onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
+                      onChange={(e) =>
+                        setFilters({ ...filters, endDate: e.target.value })
+                      }
                     />
                   </div>
                   <div className="filter-group">
@@ -629,12 +897,22 @@ export default function AdminDashboard() {
                     <input
                       type="number"
                       value={filters.limit}
-                      onChange={(e) => setFilters({ ...filters, limit: Math.max(1, parseInt(e.target.value, 10)) })}
+                      onChange={(e) =>
+                        setFilters({
+                          ...filters,
+                          limit: Math.max(1, parseInt(e.target.value, 10)),
+                        })
+                      }
                       min="1"
                       max="100"
                     />
                   </div>
-                  <button className="btn btn-primary btn-apply" onClick={() => fetchOrders(1)}>Áp Dụng</button>
+                  <button
+                    className="btn btn-primary btn-apply"
+                    onClick={() => fetchOrders(1)}
+                  >
+                    Áp Dụng
+                  </button>
                 </div>
 
                 {loading ? (
@@ -657,21 +935,39 @@ export default function AdminDashboard() {
                         <tbody>
                           {orders.length > 0 ? (
                             orders.map((order, idx) => {
-                              const orderStatus = order.status || 'Pending';
-                              const normalizedStatus = orderStatus.toLowerCase();
+                              const orderStatus = order.status || "Pending";
+                              const normalizedStatus =
+                                orderStatus.toLowerCase();
 
                               return (
-                                <tr key={order._id} className={`status-${normalizedStatus}`}>
-                                  <td className="text-center">{(filters.page - 1) * filters.limit + idx + 1}</td>
-                                  <td>{order.customerInfo?.name || 'N/A'}</td>
-                                  <td>{order.customerInfo?.phone || 'N/A'}</td>
-                                  <td className="text-right">{formatVND(order.totalPrice)}</td>
-                                  <td><span className={`badge badge-${normalizedStatus}`}>{orderStatus}</span></td>
+                                <tr
+                                  key={order._id}
+                                  className={`status-${normalizedStatus}`}
+                                >
+                                  <td className="text-center">
+                                    {(filters.page - 1) * filters.limit +
+                                      idx +
+                                      1}
+                                  </td>
+                                  <td>{order.customerInfo?.name || "N/A"}</td>
+                                  <td>{order.customerInfo?.phone || "N/A"}</td>
+                                  <td className="text-right">
+                                    {formatVND(order.totalPrice)}
+                                  </td>
+                                  <td>
+                                    <span
+                                      className={`badge badge-${normalizedStatus}`}
+                                    >
+                                      {orderStatus}
+                                    </span>
+                                  </td>
                                   <td>{formatDate(order.createdAt)}</td>
                                   <td className="actions-cell">
                                     <button
                                       className="btn-icon btn-view"
-                                      onClick={() => handleViewOrderDetail(order)}
+                                      onClick={() =>
+                                        handleViewOrderDetail(order)
+                                      }
                                       title="Xem chi tiết"
                                     >
                                       👁
@@ -681,7 +977,11 @@ export default function AdminDashboard() {
                               );
                             })
                           ) : (
-                            <tr><td colSpan="7" className="text-center">Không có đơn hàng nào</td></tr>
+                            <tr>
+                              <td colSpan="7" className="text-center">
+                                Không có đơn hàng nào
+                              </td>
+                            </tr>
                           )}
                         </tbody>
                       </table>
@@ -694,7 +994,9 @@ export default function AdminDashboard() {
                       >
                         ← Trước
                       </button>
-                      <span className="page-info">Trang {filters.page} / {orderTotalPages}</span>
+                      <span className="page-info">
+                        Trang {filters.page} / {orderTotalPages}
+                      </span>
                       <button
                         className="btn btn-small"
                         disabled={filters.page >= orderTotalPages}
@@ -708,7 +1010,7 @@ export default function AdminDashboard() {
               </div>
             )}
 
-            {activeTab === 'charms' && (
+            {activeTab === "charms" && (
               <div className="charms-tab">
                 <div className="tab-actions">
                   <div>
@@ -726,7 +1028,10 @@ export default function AdminDashboard() {
                     </div>
                     <div className="filter-group compact">
                       <label>Số Hàng/Trang</label>
-                      <select value={charmFilters.limit} onChange={handleCharmLimitChange}>
+                      <select
+                        value={charmFilters.limit}
+                        onChange={handleCharmLimitChange}
+                      >
                         <option value={5}>5</option>
                         <option value={10}>10</option>
                         <option value={20}>20</option>
@@ -734,7 +1039,7 @@ export default function AdminDashboard() {
                       </select>
                     </div>
                   </div>
-                  <button 
+                  <button
                     className="btn btn-success"
                     onClick={() => {
                       setEditingCharm(null);
@@ -766,16 +1071,27 @@ export default function AdminDashboard() {
                           {charms.length > 0 ? (
                             charms.map((charm, idx) => (
                               <tr key={charm._id}>
-                                <td className="text-center">{(charmFilters.page - 1) * charmFilters.limit + idx + 1}</td>
+                                <td className="text-center">
+                                  {(charmFilters.page - 1) *
+                                    charmFilters.limit +
+                                    idx +
+                                    1}
+                                </td>
                                 <td>
-                                  <img src={charm.image} alt={charm.name} className="charm-thumb" />
+                                  <img
+                                    src={charm.image}
+                                    alt={charm.name}
+                                    className="charm-thumb"
+                                  />
                                 </td>
                                 <td>{charm.name}</td>
-                                <td>{charm.category?.name || 'N/A'}</td>
-                                <td className="text-right">{formatVND(charm.price)}</td>
+                                <td>{charm.category?.name || "N/A"}</td>
+                                <td className="text-right">
+                                  {formatVND(charm.price)}
+                                </td>
                                 <td className="text-center">{charm.stock}</td>
                                 <td className="actions-cell">
-                                  <button 
+                                  <button
                                     className="btn-icon btn-edit"
                                     onClick={() => {
                                       setEditingCharm(charm);
@@ -785,9 +1101,9 @@ export default function AdminDashboard() {
                                   >
                                     ✏️
                                   </button>
-                                  <button 
+                                  <button
                                     className="btn-icon btn-delete"
-                                    onClick={() => handleDeleteCharm(charm._id)}
+                                    onClick={() => handleDeleteCharm(col._id)}
                                     title="Xóa"
                                   >
                                     🗑️
@@ -796,7 +1112,11 @@ export default function AdminDashboard() {
                               </tr>
                             ))
                           ) : (
-                            <tr><td colSpan="7" className="text-center">Không có charm nào</td></tr>
+                            <tr>
+                              <td colSpan="7" className="text-center">
+                                Không có charm nào
+                              </td>
+                            </tr>
                           )}
                         </tbody>
                       </table>
@@ -804,7 +1124,11 @@ export default function AdminDashboard() {
                     <div className="table-footer">
                       <span>
                         Hiển thị {charmRangeStart}-
-                        {Math.min(charmFilters.page * charmFilters.limit, totalCharms)} / {totalCharms} charm
+                        {Math.min(
+                          charmFilters.page * charmFilters.limit,
+                          totalCharms,
+                        )}{" "}
+                        / {totalCharms} charm
                       </span>
                       <span>{charmFilters.limit} hàng/trang</span>
                     </div>
@@ -816,7 +1140,9 @@ export default function AdminDashboard() {
                       >
                         ← Trước
                       </button>
-                      <span className="page-info">Trang {charmFilters.page} / {charmTotalPages}</span>
+                      <span className="page-info">
+                        Trang {charmFilters.page} / {charmTotalPages}
+                      </span>
                       <button
                         className="btn btn-small"
                         disabled={charmFilters.page >= charmTotalPages}
@@ -830,7 +1156,7 @@ export default function AdminDashboard() {
               </div>
             )}
 
-            {activeTab === 'categories' && (
+            {activeTab === "categories" && (
               <div className="categories-tab">
                 <div className="tab-actions">
                   <div>
@@ -840,14 +1166,17 @@ export default function AdminDashboard() {
                   <div className="toolbar-inline">
                     <div className="filter-group compact">
                       <label>Số Hàng/Trang</label>
-                      <select value={categoryFilters.limit} onChange={handleCategoryLimitChange}>
+                      <select
+                        value={categoryFilters.limit}
+                        onChange={handleCategoryLimitChange}
+                      >
                         <option value={4}>4</option>
                         <option value={8}>8</option>
                         <option value={12}>12</option>
                         <option value={24}>24</option>
                       </select>
                     </div>
-                    <button 
+                    <button
                       className="btn btn-success"
                       onClick={() => {
                         setEditingCategory(null);
@@ -860,14 +1189,14 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="categories-grid">
-                  {categoryPageItems.map(cat => (
+                  {categoryPageItems.map((cat) => (
                     <div key={cat._id} className="category-card">
                       <div className="category-info">
                         <h4>{cat.name}</h4>
                         <p className="category-id">ID: {cat._id}</p>
                       </div>
                       <div className="category-actions">
-                        <button 
+                        <button
                           className="btn-icon btn-edit"
                           onClick={() => {
                             setEditingCategory(cat);
@@ -877,7 +1206,7 @@ export default function AdminDashboard() {
                         >
                           ✏️
                         </button>
-                        <button 
+                        <button
                           className="btn-icon btn-delete"
                           onClick={() => handleDeleteCategory(cat._id)}
                           title="Xóa"
@@ -891,7 +1220,11 @@ export default function AdminDashboard() {
                 <div className="table-footer">
                   <span>
                     Hiển thị {categoryRangeStart}-
-                    {Math.min(categoryCurrentPage * categoryFilters.limit, categories.length)} / {categories.length} danh mục
+                    {Math.min(
+                      categoryCurrentPage * categoryFilters.limit,
+                      categories.length,
+                    )}{" "}
+                    / {categories.length} danh mục
                   </span>
                   <span>{categoryFilters.limit} hàng/trang</span>
                 </div>
@@ -899,19 +1232,247 @@ export default function AdminDashboard() {
                   <button
                     className="btn btn-small"
                     disabled={categoryCurrentPage === 1}
-                    onClick={() => setCategoryFilters((prev) => ({ ...prev, page: Math.max(1, prev.page - 1) }))}
+                    onClick={() =>
+                      setCategoryFilters((prev) => ({
+                        ...prev,
+                        page: Math.max(1, prev.page - 1),
+                      }))
+                    }
                   >
                     ← Trước
                   </button>
-                  <span className="page-info">Trang {categoryCurrentPage} / {categoryTotalPages || 1}</span>
+                  <span className="page-info">
+                    Trang {categoryCurrentPage} / {categoryTotalPages || 1}
+                  </span>
                   <button
                     className="btn btn-small"
                     disabled={categoryCurrentPage >= categoryTotalPages}
-                    onClick={() => setCategoryFilters((prev) => ({ ...prev, page: Math.min(categoryTotalPages, prev.page + 1) }))}
+                    onClick={() =>
+                      setCategoryFilters((prev) => ({
+                        ...prev,
+                        page: Math.min(categoryTotalPages, prev.page + 1),
+                      }))
+                    }
                   >
                     Tiếp →
                   </button>
                 </div>
+              </div>
+            )}
+            {activeTab === "collections" && (
+              <div className="collections-tab">
+                <div className="tab-actions">
+                  <div>
+                    <h3>Quản lý Bộ Sưu Tập</h3>
+                    <p>
+                      Các mẫu vòng tay thiết kế sẵn dành cho khách hàng mua
+                      nhanh.
+                    </p>
+                  </div>
+                  <div className="toolbar-inline">
+                    <div className="search-box">
+                      <input
+                        type="text"
+                        placeholder="Tìm kiếm mẫu vòng..."
+                        value={collectionFilters.search}
+                        onChange={(e) =>
+                          setCollectionFilters({
+                            ...collectionFilters,
+                            search: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
+                  </div>
+                  <button
+                    className="btn btn-success"
+                    onClick={() => {
+                      setEditingCollection(null);
+                      setShowCollectionModal(true);
+                    }}
+                  >
+                    + Thêm Mẫu Mới
+                  </button>
+                </div>
+
+                {loading ? (
+                  <div className="loading">Đang tải...</div>
+                ) : (
+                  <>
+                    <div className="table-container">
+                      <table className="data-table">
+                        <thead>
+                          <tr>
+                            <th>#</th>
+                            <th>Hình</th>
+                            <th>Tên Mẫu Vòng</th>
+                            <th>Mô tả</th>
+                            <th>Giá</th>
+                            <th>Thao Tác</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {collections.length > 0 ? (
+                            collections.map((col, idx) => (
+                              <tr key={col._id || idx}>
+                                <td className="text-center">
+                                  {(collectionFilters.page - 1) *
+                                    collectionFilters.limit +
+                                    idx +
+                                    1}
+                                </td>
+                                <td>
+                                  <img
+                                    src={col.image}
+                                    alt={col.name}
+                                    className="charm-thumb"
+                                  />
+                                </td>
+                                <td>
+                                  <strong>{col.name}</strong>
+                                </td>
+                                <td
+                                  style={{
+                                    maxWidth: "250px",
+                                    whiteSpace: "nowrap",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                  }}
+                                >
+                                  {col.description || "N/A"}
+                                </td>
+                                <td className="text-right font-bold text-[#DE5E14]">
+                                  {formatVND(col.price)}
+                                </td>
+                                <td className="actions-cell">
+                                  <button
+                                    className="btn-icon btn-edit"
+                                    onClick={() => {
+                                      setEditingCollection(col);
+                                      setShowCollectionModal(true);
+                                    }}
+                                    title="Chỉnh sửa"
+                                  >
+                                    ✏️
+                                  </button>
+                                  <button
+                                    className="btn-icon btn-delete"
+                                    onClick={() =>
+                                      handleDeleteCollection(col._id)
+                                    }
+                                    title="Xóa"
+                                  >
+                                    🗑️
+                                  </button>
+                                </td>
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td colSpan="6" className="text-center">
+                                Chưa có bộ sưu tập nào. Hãy thêm mẫu mới!
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+            {activeTab === "discounts" && (
+              <div className="discounts-tab">
+                <div className="tab-actions">
+                  <div>
+                    <h3>Quản lý Khuyến Mãi</h3>
+                    <p>
+                      Cài đặt các sự kiện giảm giá toàn trang theo phần trăm.
+                    </p>
+                  </div>
+                  {/* Assuming you don't need a search bar for discounts right now, just the add button */}
+                  <button
+                    className="btn btn-success"
+                    onClick={() => {
+                      setEditingDiscount(null);
+                      setShowDiscountModal(true);
+                    }}
+                  >
+                    + Thêm Sự Kiện
+                  </button>
+                </div>
+
+                {loading ? (
+                  <div className="loading">Đang tải...</div>
+                ) : (
+                  <>
+                    <div className="table-container">
+                      <table className="data-table admin-table">
+                        <thead>
+                          <tr>
+                            <th>#</th>
+                            <th>Tên Sự Kiện</th>
+                            <th>Giảm giá (%)</th>
+                            <th>Bắt đầu</th>
+                            <th>Kết thúc</th>
+                            <th>Thao Tác</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {discounts && discounts.length > 0 ? (
+                            discounts.map((discount, idx) => (
+                              <tr key={discount._id || idx}>
+                                <td className="text-center">{idx + 1}</td>
+                                <td>
+                                  <strong>{discount.name}</strong>
+                                </td>
+                                <td>{discount.discountPercent}%</td>
+                                {/* Formatting dates nicely for display */}
+                                <td>
+                                  {new Date(
+                                    discount.startDate,
+                                  ).toLocaleDateString("vi-VN")}
+                                </td>
+                                <td>
+                                  {new Date(
+                                    discount.endDate,
+                                  ).toLocaleDateString("vi-VN")}
+                                </td>
+                                <td className="actions-cell">
+                                  <button
+                                    className="btn-icon btn-edit"
+                                    onClick={() => {
+                                      setEditingDiscount(discount);
+                                      setShowDiscountModal(true);
+                                    }}
+                                    title="Chỉnh sửa"
+                                  >
+                                    ✏️
+                                  </button>
+                                  <button
+                                    className="btn-icon btn-delete"
+                                    onClick={() =>
+                                      handleDeleteDiscount(discount._id)
+                                    }
+                                    title="Xóa"
+                                  >
+                                    🗑️
+                                  </button>
+                                </td>
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td colSpan="6" className="text-center">
+                                Chưa có sự kiện nào. Hãy thêm sự kiện mới!
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </div>
@@ -954,13 +1515,34 @@ export default function AdminDashboard() {
 
       {showOrderDetail && (
         <OrderDetailModal
-          key={`${selectedOrder?._id || 'order'}-${selectedOrder?.status || 'status'}`}
+          key={`${selectedOrder?._id || "order"}-${selectedOrder?.status || "status"}`}
           order={selectedOrder}
           onUpdateStatus={handleUpdateOrderStatus}
           updatingStatus={updatingOrderStatus}
           onClose={() => {
             setShowOrderDetail(false);
             setSelectedOrder(null);
+          }}
+        />
+      )}
+
+      {showCollectionModal && (
+        <CollectionModal
+          collection={editingCollection}
+          onSave={handleSaveCollection}
+          onClose={() => {
+            setShowCollectionModal(false);
+            setEditingCollection(null);
+          }}
+        />
+      )}
+      {showDiscountModal && (
+        <DiscountModal
+          discount={editingDiscount}
+          onSave={handleSaveDiscount}
+          onClose={() => {
+            setShowDiscountModal(false);
+            setEditingDiscount(null);
           }}
         />
       )}

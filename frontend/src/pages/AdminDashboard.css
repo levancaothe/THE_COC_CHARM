@@ -121,7 +121,10 @@
   font: inherit;
   font-size: 14px;
   outline: none;
-  transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
 }
 
 .form-group input:focus,
@@ -138,8 +141,7 @@
   width: 100vw;
   margin-left: calc(50% - 50vw);
   background:
-    linear-gradient(180deg, #eef3f8 0, var(--admin-bg) 260px),
-    var(--admin-bg);
+    linear-gradient(180deg, #eef3f8 0, var(--admin-bg) 260px), var(--admin-bg);
 }
 
 .admin-header {
@@ -359,7 +361,10 @@
   font-size: 14px;
   font-weight: 800;
   cursor: pointer;
-  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    border-color 0.18s ease;
 }
 
 .tab-btn strong {
@@ -564,7 +569,10 @@
   border-radius: 8px;
   background: #f5f8fb;
   cursor: pointer;
-  transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    transform 0.18s ease;
 }
 
 .btn-icon:hover {
@@ -676,7 +684,10 @@
   background: #fff;
   font-size: 15px;
   cursor: pointer;
-  transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    transform 0.18s ease;
 }
 
 .btn-icon:hover {
@@ -724,7 +735,8 @@
   overflow: hidden;
   margin: 7px 0 0;
   color: var(--admin-muted);
-  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-family:
+    ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
   font-size: 11px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -842,7 +854,11 @@
   letter-spacing: 0;
   text-transform: none;
   cursor: pointer;
-  transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
   white-space: nowrap;
 }
 

@@ -10,7 +10,7 @@
   align-items: center;
   display: grid;
   grid-template-columns: 128px 1fr 80px;
-  max-width: 1220px;
+  max-width: 1280px;
   min-height: 86px;
   margin: 0 auto;
   padding: 0 48px;
@@ -36,7 +36,8 @@
 .nav-links {
   align-items: center;
   display: flex;
-  gap: clamp(36px, 6vw, 92px);
+  /* Reduced the gap significantly so 8 items can fit comfortably */
+  gap: clamp(16px, 2.5vw, 40px);
   justify-content: center;
   list-style: none;
   margin: 0;
@@ -157,7 +158,9 @@
     transform: translateY(-150%);
     opacity: 0;
     pointer-events: none;
-    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    transition:
+      transform 0.3s ease-in-out,
+      opacity 0.3s ease-in-out;
     box-shadow: 0 10px 15px rgba(0, 0, 0, 0.05);
     align-items: center;
   }
