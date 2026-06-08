@@ -7,6 +7,8 @@ const DiscountModal = ({ discount, onSave, onClose }) => {
     discountPercent: "",
     startDate: "",
     endDate: "",
+    code: "",
+    maxUsers: "",
   });
 
   // If we are editing, fill the form with existing data
@@ -22,13 +24,20 @@ const DiscountModal = ({ discount, onSave, onClose }) => {
         endDate: discount.endDate
           ? new Date(discount.endDate).toISOString().split("T")[0]
           : "",
+        code: discount.code || "",
+        maxUsers: discount.maxUsers !== undefined && discount.maxUsers !== null ? discount.maxUsers : "",
       });
     }
   }, [discount]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(formData);
+    const dataToSave = {
+      ...formData,
+      code: formData.code.trim() || null,
+      maxUsers: formData.maxUsers ? parseInt(formData.maxUsers, 10) : 1,
+    };
+    onSave(dataToSave);
   };
 
   return (
@@ -92,6 +101,35 @@ const DiscountModal = ({ discount, onSave, onClose }) => {
               required
               min="1"
               max="100"
+            />
+          </div>
+
+          <div className="form-group" style={{ marginBottom: "15px" }}>
+            <label>Mã giảm giá (Code)</label>
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Tự chọn mã code (VD: CHAOMUNG2026) - Để trống nếu áp dụng tự động"
+              style={{ width: "100%", padding: "8px", marginTop: "5px" }}
+              value={formData.code}
+              onChange={(e) =>
+                setFormData({ ...formData, code: e.target.value })
+              }
+            />
+          </div>
+
+          <div className="form-group" style={{ marginBottom: "15px" }}>
+            <label>Số người tối đa được áp dụng</label>
+            <input
+              type="number"
+              className="form-control"
+              placeholder="Để trống nếu không giới hạn"
+              style={{ width: "100%", padding: "8px", marginTop: "5px" }}
+              value={formData.maxUsers}
+              onChange={(e) =>
+                setFormData({ ...formData, maxUsers: e.target.value })
+              }
+              min="1"
             />
           </div>
 

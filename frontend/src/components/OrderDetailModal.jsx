@@ -174,8 +174,24 @@ export default function OrderDetailModal({
                   {formatDate(order.createdAt)}
                 </span>
               </div>
+              {order.discountAmount > 0 && (
+                <>
+                  <div className="detail-item">
+                    <span className="detail-label">Tạm tính:</span>
+                    <span className="detail-value">
+                      {formatVND(order.totalPrice + order.discountAmount)}
+                    </span>
+                  </div>
+                  <div className="detail-item">
+                    <span className="detail-label">Khuyến mãi:</span>
+                    <span className="detail-value" style={{ color: "#e63946", fontWeight: "bold" }}>
+                      -{formatVND(order.discountAmount)} {order.discountCode ? `(${order.discountCode})` : ""}
+                    </span>
+                  </div>
+                </>
+              )}
               <div className="detail-item">
-                <span className="detail-label">Tổng tiền:</span>
+                <span className="detail-label">Tổng thanh toán:</span>
                 <span className="detail-value price">
                   {formatVND(order.totalPrice)}
                 </span>
@@ -217,12 +233,12 @@ export default function OrderDetailModal({
                 {order.items.map((item, idx) => (
                   <div
                     key={idx}
-                    className={`order-item-card ${item.productType === "BraceletDesign" ? "order-item-card--design" : ""}`}
+                    className={`order-item-card ${(item.productType === "BraceletDesign" || item.productType === "Collection") ? "order-item-card--design" : ""}`}
                   >
                     <div
-                      className={`order-item-media ${item.productType === "BraceletDesign" ? "order-item-media--design" : ""}`}
+                      className={`order-item-media ${(item.productType === "BraceletDesign" || item.productType === "Collection") ? "order-item-media--design" : ""}`}
                     >
-                      {item.productType === "BraceletDesign" &&
+                      {(item.productType === "BraceletDesign" || item.productType === "Collection") &&
                       (item.designCharmDetails?.length ||
                         item.charmDetails?.length ||
                         item.productDetail?.charms?.length) ? (
@@ -249,11 +265,13 @@ export default function OrderDetailModal({
                       <div className="order-item-head">
                         <h5>{formatItemTitle(item)}</h5>
                         <span
-                          className={`item-type-badge ${item.productType === "BraceletDesign" ? "item-type-badge--design" : "item-type-badge--charm"}`}
+                          className={`item-type-badge ${(item.productType === "BraceletDesign" || item.productType === "Collection") ? "item-type-badge--design" : "item-type-badge--charm"}`}
                         >
                           {item.productType === "BraceletDesign"
                             ? "Thiết kế"
-                            : "Charm"}
+                            : item.productType === "Collection"
+                              ? "Bộ sưu tập"
+                              : "Charm"}
                         </span>
                       </div>
                       <p>
@@ -271,7 +289,7 @@ export default function OrderDetailModal({
                           </span>
                         </div>
                       )}
-                      {item.productType === "BraceletDesign" && (
+                      {(item.productType === "BraceletDesign" || item.productType === "Collection") && (
                         <p className="order-design-summary">
                           Vòng tay được ghép từ{" "}
                           {item.designCharmDetails &&
