@@ -2,23 +2,17 @@ const express = require('express');
 const {
     getCharms,
     getCharm,
-    createCharm,
-    updateCharm,
-    deleteCharm,
     getPopularCharms
 } = require('../controllers/charmController');
 
 const router = express.Router();
 
 router.route('/')
-    .get(getCharms)
-    .post(createCharm);
+    .get(getCharms);
 
 router.get('/popular', getPopularCharms);
 
 router.route('/:id')
-    .get(getCharm)
-    .put(updateCharm)
-    .delete(deleteCharm);
+    .get(getCharm);
 
 module.exports = router;

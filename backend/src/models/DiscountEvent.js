@@ -20,6 +20,19 @@ const discountEventSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
+    code: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+    maxUsers: {
+      type: Number,
+      default: 1,
+    },
+    usedUsers: {
+      type: Number,
+      default: 0,
+    },
     isActive: {
       type: Boolean,
       default: true,

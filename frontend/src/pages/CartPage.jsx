@@ -45,6 +45,77 @@ const CartPage = () => {
   );
   const hasSelectedItems = selectedItems.length > 0;
 
+  const subtotal = useMemo(
+    () => selectedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+    [selectedItems],
+  );
+
+  // Discount states
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedDiscount, setAppliedDiscount] = useState(null);
+  const [discountAmount, setDiscountAmount] = useState(0);
+  const [discountError, setDiscountError] = useState("");
+  const [isApplying, setIsApplying] = useState(false);
+
+  const validateDiscount = async (codeToValidate) => {
+    if (!hasSelectedItems) {
+      setAppliedDiscount(null);
+      setDiscountAmount(0);
+      setDiscountError("");
+      return;
+    }
+    setIsApplying(true);
+    setDiscountError("");
+    try {
+      const response = await api.post("/discounts/validate", {
+        code: codeToValidate,
+        subtotal: subtotal
+      });
+      if (response.data.valid) {
+        setAppliedDiscount(response.data.discount);
+        setDiscountAmount(response.data.discountAmount);
+      } else {
+        if (codeToValidate) {
+          setDiscountError(response.data.message || "Mã giảm giá không hợp lệ");
+          setAppliedDiscount(null);
+          setDiscountAmount(0);
+        } else {
+          setAppliedDiscount(null);
+          setDiscountAmount(0);
+        }
+      }
+    } catch (err) {
+      console.error("Lỗi xác thực mã giảm giá:", err);
+      setDiscountError(err.response?.data?.message || "Mã giảm giá không hợp lệ hoặc đã hết lượt sử dụng");
+      setAppliedDiscount(null);
+      setDiscountAmount(0);
+    } finally {
+      setIsApplying(false);
+    }
+  };
+
+  useEffect(() => {
+    if (appliedDiscount && appliedDiscount.code) {
+      validateDiscount(appliedDiscount.code);
+    } else {
+      validateDiscount("");
+    }
+  }, [subtotal, hasSelectedItems]);
+
+  const handleApplyCoupon = (e) => {
+    e.preventDefault();
+    if (!couponCode.trim()) {
+      alert("Vui lòng nhập mã giảm giá!");
+      return;
+    }
+    validateDiscount(couponCode.trim());
+  };
+
+  const handleRemoveCoupon = () => {
+    setCouponCode("");
+    validateDiscount("");
+  };
+
   const getCanIncreaseQuantity = (item) => {
     const maxQuantity = getItemMaxQuantity(item);
     return !Number.isFinite(maxQuantity) || item.quantity < maxQuantity;
@@ -188,7 +259,8 @@ const CartPage = () => {
           price: item.price,
         })),
         inventoryImpact: buildInventoryImpact(selectedItems),
-        totalPrice,
+        totalPrice: subtotal - discountAmount,
+        discountCode: appliedDiscount && appliedDiscount.code ? appliedDiscount.code : null,
         customerInfo: {
           name: customerInfo.name.trim(),
           phone: customerInfo.phone.trim(),
@@ -226,6 +298,10 @@ const CartPage = () => {
         city: "",
         note: "",
       });
+      setCouponCode("");
+      setAppliedDiscount(null);
+      setDiscountAmount(0);
+      setDiscountError("");
     } catch (error) {
       console.error("Lỗi khi đặt hàng:", error);
       alert(
@@ -267,20 +343,23 @@ const CartPage = () => {
                   </div>
 
                   <div className="item-image">
-                    {/* Render mini charms for designs, but use cover image for collections & charms */}
-                    {item.type === "design" && item.charms ? (
+                    {/* Render mini charms for designs & collections, but use cover image for charms */}
+                    {(item.type === "design" || item.type === "collection") && item.charms ? (
                       <div className="design-preview">
-                        {item.charms.map((charm, index) => (
-                          <img
-                            key={`${charm._id || charm.name}-${index}`}
-                            src={
-                              charm.image || "https://via.placeholder.com/50"
-                            }
-                            alt=""
-                            className="design-charm-mini"
-                            title={charm.name}
-                          />
-                        ))}
+                        {item.charms.map((c, index) => {
+                          const charmObj = c.charm || c;
+                          return (
+                            <img
+                              key={`${charmObj?._id || charmObj?.name || "charm"}-${index}`}
+                              src={
+                                charmObj?.image || "https://via.placeholder.com/50"
+                              }
+                              alt=""
+                              className="design-charm-mini"
+                              title={charmObj?.name}
+                            />
+                          );
+                        })}
                       </div>
                     ) : (
                       <img
@@ -527,6 +606,78 @@ const CartPage = () => {
 
                 <aside className="checkout-summary-card">
                   <h2>Đặt hàng</h2>
+
+                  {/* Mã giảm giá Input Field */}
+                  <div className="coupon-section" style={{ marginBottom: "20px", paddingBottom: "15px", borderBottom: "1px dashed rgba(10, 46, 79, 0.15)" }}>
+                    <label style={{ display: "block", fontSize: "0.9rem", color: "#0a2e4f", fontWeight: "600", marginBottom: "8px" }}>
+                      Mã giảm giá / Voucher
+                    </label>
+                    <div style={{ display: "flex", gap: "8px" }}>
+                      <input
+                        type="text"
+                        placeholder="Nhập mã giảm giá..."
+                        value={couponCode}
+                        onChange={(e) => setCouponCode(e.target.value)}
+                        disabled={isApplying}
+                        style={{
+                          flex: 1,
+                          padding: "8px 12px",
+                          border: "1px solid rgba(10, 46, 79, 0.2)",
+                          borderRadius: "4px",
+                          fontSize: "0.9rem",
+                          outline: "none"
+                        }}
+                      />
+                      {appliedDiscount && appliedDiscount.code ? (
+                        <button
+                          type="button"
+                          onClick={handleRemoveCoupon}
+                          style={{
+                            padding: "8px 12px",
+                            backgroundColor: "#e63946",
+                            color: "#fff",
+                            border: "none",
+                            borderRadius: "4px",
+                            cursor: "pointer",
+                            fontWeight: "600",
+                            fontSize: "0.9rem"
+                          }}
+                        >
+                          Hủy
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={handleApplyCoupon}
+                          disabled={isApplying || !couponCode.trim()}
+                          style={{
+                            padding: "8px 12px",
+                            backgroundColor: "#0a2e4f",
+                            color: "#fff",
+                            border: "none",
+                            borderRadius: "4px",
+                            cursor: "pointer",
+                            fontWeight: "600",
+                            fontSize: "0.9rem",
+                            opacity: (isApplying || !couponCode.trim()) ? 0.6 : 1
+                          }}
+                        >
+                          {isApplying ? "..." : "Áp dụng"}
+                        </button>
+                      )}
+                    </div>
+                    {discountError && (
+                      <p style={{ color: "#e63946", fontSize: "0.8rem", margin: "6px 0 0" }}>
+                        {discountError}
+                      </p>
+                    )}
+                    {appliedDiscount && (
+                      <p style={{ color: "#2a9d8f", fontSize: "0.85rem", margin: "6px 0 0", fontWeight: "600" }}>
+                        ✓ Đã áp dụng: {appliedDiscount.name} (-{appliedDiscount.discountPercent}%)
+                      </p>
+                    )}
+                  </div>
+
                   <div className="checkout-summary-lines">
                     {selectedItems.map((item) => (
                       <div
@@ -543,10 +694,17 @@ const CartPage = () => {
                       <span />
                       <strong>Miễn phí</strong>
                     </div>
+                    {discountAmount > 0 && (
+                      <div className="checkout-summary-line checkout-summary-line--discount" style={{ color: "#e63946" }}>
+                        <span>Giảm giá ({appliedDiscount?.discountPercent}%)</span>
+                        <span />
+                        <strong>-{formatVnd(discountAmount)}</strong>
+                      </div>
+                    )}
                   </div>
                   <div className="checkout-summary-total">
                     <span>Tổng cộng:</span>
-                    <strong>{formatVnd(totalPrice)}</strong>
+                    <strong>{formatVnd(subtotal - discountAmount)}</strong>
                   </div>
                   <p className="checkout-note">
                     Sản phẩm được chế tác thủ công, đóng gói trong hộp có kèm

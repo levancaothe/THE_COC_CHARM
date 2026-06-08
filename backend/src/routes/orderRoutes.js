@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Charm = require("../models/Charm");
 const Order = require("../models/Order");
+const DiscountEvent = require("../models/DiscountEvent");
 
 // 🟢 1. IMPORT AND INITIALIZE PAYOS
 const { PayOS } = require("@payos/node");
@@ -15,7 +16,11 @@ const normalizeOrderItems = (items = []) =>
   items.map((item) => ({
     product: String(item?.product ?? item?._id ?? ""),
     productType:
-      item?.productType === "BraceletDesign" ? "BraceletDesign" : "Charm",
+      item?.productType === "BraceletDesign"
+        ? "BraceletDesign"
+        : item?.productType === "Collection"
+          ? "Collection"
+          : "Charm",
     designCharms: Array.isArray(item?.designCharms)
       ? item.designCharms.map(String)
       : [],
@@ -40,7 +45,7 @@ const buildCharmRequirements = (items = []) => {
     }
 
     if (
-      item?.productType === "BraceletDesign" &&
+      (item?.productType === "BraceletDesign" || item?.productType === "Collection") &&
       Array.isArray(item?.designCharms)
     ) {
       item.designCharms.forEach((charmId) => {
@@ -74,6 +79,7 @@ const buildRequirementsFromInventoryImpact = (inventoryImpact = []) => {
 // --- CREATE ORDER ROUTE ---
 router.post("/", async (req, res) => {
   const items = normalizeOrderItems(req.body.items);
+  const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
   // 🟢 2. GENERATE UNIQUE ORDER CODE FOR PAYOS
   const orderCode = Number(String(Date.now()).slice(-6));
@@ -82,9 +88,61 @@ router.post("/", async (req, res) => {
     ...req.body,
     orderCode, // Add the required orderCode
     items,
-    totalPrice: Number(req.body.totalPrice) || 0,
     createdAt: req.body.createdAt || new Date(),
   };
+
+  // Securely resolve discount on backend
+  let appliedDiscount = null;
+  const now = new Date();
+  
+  if (req.body.discountCode && req.body.discountCode.trim() !== "") {
+    const codeDiscount = await DiscountEvent.findOne({
+      code: { $regex: new RegExp(`^${req.body.discountCode.trim()}$`, "i") },
+      isActive: true,
+      startDate: { $lte: now },
+      endDate: { $gte: now }
+    });
+
+    if (codeDiscount) {
+      if (codeDiscount.maxUsers !== undefined && codeDiscount.maxUsers !== null && codeDiscount.usedUsers >= codeDiscount.maxUsers) {
+        return res.status(400).json({ success: false, message: "Mã giảm giá đã hết lượt sử dụng" });
+      }
+      appliedDiscount = codeDiscount;
+    } else {
+      return res.status(400).json({ success: false, message: "Mã giảm giá không tồn tại hoặc đã hết hạn" });
+    }
+  } else {
+    // Check for auto-applied discount
+    const autoDiscount = await DiscountEvent.findOne({
+      $or: [{ code: { $exists: false } }, { code: null }, { code: "" }],
+      isActive: true,
+      startDate: { $lte: now },
+      endDate: { $gte: now }
+    }).sort({ discountPercent: -1 });
+
+    if (autoDiscount && (autoDiscount.maxUsers === undefined || autoDiscount.maxUsers === null || autoDiscount.usedUsers < autoDiscount.maxUsers)) {
+      appliedDiscount = autoDiscount;
+    }
+  }
+
+  if (appliedDiscount) {
+    const discountAmount = Math.round(subtotal * (appliedDiscount.discountPercent / 100));
+    payload.discountCode = appliedDiscount.code || appliedDiscount.name;
+    payload.discountAmount = discountAmount;
+    payload.totalPrice = Math.max(0, subtotal - discountAmount);
+  } else {
+    payload.discountCode = null;
+    payload.discountAmount = 0;
+    payload.totalPrice = subtotal;
+  }
+
+  // 🟢 If total price after discount is 0 or less, mark status as Paid directly
+  if (payload.totalPrice <= 0) {
+    if (!payload.paymentInfo) {
+      payload.paymentInfo = {};
+    }
+    payload.paymentInfo.status = "Paid";
+  }
 
   const charmRequirements = req.body.inventoryImpact?.length
     ? buildRequirementsFromInventoryImpact(req.body.inventoryImpact)
@@ -159,9 +217,17 @@ router.post("/", async (req, res) => {
     // CREATE THE ORDER IN MONGODB
     const order = await Order.create(payload);
 
-    // 🟢 3. GENERATE PAYOS PAYMENT LINK IF METHOD IS PAYOS
+    // Increment discount usage count
+    if (appliedDiscount) {
+      await DiscountEvent.findByIdAndUpdate(appliedDiscount._id, { $inc: { usedUsers: 1 } });
+    }
+
+    // 🟢 3. GENERATE PAYOS PAYMENT LINK IF METHOD IS PAYOS (Bypass if totalPrice is 0)
     let checkoutUrl = null;
-    if (order.paymentInfo && order.paymentInfo.method === "PayOS") {
+    if (order.totalPrice <= 0) {
+      order.paymentInfo.status = "Paid";
+      await order.save();
+    } else if (order.paymentInfo && order.paymentInfo.method === "PayOS") {
       try {
         const clientUrl =
           process.env.CLIENT_URL ||
@@ -296,7 +362,7 @@ router.delete("/cancel-payos-order", async (req, res) => {
             (charmsToRestore.get(item.product) || 0) + qty,
           );
         } else if (
-          item.productType === "BraceletDesign" &&
+          (item.productType === "BraceletDesign" || item.productType === "Collection") &&
           Array.isArray(item.designCharms)
         ) {
           item.designCharms.forEach((charmId) => {

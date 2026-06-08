@@ -143,19 +143,25 @@ const OrdersPage = () => {
                   <span>{order.status || 'Pending'}</span>
                 </div>
 
-                <div className="lookup-order-items">
+                 <div className="lookup-order-items">
                   {order.items.map((item, index) => (
                     <div
                       key={`${order._id}-${index}`}
-                      className={`lookup-order-item ${item.productType === 'BraceletDesign' ? 'lookup-order-item--design' : ''}`}
+                      className={`lookup-order-item ${(item.productType === 'BraceletDesign' || item.productType === 'Collection') ? 'lookup-order-item--design' : ''}`}
                     >
-                      {item.productType === 'BraceletDesign' && renderBraceletPreview(item)}
-                      <div className={`lookup-order-item__main ${item.productType === 'BraceletDesign' ? 'lookup-order-item__main--design' : ''}`}>
-                        <span>{item.productType === 'BraceletDesign' ? 'Vòng tay thiết kế' : 'Hạt Charm lẻ'}</span>
+                      {(item.productType === 'BraceletDesign' || item.productType === 'Collection') && renderBraceletPreview(item)}
+                      <div className={`lookup-order-item__main ${(item.productType === 'BraceletDesign' || item.productType === 'Collection') ? 'lookup-order-item__main--design' : ''}`}>
+                        <span>
+                          {item.productType === 'BraceletDesign'
+                            ? 'Vòng tay thiết kế'
+                            : item.productType === 'Collection'
+                            ? 'Bộ sưu tập'
+                            : 'Hạt Charm lẻ'}
+                        </span>
                         <span>Số lượng: {item.quantity}</span>
                         <strong>{formatVnd(item.price * item.quantity)}</strong>
                       </div>
-                      {item.productType === 'BraceletDesign' && (
+                      {(item.productType === 'BraceletDesign' || item.productType === 'Collection') && (
                         <p className="lookup-design-summary">
                           Vòng tay được ghép từ {(getDesignCharms(item)).length} hạt charm
                         </p>
@@ -171,6 +177,16 @@ const OrdersPage = () => {
                     <p><strong>Địa chỉ:</strong> {order.customerInfo.address}</p>
                   </div>
                   <div className="lookup-total">
+                    {order.discountAmount > 0 && (
+                      <div className="lookup-discount-line" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px', marginBottom: '8px', borderBottom: '1px dashed #eee', paddingBottom: '8px' }}>
+                        <div style={{ fontSize: '0.85rem', color: '#666' }}>
+                          Tạm tính: {formatVnd(order.totalPrice + order.discountAmount)}
+                        </div>
+                        <div style={{ fontSize: '0.85rem', color: '#e63946', fontWeight: 'bold' }}>
+                          Khuyến mãi {order.discountCode ? `(${order.discountCode})` : ""}: -{formatVnd(order.discountAmount)}
+                        </div>
+                      </div>
+                    )}
                     <span>Tổng thanh toán</span>
                     <strong>{formatVnd(order.totalPrice)}</strong>
                   </div>

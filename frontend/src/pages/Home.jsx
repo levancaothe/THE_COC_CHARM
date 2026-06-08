@@ -194,7 +194,7 @@ const Home = () => {
           </p>
           <div className="home-hero__actions">
             <Link to="/designer" className="home-btn home-btn--primary">Bắt đầu thiết kế <span>→</span></Link>
-            <Link to="/charms" className="home-btn home-btn--accent">Xem bộ sưu tập <span>→</span></Link>
+            <Link to="/collections" className="home-btn home-btn--accent">Xem bộ sưu tập <span>→</span></Link>
           </div>
         </div>
         <div className="home-hero__visual" aria-hidden="true">

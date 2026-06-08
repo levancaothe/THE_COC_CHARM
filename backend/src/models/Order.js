@@ -16,7 +16,7 @@ const orderSchema = new mongoose.Schema({
       productType: {
         type: String,
         required: true,
-        enum: ["Charm", "BraceletDesign"],
+        enum: ["Charm", "BraceletDesign", "Collection"],
       },
       designCharms: [
         {
@@ -42,6 +42,14 @@ const orderSchema = new mongoose.Schema({
   totalPrice: {
     type: Number,
     required: true,
+  },
+  discountCode: {
+    type: String,
+    default: null,
+  },
+  discountAmount: {
+    type: Number,
+    default: 0,
   },
   customerInfo: {
     name: { type: String, required: true },

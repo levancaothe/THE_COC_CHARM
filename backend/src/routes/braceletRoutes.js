@@ -1,22 +1,14 @@
 const express = require('express');
 const {
     getDesigns,
-    getPopularThemes,
-    createDesign,
-    updateDesign,
-    deleteDesign
+    getPopularThemes
 } = require('../controllers/braceletController');
 
 const router = express.Router();
 
 router.route('/')
-    .get(getDesigns)
-    .post(createDesign);
+    .get(getDesigns);
 
 router.get('/popular-themes', getPopularThemes);
-
-router.route('/:id')
-    .put(updateDesign)
-    .delete(deleteDesign);
 
 module.exports = router;

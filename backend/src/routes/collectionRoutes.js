@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Collection = require("../models/Collection");
+const { jwtAuth, requireRole } = require("../middleware/authMiddleware");
 // Import your Cloudinary utility! (Adjust the path if necessary based on your folder structure)
 const { uploadImageToCloudinary } = require("../utils/cloudinary");
 
@@ -29,7 +30,7 @@ router.get("/", async (req, res) => {
 });
 
 // 2. CREATE a new collection (From your Modal)
-router.post("/", async (req, res) => {
+router.post("/", jwtAuth, requireRole("admin", "manager"), async (req, res) => {
   try {
     let collectionData = { ...req.body };
     // collectionData.status is automatically included here.
@@ -59,7 +60,7 @@ router.post("/", async (req, res) => {
 });
 
 // 3. UPDATE an existing collection (When clicking ✏️)
-router.put("/:id", async (req, res) => {
+router.put("/:id", jwtAuth, requireRole("admin", "manager"), async (req, res) => {
   try {
     let updateData = { ...req.body };
 
@@ -92,7 +93,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // 4. DELETE a collection (When clicking 🗑️)
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", jwtAuth, requireRole("admin", "manager"), async (req, res) => {
   try {
     await Collection.findByIdAndDelete(req.params.id);
     res.status(200).json({ message: "Đã xóa thành công" });
