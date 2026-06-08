@@ -160,11 +160,12 @@ const DesignerPage = () => {
   const fetchCharmsAndCategories = async () => {
     try {
       const [charmsRes, catRes] = await Promise.all([
-        api.get('/charms?limit=100'),
+        api.get('/charms?limit=1000'),  // Tăng từ 100 lên 1000 để load hết charm
         api.get('/categories')
       ]);
       setAvailableCharms(charmsRes.data.data);
       setCategories(catRes.data.data);
+      console.log(`Loaded ${charmsRes.data.data.length} charms and ${catRes.data.data.length} categories`);
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -212,11 +213,11 @@ const DesignerPage = () => {
         : cap;
 
       const initialCharms = Array.from({ length: safeCapacity }).map(() =>
-        ({
-          ...defaultCharm,
-          instanceId: Math.random().toString(36).substr(2, 9),
-          isDefault: true
-        })
+      ({
+        ...defaultCharm,
+        instanceId: Math.random().toString(36).substr(2, 9),
+        isDefault: true
+      })
       );
       setSelectedCharms(initialCharms);
       return safeCapacity;
@@ -268,11 +269,11 @@ const DesignerPage = () => {
     setSelectedCharms((prevCharms) => [
       ...prevCharms,
       ...Array.from({ length: additionalNeeded }).map(() =>
-        ({
-          ...defaultCharm,
-          instanceId: Math.random().toString(36).substr(2, 9),
-          isDefault: true
-        })
+      ({
+        ...defaultCharm,
+        instanceId: Math.random().toString(36).substr(2, 9),
+        isDefault: true
+      })
       )
     ]);
     return desiredCapacity;
@@ -442,11 +443,11 @@ const DesignerPage = () => {
       const designRecord = isSaved
         ? saveDesignToLibrary(designData, existingId)
         : {
-            ...designData,
-            _id: existingId || createDesignId(),
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          };
+          ...designData,
+          _id: existingId || createDesignId(),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
 
       const cartDesign = {
         _id: designRecord._id,

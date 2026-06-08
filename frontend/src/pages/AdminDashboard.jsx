@@ -201,11 +201,7 @@ export default function AdminDashboard() {
   // Charms state
   const [charms, setCharms] = useState([]);
   const [totalCharms, setTotalCharms] = useState(0);
-  const [charmFilters, setCharmFilters] = useState({
-    search: "",
-    limit: 10,
-    page: 1,
-  });
+  const [charmFilters, setCharmFilters] = useState({ search: '', limit: 50, page: 1 });
   const [editingCharm, setEditingCharm] = useState(null);
   const [showCharmModal, setShowCharmModal] = useState(false);
 

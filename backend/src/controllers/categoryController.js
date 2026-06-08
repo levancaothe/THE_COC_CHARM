@@ -3,10 +3,16 @@ const Charm = require('../models/Charm');
 
 const getCategories = async (req, res, next) => {
     try {
-        const categories = await Category.find().lean();
+        // Sort categories newest first (left-to-right on UI)
+        const categories = await Category.find().sort({ createdAt: -1 }).lean();
         
         for (let cat of categories) {
-            const charms = await Charm.find({ category: cat._id }).limit(6).select('image').lean();
+            // Thumbnail shows newest charms first
+            const charms = await Charm.find({ category: cat._id })
+                .sort({ createdAt: -1 })
+                .limit(6)
+                .select('image')
+                .lean();
             cat.thumbnails = charms.map(c => c.image);
         }
 
