@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useDrop, useDrag } from 'react-dnd';
 import { getProxyImageUrl } from '../utils/imageProxy';
 
-const PlacedCharm = ({ charm, index, onRemove, onReplace, moveCharmInSequence, exportMode }) => {
+const PlacedCharm = ({ charm, index, onRemove, onReplace, moveCharmInSequence }) => {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: 'SORTABLE_CHARM',
     item: { index },
