@@ -2,6 +2,7 @@ const Charm = require("../models/Charm");
 const Category = require("../models/Category");
 const Order = require("../models/Order");
 const BraceletDesign = require("../models/BraceletDesign");
+const Collection = require("../models/Collection");
 const mongoose = require("mongoose");
 
 exports.getStats = async (req, res, next) => {
@@ -100,17 +101,22 @@ exports.getOrders = async (req, res, next) => {
 
     const charmIds = new Set();
     const productIds = new Set();
+    const collectionIds = new Set();
 
     orders.forEach((order) => {
       (order.items || []).forEach((item) => {
         if (item?.productType === "Charm" && item?.product) {
           charmIds.add(String(item.product));
         }
+        if (item?.productType === "Collection" && item?.product) {
+          collectionIds.add(String(item.product));
+        }
         if (
-          item?.productType === "BraceletDesign" &&
+          (item?.productType === "BraceletDesign" || item?.productType === "Collection") &&
           Array.isArray(item?.designCharms)
         ) {
           if (
+            item?.productType === "BraceletDesign" &&
             item?.product &&
             mongoose.Types.ObjectId.isValid(String(item.product))
           ) {
@@ -124,7 +130,7 @@ exports.getOrders = async (req, res, next) => {
       });
     });
 
-    const [charmDocs, productDocs] = await Promise.all([
+    const [charmDocs, productDocs, collectionDocs] = await Promise.all([
       charmIds.size > 0
         ? Charm.find({ _id: { $in: [...charmIds] } })
             .populate("category", "name")
@@ -136,6 +142,10 @@ exports.getOrders = async (req, res, next) => {
             .select("_id name totalPrice charms createdAt")
             .lean()
         : Promise.resolve([]),
+      collectionIds.size > 0
+        ? Collection.find({ _id: { $in: [...collectionIds] } })
+            .lean()
+        : Promise.resolve([]),
     ]);
 
     const charmMap = new Map(
@@ -143,6 +153,9 @@ exports.getOrders = async (req, res, next) => {
     );
     const productMap = new Map(
       productDocs.map((product) => [String(product._id), product]),
+    );
+    const collectionMap = new Map(
+      collectionDocs.map((col) => [String(col._id), col]),
     );
 
     const enrichedOrders = orders.map((order) => ({
@@ -172,7 +185,9 @@ exports.getOrders = async (req, res, next) => {
           productDetail:
             item?.productType === "Charm"
               ? charmMap.get(productId) || null
-              : productMap.get(productId) || null,
+              : item?.productType === "Collection"
+                ? collectionMap.get(productId) || null
+                : productMap.get(productId) || null,
           charmDetails,
         };
       }),

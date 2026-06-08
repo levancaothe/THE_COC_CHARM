@@ -108,6 +108,7 @@
 
 .form-group input,
 .form-group select,
+.form-group textarea,
 .filter-group input,
 .filter-group select,
 .search-box input {
@@ -129,6 +130,7 @@
 
 .form-group input:focus,
 .form-group select:focus,
+.form-group textarea:focus,
 .filter-group input:focus,
 .filter-group select:focus,
 .search-box input:focus {

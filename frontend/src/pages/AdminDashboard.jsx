@@ -3,6 +3,7 @@ import OrderDetailModal from "../components/OrderDetailModal";
 import CollectionModal from "../components/CollectionModal";
 import api from "../services/api";
 import "./AdminDashboard.css";
+import "./MyDesignsPage.css";
 import DiscountModal from "../components/DiscountModal";
 const formatVND = (value) =>
   `${new Intl.NumberFormat("vi-VN", {
@@ -313,6 +314,19 @@ export default function AdminDashboard() {
     }
   }
 
+  async function fetchDiscounts() {
+    setLoading(true);
+    try {
+      const res = await api.get("/discounts");
+      setDiscounts(res.data || []);
+    } catch (err) {
+      console.error("Error fetching discounts:", err);
+      alert(err.response?.data?.message || "Failed to fetch discounts");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   const handleRefreshData = async () => {
     setLoading(true);
     try {
@@ -340,6 +354,9 @@ export default function AdminDashboard() {
           headers: { Authorization: `Bearer ${token}` },
         });
         setCategories(res.data.categories || []);
+      } else if (activeTab === "discounts") {
+        const res = await api.get("/discounts");
+        setDiscounts(res.data || []);
       }
     } catch (err) {
       alert(err.response?.data?.message || "Không thể làm mới dữ liệu");
@@ -360,6 +377,7 @@ export default function AdminDashboard() {
     if (token && activeTab === "orders") fetchOrders(1);
     if (token && activeTab === "charms") fetchCharms(1);
     if (token && activeTab === "collections") fetchCollections();
+    if (token && activeTab === "discounts") fetchDiscounts();
   }, [activeTab, token]);
   /* eslint-enable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps */
 
@@ -562,7 +580,9 @@ export default function AdminDashboard() {
     try {
       if (editingDiscount) {
         // 1. UPDATE EXISTING DISCOUNT IN DATABASE
-        await api.put(`/discounts/${editingDiscount._id}`, discountData);
+        await api.put(`/discounts/${editingDiscount._id}`, discountData, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
         // Update local state so UI changes instantly
         setDiscounts(
@@ -572,7 +592,9 @@ export default function AdminDashboard() {
         );
       } else {
         // 2. CREATE NEW DISCOUNT IN DATABASE
-        const response = await api.post("/discounts", discountData);
+        const response = await api.post("/discounts", discountData, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
         // Get the real data (with the real MongoDB _id) from the backend response
         // Note: adjust 'response.data.data' based on exactly how your backend formats the response
@@ -587,7 +609,7 @@ export default function AdminDashboard() {
       setEditingDiscount(null);
     } catch (error) {
       console.error("Lỗi khi lưu khuyến mãi (Error saving discount):", error);
-      alert("Có lỗi xảy ra khi lưu sự kiện!");
+      alert(error.response?.data?.message || "Có lỗi xảy ra khi lưu sự kiện!");
     }
   };
 
@@ -596,7 +618,9 @@ export default function AdminDashboard() {
     if (window.confirm("Bạn có chắc chắn muốn xóa sự kiện này?")) {
       try {
         // 3. DELETE DISCOUNT FROM DATABASE
-        await api.delete(`/discounts/${id}`);
+        await api.delete(`/discounts/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
         // Remove from local state
         setDiscounts(discounts.filter((d) => d._id !== id));
@@ -629,11 +653,15 @@ export default function AdminDashboard() {
     try {
       if (editingCollection && editingCollection._id) {
         // UPDATE (PUT request)
-        await api.put(`/collections/${editingCollection._id}`, collectionData);
+        await api.put(`/collections/${editingCollection._id}`, collectionData, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         alert("Cập nhật thành công!");
       } else {
         // CREATE (POST request)
-        await api.post("/collections", collectionData);
+        await api.post("/collections", collectionData, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         alert("Thêm mới thành công!");
       }
       setShowCollectionModal(false);
@@ -653,7 +681,9 @@ export default function AdminDashboard() {
       )
     ) {
       try {
-        await api.delete(`/collections/${id}`);
+        await api.delete(`/collections/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         alert("Đã xóa thành công!");
         fetchCollections(); // Refresh the table
       } catch (error) {
@@ -1308,84 +1338,78 @@ export default function AdminDashboard() {
                   <div className="loading">Đang tải...</div>
                 ) : (
                   <>
-                    <div className="table-container">
-                      <table className="data-table">
-                        <thead>
-                          <tr>
-                            <th>#</th>
-                            <th>Hình</th>
-                            <th>Tên Mẫu Vòng</th>
-                            <th>Mô tả</th>
-                            <th>Giá</th>
-                            <th>Thao Tác</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {collections.length > 0 ? (
-                            collections.map((col, idx) => (
-                              <tr key={col._id || idx}>
-                                <td className="text-center">
-                                  {(collectionFilters.page - 1) *
-                                    collectionFilters.limit +
-                                    idx +
-                                    1}
-                                </td>
-                                <td>
+                    <div className="my-designs-grid" style={{ marginTop: "20px" }}>
+                      {collections.map((col, idx) => (
+                        <article key={col._id || idx} className="my-design-card">
+                          <div className="my-design-card__head">
+                            <div>
+                              <h2>{col.name}</h2>
+                              <p
+                                style={{
+                                  fontSize: "0.85rem",
+                                  color: "var(--admin-muted)",
+                                  margin: "4px 0 0",
+                                  display: "-webkit-box",
+                                  WebkitLineClamp: 2,
+                                  WebkitBoxOrient: "vertical",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                }}
+                              >
+                                {col.description || "Không có mô tả"}
+                              </p>
+                            </div>
+                            <span>{col.charms?.length || 0} hạt</span>
+                          </div>
+
+                          <div className="my-design-preview" aria-label={`Preview ${col.name}`}>
+                            <div className="my-design-band">
+                              {(col.charms || []).map((item, index) => {
+                                const charmObj = item.charm || item;
+                                return (
                                   <img
-                                    src={col.image}
-                                    alt={col.name}
-                                    className="charm-thumb"
+                                    key={`${charmObj?._id || index}`}
+                                    src={charmObj?.image}
+                                    alt=""
                                   />
-                                </td>
-                                <td>
-                                  <strong>{col.name}</strong>
-                                </td>
-                                <td
-                                  style={{
-                                    maxWidth: "250px",
-                                    whiteSpace: "nowrap",
-                                    overflow: "hidden",
-                                    textOverflow: "ellipsis",
-                                  }}
-                                >
-                                  {col.description || "N/A"}
-                                </td>
-                                <td className="text-right font-bold text-[#DE5E14]">
-                                  {formatVND(col.price)}
-                                </td>
-                                <td className="actions-cell">
-                                  <button
-                                    className="btn-icon btn-edit"
-                                    onClick={() => {
-                                      setEditingCollection(col);
-                                      setShowCollectionModal(true);
-                                    }}
-                                    title="Chỉnh sửa"
-                                  >
-                                    ✏️
-                                  </button>
-                                  <button
-                                    className="btn-icon btn-delete"
-                                    onClick={() =>
-                                      handleDeleteCollection(col._id)
-                                    }
-                                    title="Xóa"
-                                  >
-                                    🗑️
-                                  </button>
-                                </td>
-                              </tr>
-                            ))
-                          ) : (
-                            <tr>
-                              <td colSpan="6" className="text-center">
-                                Chưa có bộ sưu tập nào. Hãy thêm mẫu mới!
-                              </td>
-                            </tr>
-                          )}
-                        </tbody>
-                      </table>
+                                );
+                              })}
+                            </div>
+                          </div>
+
+                          <div className="my-design-card__foot">
+                            <strong style={{ color: "#d95c14", fontSize: "1.15rem" }}>
+                              {formatVND(col.price)}
+                            </strong>
+                            <div className="my-design-actions">
+                              <button
+                                className="my-design-edit"
+                                type="button"
+                                onClick={() => {
+                                  setEditingCollection(col);
+                                  setShowCollectionModal(true);
+                                }}
+                              >
+                                Sửa mẫu
+                              </button>
+                              <button
+                                className="my-design-delete"
+                                type="button"
+                                onClick={() => handleDeleteCollection(col._id)}
+                              >
+                                Xóa
+                              </button>
+                            </div>
+                          </div>
+                        </article>
+                      ))}
                     </div>
+
+                    {collections.length === 0 && (
+                      <div className="my-design-empty">
+                        <p>Chưa có bộ sưu tập nào. Hãy thêm mẫu mới!</p>
+                      </div>
+                    )}
                   </>
                 )}
               </div>
@@ -1421,9 +1445,11 @@ export default function AdminDashboard() {
                           <tr>
                             <th>#</th>
                             <th>Tên Sự Kiện</th>
+                            <th>Mã Code</th>
                             <th>Giảm giá (%)</th>
                             <th>Bắt đầu</th>
                             <th>Kết thúc</th>
+                            <th>Lượt áp dụng (Đã dùng / Tối đa)</th>
                             <th>Thao Tác</th>
                           </tr>
                         </thead>
@@ -1434,6 +1460,15 @@ export default function AdminDashboard() {
                                 <td className="text-center">{idx + 1}</td>
                                 <td>
                                   <strong>{discount.name}</strong>
+                                </td>
+                                <td>
+                                  {discount.code ? (
+                                    <span style={{ fontFamily: "monospace", padding: "2px 6px", background: "rgba(10, 46, 79, 0.08)", borderRadius: "4px", fontWeight: "bold", color: "#0a2e4f" }}>
+                                      {discount.code}
+                                    </span>
+                                  ) : (
+                                    <em style={{ color: "#86868b" }}>Tự động</em>
+                                  )}
                                 </td>
                                 <td>{discount.discountPercent}%</td>
                                 {/* Formatting dates nicely for display */}
@@ -1446,6 +1481,15 @@ export default function AdminDashboard() {
                                   {new Date(
                                     discount.endDate,
                                   ).toLocaleDateString("vi-VN")}
+                                </td>
+                                <td>
+                                  {discount.maxUsers !== undefined && discount.maxUsers !== null ? (
+                                    <span>
+                                      {discount.usedUsers || 0} / {discount.maxUsers}
+                                    </span>
+                                  ) : (
+                                    <span style={{ color: "#2a9d8f", fontWeight: "600" }}>Không giới hạn</span>
+                                  )}
                                 </td>
                                 <td className="actions-cell">
                                   <button
@@ -1472,7 +1516,7 @@ export default function AdminDashboard() {
                             ))
                           ) : (
                             <tr>
-                              <td colSpan="6" className="text-center">
+                              <td colSpan="8" className="text-center">
                                 Chưa có sự kiện nào. Hãy thêm sự kiện mới!
                               </td>
                             </tr>
