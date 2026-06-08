@@ -116,6 +116,9 @@ const DiscountModal = ({ discount, onSave, onClose }) => {
                 setFormData({ ...formData, code: e.target.value })
               }
             />
+            <small style={{ display: "block", marginTop: "6px", color: "#666", fontStyle: "italic" }}>
+              ℹ️ Mã code phải khớp chính xác (case-sensitive) kể cả chữ hoa, chữ thường. VD: "SUMMER2026" khác "summer2026"
+            </small>
           </div>
 
           <div className="form-group" style={{ marginBottom: "15px" }}>

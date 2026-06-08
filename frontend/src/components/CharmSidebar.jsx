@@ -111,9 +111,7 @@ const CharmSidebar = ({
     : [];
 
   React.useEffect(() => {
-    console.log(
-      `[CharmSidebar Debug] Total charms: ${charms.length}, Categories: ${categories.length}, Selected event: ${selectedEvent?.name || "None"}, Filtered charms: ${filteredCharms.length}`,
-    );
+    // Sidebar state updated
   }, [charms, categories, selectedEvent, filteredCharms]);
 
   const handleCategoryClick = (category) => {

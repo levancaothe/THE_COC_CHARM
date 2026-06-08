@@ -4,12 +4,9 @@ import './SuccessModal.css';
 export default function SuccessModal({ isOpen, onClose, title, message }) {
   const navigate = useNavigate();
 
-  console.log('SuccessModal render - isOpen:', isOpen);
-
   if (!isOpen) return null;
 
   const handleGoHome = () => {
-    console.log('Going home...');
     onClose();
     navigate('/');
   };

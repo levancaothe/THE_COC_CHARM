@@ -97,7 +97,7 @@ router.post("/", async (req, res) => {
   
   if (req.body.discountCode && req.body.discountCode.trim() !== "") {
     const codeDiscount = await DiscountEvent.findOne({
-      code: { $regex: new RegExp(`^${req.body.discountCode.trim()}$`, "i") },
+      code: req.body.discountCode.trim(),
       isActive: true,
       startDate: { $lte: now },
       endDate: { $gte: now }

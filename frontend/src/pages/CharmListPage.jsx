@@ -29,7 +29,6 @@ const CharmListPage = () => {
     try {
       const { data } = await api.get("/charms?limit=1000");
       setCharms(data.data);
-      console.log(`Loaded ${data.data.length} charms for listing`);
     } catch (error) {
       console.error("Error fetching charms:", error);
     } finally {

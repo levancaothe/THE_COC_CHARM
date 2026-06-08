@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const DiscountEvent = require("../models/DiscountEvent");
+const Order = require("../models/Order");
 const { jwtAuth, requireRole } = require("../middleware/authMiddleware");
 
 // Lấy tất cả sự kiện
@@ -99,13 +100,13 @@ router.post("/validate", async (req, res) => {
       return res.status(200).json({ valid: false, message: "Không có khuyến mãi tự động nào đang hoạt động" });
     }
 
-    // Tìm kiếm theo code (không phân biệt hoa thường)
+    // Tìm kiếm theo code (bắt buộc khớp chính xác, cả hoa thường)
     const discount = await DiscountEvent.findOne({
-      code: { $regex: new RegExp(`^${code.trim()}$`, "i") },
+      code: code.trim(),
       isActive: true,
       startDate: { $lte: now },
       endDate: { $gte: now }
-    });
+    }).collation({ locale: "en", strength: 3 }); // strength 3 = case-sensitive matching
 
     if (!discount) {
       return res.status(400).json({ valid: false, message: "Mã giảm giá không tồn tại hoặc đã hết hạn" });
@@ -123,6 +124,39 @@ router.post("/validate", async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: "Lỗi máy chủ", error });
+  }
+});
+
+// Xem chi tiết người dùng đã sử dụng mã giảm giá
+router.get("/:id/usage", jwtAuth, requireRole("admin", "manager"), async (req, res) => {
+  try {
+    const discount = await DiscountEvent.findById(req.params.id);
+    if (!discount) {
+      return res.status(404).json({ message: "Không tìm thấy sự kiện giảm giá" });
+    }
+
+    const queryCode = discount.code || discount.name;
+    const orders = await Order.find({ discountCode: queryCode }).sort({ createdAt: -1 });
+
+    const usageDetails = orders.map(order => ({
+      orderId: order._id,
+      orderCode: order.orderCode,
+      customerName: order.customerInfo?.name,
+      customerPhone: order.customerInfo?.phone,
+      customerEmail: order.customerInfo?.email,
+      customerAddress: order.customerInfo?.address,
+      totalPrice: order.totalPrice,
+      discountAmount: order.discountAmount,
+      status: order.status,
+      createdAt: order.createdAt
+    }));
+
+    res.status(200).json({
+      discount,
+      usage: usageDetails
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Lỗi server", error });
   }
 });
 

@@ -134,10 +134,6 @@ const CartPage = () => {
           await api.delete("/orders/cancel-payos-order", {
             data: { orderCode: orderCode },
           });
-
-          console.log(
-            `Đơn hàng #${orderCode} đã bị xóa hoàn toàn khỏi hệ thống.`,
-          );
         } catch (err) {
           console.error("Lỗi khi xóa đơn hàng:", err);
         }
@@ -278,7 +274,6 @@ const CartPage = () => {
       };
 
       const response = await api.post("/orders", orderPayload);
-      console.log("TRẢ VỀ TỪ BACKEND:", response);
 
       if (paymentMethod === "PayOS" && response.data.checkoutUrl) {
         window.location.href = response.data.checkoutUrl;
@@ -669,6 +664,11 @@ const CartPage = () => {
                     {discountError && (
                       <p style={{ color: "#e63946", fontSize: "0.8rem", margin: "6px 0 0" }}>
                         {discountError}
+                      </p>
+                    )}
+                    {!appliedDiscount && (
+                      <p style={{ color: "#666", fontSize: "0.75rem", margin: "6px 0 0", fontStyle: "italic" }}>
+                        💡 Lưu ý: Mã code phải khớp chính xác
                       </p>
                     )}
                     {appliedDiscount && (
