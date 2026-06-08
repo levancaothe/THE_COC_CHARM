@@ -82,20 +82,53 @@ const CharmListPage = () => {
         >
           Các Chủ Đề Charm
         </h3>
+        {/* Horizontal scrollable row — swipe/scroll to browse */}
         <div
           style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-            gap: "20px",
+            display: "flex",
+            flexDirection: "row",
+            flexWrap: "nowrap",
+            overflowX: "auto",
+            overflowY: "hidden",
+            gap: "16px",
+            paddingBottom: "12px",
+            scrollbarWidth: "thin",
+            scrollbarColor: "var(--primary-gold) transparent",
+            WebkitOverflowScrolling: "touch",
+            cursor: "grab",
+          }}
+          onMouseDown={(e) => {
+            const el = e.currentTarget;
+            el.dataset.isDown = "true";
+            el.dataset.startX = e.pageX - el.offsetLeft;
+            el.dataset.scrollLeft = el.scrollLeft;
+            el.style.cursor = "grabbing";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.dataset.isDown = "false";
+            e.currentTarget.style.cursor = "grab";
+          }}
+          onMouseUp={(e) => {
+            e.currentTarget.dataset.isDown = "false";
+            e.currentTarget.style.cursor = "grab";
+          }}
+          onMouseMove={(e) => {
+            const el = e.currentTarget;
+            if (el.dataset.isDown !== "true") return;
+            e.preventDefault();
+            const x = e.pageX - el.offsetLeft;
+            const walk = (x - Number(el.dataset.startX)) * 1.5;
+            el.scrollLeft = Number(el.dataset.scrollLeft) - walk;
           }}
         >
           {categories.map((cat) => (
-            <CategoryCard
-              key={cat._id}
-              category={cat}
-              onClick={(c) => handleCategoryClick(c._id)}
-              isSelected={selectedCategory === cat._id}
-            />
+            <div key={cat._id} style={{ flexShrink: 0 }}>
+              <CategoryCard
+                category={cat}
+                onClick={(c) => handleCategoryClick(c._id)}
+                isSelected={selectedCategory === cat._id}
+              />
+            </div>
           ))}
         </div>
 

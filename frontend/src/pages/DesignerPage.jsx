@@ -628,7 +628,7 @@ const DesignerPage = () => {
         </div>
 
         <div className="designer-checkout-panel">
-          <PriceSummary totalPrice={totalPrice} count={selectedCharms.length} />
+          <PriceSummary selectedCharms={selectedCharms} selectedBaseCharm={selectedBaseCharm} />
           <DesignerToolbar
             onSave={() => persistDesign({
               isSaved: true,
