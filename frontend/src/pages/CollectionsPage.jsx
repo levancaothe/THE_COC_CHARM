@@ -18,7 +18,8 @@ const CollectionsPage = () => {
       } catch (error) {
         console.error("Lỗi khi tải bộ sưu tập:", error);
       } finally {
-        loading(false);
+        // BUG FIX: Changed loading(false) to setLoading(false)
+        setLoading(false);
       }
     };
 
