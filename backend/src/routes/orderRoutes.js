@@ -118,12 +118,10 @@ router.post("/", async (req, res) => {
       }
       appliedDiscount = codeDiscount;
     } else {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Mã giảm giá không tồn tại hoặc đã hết hạn",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Mã giảm giá không tồn tại hoặc đã hết hạn",
+      });
     }
   } else {
     // Check for auto-applied discount
@@ -323,63 +321,45 @@ router.get("/", async (req, res) => {
 });
 
 // 🟢 4. ADD WEBHOOK ROUTE TO AUTOMATICALLY UPDATE ORDER STATUS
+// 🟢 FINAL BULLETPROOF WEBHOOK ROUTE
 router.post("/webhook", async (req, res) => {
-  console.log("🚨 WEBHOOK HIT! Payload:", req.body); // Helpful for debugging in Vercel logs
-
   try {
     const webhookData = req.body;
 
-    // Attempt to verify the data
+    // 1. Securely verify the PayOS signature data
     const verifiedData = payos.verifyPaymentWebhookData(webhookData);
 
-    console.log(
-      "✅ Webhook verified successfully! Order Code:",
-      verifiedData.orderCode,
-    );
+    // 2. Safe number conversion (MongoDB stores orderCode as a Number, so we cast it just in case)
+    const orderCodeNum =
+      verifiedData && verifiedData.orderCode
+        ? Number(verifiedData.orderCode)
+        : null;
 
-    // 🛠️ THE FIX: Check 'webhookData.code' for "00", NOT 'verifiedData.code'
-    if (webhookData.code === "00" && verifiedData.orderCode) {
-      const orderCode = verifiedData.orderCode;
-
-      console.log(`🔄 Updating database for order ${orderCode}...`);
-
-      const updatedOrder = await Order.findOneAndUpdate(
-        { orderCode: orderCode },
+    // 3. Fix the conditional check: PayOS success code "00" is on webhookData, NOT verifiedData
+    if ((webhookData.code === "00" || req.body.code === "00") && orderCodeNum) {
+      // 4. Update the database using the converted numeric orderCode
+      await Order.findOneAndUpdate(
+        { orderCode: orderCodeNum },
         {
           "paymentInfo.status": "Paid",
           status: "Processing",
           "paymentInfo.transactionId":
-            verifiedData.reference || "PayOS_Transfer",
+            verifiedData.reference ||
+            String(verifiedData.paymentLinkId || "PayOS"),
         },
-        { new: true }, // This tells Mongoose to return the updated document
       );
-
-      if (updatedOrder) {
-        console.log("🎉 Database successfully updated to Paid!");
-      } else {
-        console.log(
-          "⚠️ Could not find an order in the DB with that orderCode!",
-        );
-      }
     }
 
-    // Always return 200 OK to PayOS
+    // 5. Always answer PayOS with a 200 OK success response
     return res.status(200).json({
       success: true,
-      message: "Webhook processed successfully",
+      message: "Webhook processed completely",
     });
   } catch (error) {
-    console.error(
-      "Webhook Verification Error (Likely a test ping):",
-      error.message,
-    );
-
-    // 🛠️ THE FIX: We must return 200 OK even if verification fails,
-    // otherwise the PayOS dashboard will refuse to save the Webhook URL!
+    // 6. Even if something fails, return a 200 so PayOS doesn't break down or lock your URL
     return res.status(200).json({
       success: true,
-      message:
-        "Webhook received (verification failed, but returning 200 for PayOS setup)",
+      message: "Webhook caught error but returned 200",
     });
   }
 });
