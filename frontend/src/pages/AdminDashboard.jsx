@@ -330,45 +330,6 @@ export default function AdminDashboard() {
     }
   }
 
-  const handleRefreshData = async () => {
-    setLoading(true);
-    try {
-      const statsRes = await api.get("/admin/stats", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setStats(statsRes.data);
-
-      if (activeTab === "orders") {
-        const res = await api.get("/admin/orders", {
-          headers: { Authorization: `Bearer ${token}` },
-          params: filters,
-        });
-        setOrders(res.data.orders || []);
-        setTotalOrders(res.data.total || 0);
-      } else if (activeTab === "charms") {
-        const res = await api.get("/admin/charms", {
-          headers: { Authorization: `Bearer ${token}` },
-          params: charmFilters,
-        });
-        setCharms(res.data.charms || []);
-        setTotalCharms(res.data.total || 0);
-      } else if (activeTab === "categories") {
-        const res = await api.get("/admin/categories", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setCategories(res.data.categories || []);
-      } else if (activeTab === "discounts") {
-        const res = await api.get("/discounts");
-        setDiscounts(res.data || []);
-      }
-    } catch (err) {
-      alert(err.response?.data?.message || "Không thể làm mới dữ liệu");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  /* eslint-disable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps */
   useEffect(() => {
     if (token) {
       fetchStats();
@@ -382,7 +343,6 @@ export default function AdminDashboard() {
     if (token && activeTab === "collections") fetchCollections();
     if (token && activeTab === "discounts") fetchDiscounts();
   }, [activeTab, token]);
-  /* eslint-enable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps */
 
   const handleLogin = async () => {
     if (!username || !password) {
