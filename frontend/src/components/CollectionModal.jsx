@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import html2canvas from "html2canvas";
@@ -102,9 +102,6 @@ export default function CollectionModal({ collection, onSave, onClose }) {
       null,
     [baseCharmOptions, material],
   );
-
-  const basePrice =
-    (selectedBaseCharm?.price || 0) * (Number(tempCapacity) || 0);
 
   const getCharmUsageCount = (charmId, charms = selectedCharms) =>
     charms.filter((charm) => charm?._id === charmId).length;

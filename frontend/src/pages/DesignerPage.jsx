@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import html2canvas from "html2canvas";
@@ -37,7 +37,9 @@ const writeSavedDesigns = (designs) => {
 
 const stripCharmMeta = (charm) => {
   if (!charm) return charm;
-  const { instanceId, isDefault, ...cleanCharm } = charm;
+  const cleanCharm = { ...charm };
+  delete cleanCharm.instanceId;
+  delete cleanCharm.isDefault;
   return cleanCharm;
 };
 
@@ -526,7 +528,7 @@ const DesignerPage = () => {
         navigate(returnTo, { state: { focusCheckout: returnTo === "/cart" } });
       }
       return true;
-    } catch (error) {
+    } catch {
       if (showAlert) {
         alert("Lỗi khi lưu thiết kế");
       }

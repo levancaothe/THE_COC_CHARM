@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useCart } from "../context/CartContext";
 import api from "../services/api";
 import "./CollectionsPage.css";

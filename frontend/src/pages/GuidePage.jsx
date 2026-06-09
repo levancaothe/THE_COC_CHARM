@@ -1,4 +1,3 @@
-import React from 'react';
 import './GuidePage.css';
 
 const policySections = [

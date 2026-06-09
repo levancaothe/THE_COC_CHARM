@@ -1,5 +1,3 @@
-import React from 'react';
-
 export const PriceSummary = ({ selectedCharms = [], selectedBaseCharm }) => {
   const formatPrice = (value) => `${new Intl.NumberFormat('vi-VN').format(value || 0)} VND`;
 

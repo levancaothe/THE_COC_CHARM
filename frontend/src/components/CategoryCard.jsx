@@ -1,4 +1,3 @@
-import React from 'react';
 import { getProxyImageUrl } from '../utils/imageProxy';
 
 const CategoryCard = ({ category, onClick, isSelected }) => {
