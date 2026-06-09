@@ -161,7 +161,7 @@
     transition:
       transform 0.3s ease-in-out,
       opacity 0.3s ease-in-out;
-    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 10px 15px rgba(10, 46, 79, 0.05);
     align-items: center;
   }
 

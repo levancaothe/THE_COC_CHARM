@@ -25,7 +25,7 @@
 .order-detail-section h4 {
   font-size: 16px;
   font-weight: 700;
-  color: #333;
+  color: #0A2E4F;
   margin: 0 0 16px 0;
   display: flex;
   align-items: center;
@@ -58,7 +58,7 @@
 
 .detail-value {
   font-size: 14px;
-  color: #333;
+  color: #0A2E4F;
   font-weight: 500;
 }
 
@@ -130,7 +130,7 @@
 
 .order-item-card:hover {
   background: #f0f2f5;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(10, 46, 79, 0.08);
 }
 
 .order-item-card--design {
@@ -181,7 +181,7 @@
 .order-item-info h5 {
   font-size: 14px;
   font-weight: 600;
-  color: #333;
+  color: #0A2E4F;
   margin: 0 0 8px 0;
 }
 
@@ -317,7 +317,7 @@
   border-radius: 6px;
   border-left: 3px solid #667eea;
   font-size: 14px;
-  color: #333;
+  color: #0A2E4F;
   line-height: 1.6;
   margin: 0;
 }
@@ -353,7 +353,7 @@
   border: 1px solid #d9e2ec;
   border-radius: 6px;
   background: #fff;
-  color: #333;
+  color: #0A2E4F;
   font: inherit;
 }
 
