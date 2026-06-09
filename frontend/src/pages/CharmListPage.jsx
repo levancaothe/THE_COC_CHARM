@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import api from "../services/api";
 import CategoryCard from "../components/CategoryCard";
 import { getProxyImageUrl } from "../utils/imageProxy";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 const CharmListPage = () => {
   const [charms, setCharms] = useState([]);
@@ -66,7 +67,7 @@ const CharmListPage = () => {
       style={{ padding: "60px 20px" }}
     >
       <header style={{ marginBottom: "40px", textAlign: "center" }}>
-        <h2 className="section-title">Bộ sưu tập Charm</h2>
+        <h2 className="section-title">Các Sản Phẩm Charm</h2>
       </header>
 
       {/* Category cards */}
@@ -174,7 +175,7 @@ const CharmListPage = () => {
 
       {/* Charm list for selected category */}
       {loading ? (
-        <div className="loading-spinner" style={{ margin: "50px auto" }}></div>
+        <LoadingSpinner message="Đang tải danh sách charm..." minHeight="200px" />
       ) : selectedCategory ? (
         <div>
           <h3

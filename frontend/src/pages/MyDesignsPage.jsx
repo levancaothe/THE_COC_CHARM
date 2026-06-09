@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import ConfirmModal from '../components/ConfirmModal';
+import LoadingSpinner from '../components/LoadingSpinner';
 import './MyDesignsPage.css';
 
 const SAVED_DESIGNS_KEY = 'charmify_saved_designs';
@@ -78,7 +79,7 @@ const MyDesignsPage = () => {
         </div>
 
         {loading ? (
-          <div className="loading-spinner"></div>
+          <LoadingSpinner message="Đang tải thiết kế của bạn..." minHeight="300px" />
         ) : (
           <div className="my-designs-grid">
             {designs.map((design) => (

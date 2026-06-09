@@ -38,6 +38,6 @@
 
   /* Typography */
   --sans: 'Montserrat', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --heading: 'Montserrat', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --heading: 'Playfair Display', Georgia, 'Times New Roman', serif;
   --serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
 }

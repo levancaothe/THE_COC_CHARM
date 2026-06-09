@@ -4,10 +4,13 @@ import api from "../services/api";
 import "./CollectionsPage.css";
 import "./MyDesignsPage.css";
 import comingSoonImg from "../assets/coming_soon.jpg";
+import CollectionInfoModal from "../components/CollectionInfoModal";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 const CollectionsPage = () => {
   const [collections, setCollections] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedCollection, setSelectedCollection] = useState(null);
 
   // Assuming your CartContext provides an addToCart function
   const { addToCart } = useCart();
@@ -29,10 +32,9 @@ const CollectionsPage = () => {
   }, []);
 
   const formatVND = (price) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(price);
+    return `${new Intl.NumberFormat("vi-VN", {
+      maximumFractionDigits: 0,
+    }).format(Number(price) || 0)} VND`;
   };
 
   const handleAddToCart = (collection) => {
@@ -63,7 +65,7 @@ const CollectionsPage = () => {
       </div>
 
       {loading ? (
-        <div className="loading">Đang tải danh sách...</div>
+        <LoadingSpinner message="Đang tải danh sách..." minHeight="300px" />
       ) : collections.length === 0 ? (
         <div className="empty-state">Hiện tại chưa có mẫu vòng nào.</div>
       ) : (
@@ -78,6 +80,25 @@ const CollectionsPage = () => {
                     <div className="my-design-card__head" style={{ borderBottom: "none", paddingBottom: 0 }}>
                       <div>
                         <h2 style={{ margin: 0 }}>{item.name}</h2>
+                        <span
+                          onClick={() => setSelectedCollection(item)}
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            fontSize: "0.8rem",
+                            color: "#d95c14",
+                            cursor: "pointer",
+                            fontWeight: "700",
+                            marginTop: "6px",
+                            textTransform: "uppercase",
+                            letterSpacing: "0.3px",
+                            transition: "opacity 0.2s"
+                          }}
+                          onMouseEnter={(e) => e.target.style.opacity = "0.8"}
+                          onMouseLeave={(e) => e.target.style.opacity = "1"}
+                        >
+                          Chi tiết →
+                        </span>
                       </div>
                     </div>
 
@@ -91,7 +112,7 @@ const CollectionsPage = () => {
                         alignItems: "center",
                         justifyContent: "center",
                         backgroundColor: "#f5f5f7",
-                        height: "260px",
+                        height: "160px",
                         border: "none",
                       }}
                     >
@@ -113,20 +134,25 @@ const CollectionsPage = () => {
                     <div className="my-design-card__head">
                       <div>
                         <h2>{item.name}</h2>
-                        <p
+                        <span
+                          onClick={() => setSelectedCollection(item)}
                           style={{
-                            fontSize: "0.85rem",
-                            color: "#4b647c",
-                            margin: "4px 0 0",
-                            display: "-webkit-box",
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: "vertical",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            fontSize: "0.8rem",
+                            color: "#d95c14",
+                            cursor: "pointer",
+                            fontWeight: "700",
+                            marginTop: "6px",
+                            textTransform: "uppercase",
+                            letterSpacing: "0.3px",
+                            transition: "opacity 0.2s"
                           }}
+                          onMouseEnter={(e) => e.target.style.opacity = "0.8"}
+                          onMouseLeave={(e) => e.target.style.opacity = "1"}
                         >
-                          {item.description || "Bộ sưu tập thiết kế sẵn"}
-                        </p>
+                          Chi tiết →
+                        </span>
                       </div>
                       <span>{item.charms?.length || 0} hạt</span>
                     </div>
@@ -168,6 +194,11 @@ const CollectionsPage = () => {
           })}
         </div>
       )}
+      <CollectionInfoModal
+        isOpen={!!selectedCollection}
+        onClose={() => setSelectedCollection(null)}
+        collection={selectedCollection}
+      />
     </div>
   );
 };
