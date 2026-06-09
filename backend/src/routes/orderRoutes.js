@@ -324,66 +324,31 @@ router.get("/", async (req, res) => {
 router.post("/webhook", async (req, res) => {
   try {
     const webhookData = req.body;
+    const verifiedData = payos.verifyPaymentWebhookData(webhookData);
 
-    // 1. If PayOS is just checking if the URL is alive, approve it immediately!
-    if (
-      !webhookData ||
-      Object.keys(webhookData).length === 0 ||
-      webhookData.type === "TEST"
-    ) {
-      return res
-        .status(200)
-        .json({ success: true, message: "Webhook is alive and ready!" });
-    }
+    if (verifiedData.code === "00") {
+      const orderCode = verifiedData.orderCode;
 
-    // 2. Safe parsing for both fake test scripts and official secure PayOS data
-    let verifiedData;
-    try {
-      if (payos.webhooks && typeof payos.webhooks.verify === "function") {
-        verifiedData = payos.webhooks.verify(webhookData);
-      } else if (typeof payos.verifyPaymentWebhookData === "function") {
-        verifiedData = payos.verifyPaymentWebhookData(webhookData);
-      }
-    } catch (sigError) {
-      // Fallback: If we are intentionally manually testing via browser console, allow fake structure
-      if (webhookData.data) {
-        verifiedData = webhookData.data;
-      } else {
-        throw sigError;
-      }
-    }
-
-    // 3. Extract the numeric order code and update MongoDB
-    const orderCodeNum =
-      verifiedData && verifiedData.orderCode
-        ? Number(verifiedData.orderCode)
-        : null;
-
-    if (orderCodeNum) {
+      // Update order in database to Paid
       await Order.findOneAndUpdate(
-        { orderCode: orderCodeNum },
+        { orderCode },
         {
           "paymentInfo.status": "Paid",
           status: "Processing",
+          "paymentInfo.transactionId": verifiedData.transactionDateTime,
         },
       );
-
-      return res.status(200).json({
-        success: true,
-        message: "Database updated successfully!",
-        orderCode: orderCodeNum,
-      });
     }
 
-    return res
-      .status(200)
-      .json({ success: false, message: "No orderCode processed" });
+    res.status(200).json({
+      success: true,
+      message: "Webhook processed successfully",
+    });
   } catch (error) {
-    // Always give a 200 to PayOS validation requests so they save cleanly
-    return res.status(200).json({
+    console.error("Webhook Error:", error);
+    res.status(400).json({
       success: false,
-      message: "Gracefully handled background validation",
-      error: error.message,
+      message: "Invalid webhook data",
     });
   }
 });
