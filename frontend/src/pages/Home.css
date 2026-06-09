@@ -278,7 +278,7 @@
   top: 0;
   left: 8%;
   border: 5px solid var(--coc-orange);
-  box-shadow: 0 5px 8px rgba(0, 0, 0, 0.23);
+  box-shadow: 0 5px 8px rgba(10, 46, 79, 0.23);
 }
 
 .hero-frame--blue {
@@ -287,7 +287,7 @@
   right: 0;
   top: 235px;
   border: 5px solid var(--coc-navy);
-  box-shadow: 0 5px 8px rgba(0, 0, 0, 0.23);
+  box-shadow: 0 5px 8px rgba(10, 46, 79, 0.23);
 }
 
 .home-section {

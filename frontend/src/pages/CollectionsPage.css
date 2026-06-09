@@ -10,7 +10,7 @@
 
 .collections-header h1 {
   font-size: 2rem;
-  color: #333;
+  color: #0A2E4F;
   margin-bottom: 10px;
 }
 
@@ -29,7 +29,7 @@
   background: #fff;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 15px rgba(10, 46, 79, 0.05);
   transition: transform 0.3s ease;
   display: flex;
   flex-direction: column;
@@ -37,7 +37,7 @@
 
 .collection-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 25px rgba(10, 46, 79, 0.1);
 }
 
 .card-image {
@@ -62,7 +62,7 @@
 .card-info h3 {
   margin: 0 0 10px 0;
   font-size: 1.25rem;
-  color: #333;
+  color: #0A2E4F;
 }
 
 .card-info .description {

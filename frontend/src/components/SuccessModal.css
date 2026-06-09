@@ -23,7 +23,7 @@
   width: 90%;
   text-align: center;
   animation: slideUp 0.4s ease;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 60px rgba(10, 46, 79, 0.3);
 }
 
 .success-icon {

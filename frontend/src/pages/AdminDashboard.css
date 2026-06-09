@@ -44,7 +44,7 @@
   border: 1px solid rgba(255, 255, 255, 0.65);
   border-radius: 8px;
   padding: 34px;
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+  box-shadow: 0 24px 70px rgba(10, 46, 79, 0.28);
 }
 
 .login-brand {
@@ -763,7 +763,7 @@
   border: 1px solid rgba(255, 255, 255, 0.7);
   border-radius: 10px;
   background: #fff;
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.26);
+  box-shadow: 0 24px 70px rgba(10, 46, 79, 0.26);
   animation: slideUp 0.22s ease;
 }
 

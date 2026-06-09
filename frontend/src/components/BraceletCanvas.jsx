@@ -124,7 +124,7 @@ const BraceletCanvas = React.forwardRef(({ selectedCharms, onAddCharm, onRemoveC
         overflowX: 'auto',
         borderRadius: '24px',
         border: exportMode ? 'none' : '1px solid rgba(10, 46, 79, 0.12)',
-        boxShadow: exportMode ? 'none' : 'inset 0 4px 15px rgba(0,0,0,0.02)'
+        boxShadow: exportMode ? 'none' : 'inset 0 4px 15px rgba(10,46,79,0.02)'
       }}
     >
       {!exportMode && (
