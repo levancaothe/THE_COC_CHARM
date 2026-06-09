@@ -13,6 +13,7 @@ import GuidePage from "./pages/GuidePage";
 import AboutUsPage from "./pages/AboutUsPage";
 import { CartProvider } from "./context/CartContext";
 import CollectionsPage from "./pages/CollectionsPage";
+import LandingPage from "./pages/LandingPage";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
               <Route path="/policy" element={<GuidePage />} />
               <Route path="/about" element={<GuidePage />} />
               <Route path="/collections" element={<CollectionsPage />} />
+              <Route path="/welcome" element={<LandingPage />} />
             </Routes>
           </Layout>
         </Router>
