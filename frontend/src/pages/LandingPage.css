@@ -191,14 +191,16 @@ select {
   padding: 0.5rem 1.5rem;
   margin-bottom: 2rem;
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 1000;
   color: var(--orange);
   letter-spacing: 0.05em;
   text-transform: uppercase;
+  background: var(--bg);
 }
 .lp-hero__countdown strong {
   font-size: 1rem;
   letter-spacing: 0.12em;
+  font-weight: 1000;
 }
 .lp-hero__heading {
   font-family: var(--font-serif);

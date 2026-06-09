@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./LandingPage.css";
 import logo from "../assets/logo.png"; // 👈 put your frog logo here
+import { Link } from "react-router-dom";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const formatCurrency = (n) => n.toLocaleString("vi-VN") + "đ";
@@ -99,9 +100,9 @@ export default function LandingPage() {
           trang sức mang đậm dấu ấn cá nhân của chính bạn hoặc người thương.
         </p>
 
-        <button className="lp-btn lp-btn--primary" onClick={scrollToOrder}>
+        <Link to="/charms" className="lp-btn lp-btn--primary">
           KHÁM PHÁ NGAY
-        </button>
+        </Link>
       </section>
 
       {/* ── PRODUCT CARDS ──────────────────────────────────────────────────── */}
@@ -149,7 +150,9 @@ export default function LandingPage() {
             <br />
             để trang trí lên chiếc vòng tay của mình!
           </p>
-          <button className="lp-btn lp-btn--primary">TỰ THIẾT KẾ</button>
+          <Link to="/designer" className="lp-btn lp-btn--primary">
+            TỰ THIẾT KẾ
+          </Link>
         </div>
       </section>
 
