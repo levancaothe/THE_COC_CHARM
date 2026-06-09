@@ -332,21 +332,38 @@ router.post("/webhook", async (req, res) => {
     // Attempt to verify the data
     const verifiedData = payos.verifyPaymentWebhookData(webhookData);
 
-    // If it's a real successful payment, update the database
-    if (verifiedData && verifiedData.code === "00") {
+    console.log(
+      "✅ Webhook verified successfully! Order Code:",
+      verifiedData.orderCode,
+    );
+
+    // 🛠️ THE FIX: Check 'webhookData.code' for "00", NOT 'verifiedData.code'
+    if (webhookData.code === "00" && verifiedData.orderCode) {
       const orderCode = verifiedData.orderCode;
 
-      await Order.findOneAndUpdate(
-        { orderCode },
+      console.log(`🔄 Updating database for order ${orderCode}...`);
+
+      const updatedOrder = await Order.findOneAndUpdate(
+        { orderCode: orderCode },
         {
           "paymentInfo.status": "Paid",
           status: "Processing",
-          "paymentInfo.transactionId": verifiedData.transactionDateTime,
+          "paymentInfo.transactionId":
+            verifiedData.reference || "PayOS_Transfer",
         },
+        { new: true }, // This tells Mongoose to return the updated document
       );
+
+      if (updatedOrder) {
+        console.log("🎉 Database successfully updated to Paid!");
+      } else {
+        console.log(
+          "⚠️ Could not find an order in the DB with that orderCode!",
+        );
+      }
     }
 
-    // Always return 200 OK to PayOS so they know we received it
+    // Always return 200 OK to PayOS
     return res.status(200).json({
       success: true,
       message: "Webhook processed successfully",
