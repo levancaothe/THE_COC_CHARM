@@ -9,6 +9,7 @@
   --navy: #1b2a4a;
   --white: #ffffff;
   --bg: #fdfcfb;
+  --coc-paper: #eff3f8;
   --border: #e2e2e2;
   --text: #3a3a3a;
   --muted: #888;
@@ -178,8 +179,8 @@ select {
 .lp-hero {
   text-align: center;
   padding: 5rem var(--pad-x);
-  max-width: var(--max-w);
-  margin-inline: auto;
+
+  background: var(--coc-paper);
 }
 .lp-hero__countdown {
   display: inline-flex;
