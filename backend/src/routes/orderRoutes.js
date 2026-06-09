@@ -321,45 +321,56 @@ router.get("/", async (req, res) => {
 });
 
 // 🟢 4. ADD WEBHOOK ROUTE TO AUTOMATICALLY UPDATE ORDER STATUS
-// 🟢 FINAL BULLETPROOF WEBHOOK ROUTE
+// 🔍 DIAGNOSTIC WEBHOOK ROUTE
 router.post("/webhook", async (req, res) => {
   try {
     const webhookData = req.body;
 
-    // 1. Securely verify the PayOS signature data
-    const verifiedData = payos.verifyPaymentWebhookData(webhookData);
+    // 1. Auto-detect the correct PayOS SDK method to prevent syntax crashes
+    let verifiedData;
+    if (payos.webhooks && typeof payos.webhooks.verify === "function") {
+      verifiedData = payos.webhooks.verify(webhookData);
+    } else if (typeof payos.verifyPaymentWebhookData === "function") {
+      verifiedData = payos.verifyPaymentWebhookData(webhookData);
+    } else {
+      throw new Error(
+        "PayOS SDK verification method not found. Check how 'payos' is imported.",
+      );
+    }
 
-    // 2. Safe number conversion (MongoDB stores orderCode as a Number, so we cast it just in case)
+    // 2. Extract the order code safely
     const orderCodeNum =
       verifiedData && verifiedData.orderCode
         ? Number(verifiedData.orderCode)
         : null;
 
-    // 3. Fix the conditional check: PayOS success code "00" is on webhookData, NOT verifiedData
-    if ((webhookData.code === "00" || req.body.code === "00") && orderCodeNum) {
-      // 4. Update the database using the converted numeric orderCode
-      await Order.findOneAndUpdate(
+    if (orderCodeNum) {
+      // 3. Update the database
+      const updatedOrder = await Order.findOneAndUpdate(
         { orderCode: orderCodeNum },
         {
           "paymentInfo.status": "Paid",
           status: "Processing",
-          "paymentInfo.transactionId":
-            verifiedData.reference ||
-            String(verifiedData.paymentLinkId || "PayOS"),
         },
+        { new: true },
       );
+
+      return res.status(200).json({
+        success: true,
+        message: "Database updated successfully!",
+        updatedOrder,
+      });
     }
 
-    // 5. Always answer PayOS with a 200 OK success response
-    return res.status(200).json({
-      success: true,
-      message: "Webhook processed completely",
-    });
+    return res
+      .status(200)
+      .json({ success: false, message: "No orderCode found in verified data" });
   } catch (error) {
-    // 6. Even if something fails, return a 200 so PayOS doesn't break down or lock your URL
-    return res.status(200).json({
-      success: true,
-      message: "Webhook caught error but returned 200",
+    // 🚨 THE TRICK: Send the exact crash report back to the client so we can read it!
+    return res.status(500).json({
+      success: false,
+      errorLocation: "Catch Block",
+      errorMessage: error.message,
     });
   }
 });
