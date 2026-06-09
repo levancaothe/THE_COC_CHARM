@@ -808,6 +808,151 @@
   padding: 24px;
 }
 
+.discount-modal {
+  position: relative;
+  width: min(100%, 640px);
+  text-align: left;
+  background:
+    linear-gradient(180deg, rgba(245, 248, 251, 0.95), rgba(255, 255, 255, 0.98)),
+    #fff;
+}
+
+.discount-modal__title {
+  margin: 0 0 18px;
+  text-align: center;
+  color: var(--admin-text);
+  font-family: var(--heading);
+  font-size: 22px;
+}
+
+.discount-modal__close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--admin-muted);
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.discount-modal__close:hover {
+  border-color: rgba(10, 46, 79, 0.16);
+  background: #f3f7fb;
+  color: var(--admin-text);
+  transform: translateY(-1px);
+}
+
+.discount-modal .form-group {
+  margin-bottom: 16px;
+}
+
+.discount-modal .form-group label {
+  margin-bottom: 8px;
+}
+
+.discount-modal .form-group input,
+.discount-modal .form-group select,
+.discount-modal .form-group textarea {
+  min-height: 44px;
+}
+
+.discount-modal__mode-group {
+  margin-bottom: 18px;
+}
+
+.discount-modal__mode-options {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.discount-modal__mode-option {
+  display: grid;
+  grid-template-columns: 16px 1fr;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  background: var(--admin-panel-soft);
+  color: var(--admin-text);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+}
+
+.discount-modal__mode-option:hover {
+  border-color: rgba(10, 46, 79, 0.18);
+  background: #fff;
+  transform: translateY(-1px);
+}
+
+.discount-modal__mode-option input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  justify-self: center;
+  flex: 0 0 auto;
+  accent-color: var(--admin-primary);
+}
+
+.discount-modal__mode-option span {
+  display: block;
+  line-height: 1.35;
+}
+
+.discount-modal__code-group {
+  margin-bottom: 18px;
+}
+
+.discount-modal__hint {
+  display: block;
+  margin-top: 6px;
+  color: #64748b;
+  font-size: 12px;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.discount-modal__users-group {
+  margin-bottom: 18px;
+}
+
+.discount-modal__dates {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.discount-modal__date-field {
+  margin-bottom: 0;
+}
+
+.discount-modal__dates .form-group {
+  margin-bottom: 0;
+}
+
 .modal-actions {
   display: flex;
   justify-content: flex-end;
@@ -1066,6 +1211,14 @@
   .modal-content form,
   .modal-header {
     padding: 18px;
+  }
+
+  .discount-modal {
+    width: min(100%, 560px);
+  }
+
+  .discount-modal__dates {
+    grid-template-columns: 1fr;
   }
 
   .scroll-to-top {
