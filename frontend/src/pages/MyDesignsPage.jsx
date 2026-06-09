@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import ConfirmModal from '../components/ConfirmModal';
@@ -64,7 +64,7 @@ const MyDesignsPage = () => {
       setDesigns(nextDesigns);
       setIsModalOpen(false);
       setDeleteId(null);
-    } catch (error) {
+    } catch {
       alert('Lỗi khi xóa thiết kế');
     }
   };
