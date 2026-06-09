@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import { clampItemQuantity, getItemMaxQuantity } from "../utils/inventory";
 
 const CartContext = createContext();

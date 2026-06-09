@@ -4,7 +4,6 @@ const Charm = require("../models/Charm");
 const Order = require("../models/Order");
 const DiscountEvent = require("../models/DiscountEvent");
 
-// 🟢 1. IMPORT AND INITIALIZE PAYOS
 const { PayOS } = require("@payos/node");
 const payos = new PayOS({
   clientId: process.env.PAYOS_CLIENT_ID,
@@ -113,16 +112,19 @@ router.post("/", async (req, res) => {
     }
   } else {
     // Check for auto-applied discount
-    const autoDiscount = await DiscountEvent.findOne({
+    const autoDiscounts = await DiscountEvent.find({
       $or: [{ code: { $exists: false } }, { code: null }, { code: "" }],
       isActive: true,
       startDate: { $lte: now },
       endDate: { $gte: now }
-    }).sort({ discountPercent: -1 });
+    }).sort({ discountPercent: -1, createdAt: -1 });
 
-    if (autoDiscount && (autoDiscount.maxUsers === undefined || autoDiscount.maxUsers === null || autoDiscount.usedUsers < autoDiscount.maxUsers)) {
-      appliedDiscount = autoDiscount;
-    }
+    appliedDiscount = autoDiscounts.find(
+      (discount) =>
+        discount.maxUsers === undefined ||
+        discount.maxUsers === null ||
+        discount.usedUsers < discount.maxUsers,
+    ) || null;
   }
 
   if (appliedDiscount) {

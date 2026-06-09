@@ -15,9 +15,7 @@ const CartPage = () => {
     toggleSelection,
     removeFromCart,
     updateQuantity,
-    totalPrice,
     clearCart,
-    addToCart,
   } = useCart();
 
   const [customerInfo, setCustomerInfo] = useState({
@@ -56,6 +54,10 @@ const CartPage = () => {
   const [discountAmount, setDiscountAmount] = useState(0);
   const [discountError, setDiscountError] = useState("");
   const [isApplying, setIsApplying] = useState(false);
+  const appliedDiscountMode = useMemo(() => {
+    if (!appliedDiscount) return null;
+    return appliedDiscount.code ? "code" : "auto";
+  }, [appliedDiscount]);
 
   const validateDiscount = async (codeToValidate) => {
     if (!hasSelectedItems) {
@@ -69,7 +71,7 @@ const CartPage = () => {
     try {
       const response = await api.post("/discounts/validate", {
         code: codeToValidate,
-        subtotal: subtotal
+        subtotal: subtotal,
       });
       if (response.data.valid) {
         setAppliedDiscount(response.data.discount);
@@ -105,7 +107,7 @@ const CartPage = () => {
   const handleApplyCoupon = (e) => {
     e.preventDefault();
     if (!couponCode.trim()) {
-      alert("Vui lòng nhập mã giảm giá!");
+      alert("Vui lòng nhập đúng mã giảm giá, bao gồm cả chữ hoa/chữ thường.");
       return;
     }
     validateDiscount(couponCode.trim());
@@ -256,7 +258,8 @@ const CartPage = () => {
         })),
         inventoryImpact: buildInventoryImpact(selectedItems),
         totalPrice: subtotal - discountAmount,
-        discountCode: appliedDiscount && appliedDiscount.code ? appliedDiscount.code : null,
+        discountCode:
+          appliedDiscountMode === "code" ? appliedDiscount.code : null,
         customerInfo: {
           name: customerInfo.name.trim(),
           phone: customerInfo.phone.trim(),
@@ -610,7 +613,7 @@ const CartPage = () => {
                     <div style={{ display: "flex", gap: "8px" }}>
                       <input
                         type="text"
-                        placeholder="Nhập mã giảm giá..."
+                        placeholder="Nhập mã nếu có, để trống nếu dùng KM tự động"
                         value={couponCode}
                         onChange={(e) => setCouponCode(e.target.value)}
                         disabled={isApplying}
@@ -623,7 +626,7 @@ const CartPage = () => {
                           outline: "none"
                         }}
                       />
-                      {appliedDiscount && appliedDiscount.code ? (
+                      {appliedDiscountMode === "code" ? (
                         <button
                           type="button"
                           onClick={handleRemoveCoupon}
@@ -668,10 +671,15 @@ const CartPage = () => {
                     )}
                     {!appliedDiscount && (
                       <p style={{ color: "#666", fontSize: "0.75rem", margin: "6px 0 0", fontStyle: "italic" }}>
-                        💡 Lưu ý: Mã code phải khớp chính xác
+                        💡 Lưu ý: Mã code phải khớp chính xác từng chữ, kể cả hoa/thường.
                       </p>
                     )}
-                    {appliedDiscount && (
+                    {appliedDiscountMode === "auto" && (
+                      <p style={{ color: "#2a9d8f", fontSize: "0.85rem", margin: "6px 0 0", fontWeight: "600" }}>
+                        ✓ Khuyến mãi tự động đã được áp dụng
+                      </p>
+                    )}
+                    {appliedDiscountMode === "code" && (
                       <p style={{ color: "#2a9d8f", fontSize: "0.85rem", margin: "6px 0 0", fontWeight: "600" }}>
                         ✓ Đã áp dụng: {appliedDiscount.name} (-{appliedDiscount.discountPercent}%)
                       </p>
