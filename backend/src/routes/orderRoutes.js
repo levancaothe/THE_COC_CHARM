@@ -44,7 +44,8 @@ const buildCharmRequirements = (items = []) => {
     }
 
     if (
-      (item?.productType === "BraceletDesign" || item?.productType === "Collection") &&
+      (item?.productType === "BraceletDesign" ||
+        item?.productType === "Collection") &&
       Array.isArray(item?.designCharms)
     ) {
       item.designCharms.forEach((charmId) => {
@@ -78,7 +79,10 @@ const buildRequirementsFromInventoryImpact = (inventoryImpact = []) => {
 // --- CREATE ORDER ROUTE ---
 router.post("/", async (req, res) => {
   const items = normalizeOrderItems(req.body.items);
-  const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const subtotal = items.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0,
+  );
 
   // 🟢 2. GENERATE UNIQUE ORDER CODE FOR PAYOS
   const orderCode = Number(String(Date.now()).slice(-6));
@@ -93,22 +97,33 @@ router.post("/", async (req, res) => {
   // Securely resolve discount on backend
   let appliedDiscount = null;
   const now = new Date();
-  
+
   if (req.body.discountCode && req.body.discountCode.trim() !== "") {
     const codeDiscount = await DiscountEvent.findOne({
       code: req.body.discountCode.trim(),
       isActive: true,
       startDate: { $lte: now },
-      endDate: { $gte: now }
+      endDate: { $gte: now },
     });
 
     if (codeDiscount) {
-      if (codeDiscount.maxUsers !== undefined && codeDiscount.maxUsers !== null && codeDiscount.usedUsers >= codeDiscount.maxUsers) {
-        return res.status(400).json({ success: false, message: "Mã giảm giá đã hết lượt sử dụng" });
+      if (
+        codeDiscount.maxUsers !== undefined &&
+        codeDiscount.maxUsers !== null &&
+        codeDiscount.usedUsers >= codeDiscount.maxUsers
+      ) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Mã giảm giá đã hết lượt sử dụng" });
       }
       appliedDiscount = codeDiscount;
     } else {
-      return res.status(400).json({ success: false, message: "Mã giảm giá không tồn tại hoặc đã hết hạn" });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Mã giảm giá không tồn tại hoặc đã hết hạn",
+        });
     }
   } else {
     // Check for auto-applied discount
@@ -116,19 +131,22 @@ router.post("/", async (req, res) => {
       $or: [{ code: { $exists: false } }, { code: null }, { code: "" }],
       isActive: true,
       startDate: { $lte: now },
-      endDate: { $gte: now }
+      endDate: { $gte: now },
     }).sort({ discountPercent: -1, createdAt: -1 });
 
-    appliedDiscount = autoDiscounts.find(
-      (discount) =>
-        discount.maxUsers === undefined ||
-        discount.maxUsers === null ||
-        discount.usedUsers < discount.maxUsers,
-    ) || null;
+    appliedDiscount =
+      autoDiscounts.find(
+        (discount) =>
+          discount.maxUsers === undefined ||
+          discount.maxUsers === null ||
+          discount.usedUsers < discount.maxUsers,
+      ) || null;
   }
 
   if (appliedDiscount) {
-    const discountAmount = Math.round(subtotal * (appliedDiscount.discountPercent / 100));
+    const discountAmount = Math.round(
+      subtotal * (appliedDiscount.discountPercent / 100),
+    );
     payload.discountCode = appliedDiscount.code || appliedDiscount.name;
     payload.discountAmount = discountAmount;
     payload.totalPrice = Math.max(0, subtotal - discountAmount);
@@ -221,7 +239,9 @@ router.post("/", async (req, res) => {
 
     // Increment discount usage count
     if (appliedDiscount) {
-      await DiscountEvent.findByIdAndUpdate(appliedDiscount._id, { $inc: { usedUsers: 1 } });
+      await DiscountEvent.findByIdAndUpdate(appliedDiscount._id, {
+        $inc: { usedUsers: 1 },
+      });
     }
 
     // 🟢 3. GENERATE PAYOS PAYMENT LINK IF METHOD IS PAYOS (Bypass if totalPrice is 0)
@@ -304,14 +324,18 @@ router.get("/", async (req, res) => {
 
 // 🟢 4. ADD WEBHOOK ROUTE TO AUTOMATICALLY UPDATE ORDER STATUS
 router.post("/webhook", async (req, res) => {
+  console.log("🚨 WEBHOOK HIT! Payload:", req.body); // Helpful for debugging in Vercel logs
+
   try {
     const webhookData = req.body;
+
+    // Attempt to verify the data
     const verifiedData = payos.verifyPaymentWebhookData(webhookData);
 
-    if (verifiedData.code === "00") {
+    // If it's a real successful payment, update the database
+    if (verifiedData && verifiedData.code === "00") {
       const orderCode = verifiedData.orderCode;
 
-      // Update order in database to Paid
       await Order.findOneAndUpdate(
         { orderCode },
         {
@@ -322,15 +346,23 @@ router.post("/webhook", async (req, res) => {
       );
     }
 
-    res.status(200).json({
+    // Always return 200 OK to PayOS so they know we received it
+    return res.status(200).json({
       success: true,
       message: "Webhook processed successfully",
     });
   } catch (error) {
-    console.error("Webhook Error:", error);
-    res.status(400).json({
-      success: false,
-      message: "Invalid webhook data",
+    console.error(
+      "Webhook Verification Error (Likely a test ping):",
+      error.message,
+    );
+
+    // 🛠️ THE FIX: We must return 200 OK even if verification fails,
+    // otherwise the PayOS dashboard will refuse to save the Webhook URL!
+    return res.status(200).json({
+      success: true,
+      message:
+        "Webhook received (verification failed, but returning 200 for PayOS setup)",
     });
   }
 });
@@ -364,7 +396,8 @@ router.delete("/cancel-payos-order", async (req, res) => {
             (charmsToRestore.get(item.product) || 0) + qty,
           );
         } else if (
-          (item.productType === "BraceletDesign" || item.productType === "Collection") &&
+          (item.productType === "BraceletDesign" ||
+            item.productType === "Collection") &&
           Array.isArray(item.designCharms)
         ) {
           item.designCharms.forEach((charmId) => {
