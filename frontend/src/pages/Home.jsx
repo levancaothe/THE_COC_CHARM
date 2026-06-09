@@ -290,7 +290,7 @@ const Home = () => {
               </div>
             ))}
           </div>
-          <Link to="/charms" className="outline-link">Khám phá bộ sưu tập Charm</Link>
+          <Link to="/collections" className="outline-link">Khám phá bộ sưu tập Charm</Link>
         </div>
       </section>
 
