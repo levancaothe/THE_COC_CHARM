@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 
 const DiscountModal = ({ discount, onSave, onClose }) => {
   // Local state for the form
@@ -8,12 +8,14 @@ const DiscountModal = ({ discount, onSave, onClose }) => {
     startDate: "",
     endDate: "",
     code: "",
-    maxUsers: "",
+    maxUsers: "1",
   });
+  const [discountMode, setDiscountMode] = useState("auto");
 
   // If we are editing, fill the form with existing data
   useEffect(() => {
     if (discount) {
+      const hasCode = Boolean(discount.code && String(discount.code).trim());
       setFormData({
         name: discount.name || "",
         discountPercent: discount.discountPercent || "",
@@ -25,8 +27,19 @@ const DiscountModal = ({ discount, onSave, onClose }) => {
           ? new Date(discount.endDate).toISOString().split("T")[0]
           : "",
         code: discount.code || "",
-        maxUsers: discount.maxUsers !== undefined && discount.maxUsers !== null ? discount.maxUsers : "",
+        maxUsers:
+          discount.maxUsers !== undefined && discount.maxUsers !== null
+            ? String(discount.maxUsers)
+            : "1",
       });
+      setDiscountMode(hasCode ? "code" : "auto");
+    } else {
+      setDiscountMode("auto");
+      setFormData((prev) => ({
+        ...prev,
+        code: "",
+        maxUsers: "1",
+      }));
     }
   }, [discount]);
 
@@ -34,7 +47,8 @@ const DiscountModal = ({ discount, onSave, onClose }) => {
     e.preventDefault();
     const dataToSave = {
       ...formData,
-      code: formData.code.trim() || null,
+      code:
+        discountMode === "code" ? formData.code.trim() || null : null,
       maxUsers: formData.maxUsers ? parseInt(formData.maxUsers, 10) : 1,
     };
     onSave(dataToSave);
@@ -43,43 +57,27 @@ const DiscountModal = ({ discount, onSave, onClose }) => {
   return (
     <div className="modal-overlay">
       <div
-        className="modal-content"
-        style={{
-          background: "var(--bg-surface, #fff)",
-          position: "relative",
-          textAlign: "left",
-        }}
+        className="modal-content discount-modal"
       >
-        {/* Close 'X' Button */}
         <button
           type="button"
           onClick={onClose}
-          style={{
-            position: "absolute",
-            top: "15px",
-            right: "15px",
-            background: "none",
-            border: "none",
-            fontSize: "1.5rem",
-            cursor: "pointer",
-            color: "var(--text-muted)",
-          }}
+          className="discount-modal__close"
         >
           ×
         </button>
 
-        <h3 style={{ textAlign: "center", marginTop: 0, marginBottom: "20px" }}>
+        <h3 className="discount-modal__title">
           {discount ? "Chỉnh sửa Sự Kiện" : "Tạo Sự Kiện Mới"}
         </h3>
 
         <form onSubmit={handleSubmit}>
-          <div className="form-group" style={{ marginBottom: "15px" }}>
+          <div className="form-group">
             <label>Tên Sự Kiện</label>
             <input
               type="text"
               className="form-control"
               placeholder="VD: Black Friday"
-              style={{ width: "100%", padding: "8px", marginTop: "5px" }}
               value={formData.name}
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
@@ -88,12 +86,11 @@ const DiscountModal = ({ discount, onSave, onClose }) => {
             />
           </div>
 
-          <div className="form-group" style={{ marginBottom: "15px" }}>
+          <div className="form-group">
             <label>Phần trăm giảm (%)</label>
             <input
               type="number"
               className="form-control"
-              style={{ width: "100%", padding: "8px", marginTop: "5px" }}
               value={formData.discountPercent}
               onChange={(e) =>
                 setFormData({ ...formData, discountPercent: e.target.value })
@@ -104,30 +101,60 @@ const DiscountModal = ({ discount, onSave, onClose }) => {
             />
           </div>
 
-          <div className="form-group" style={{ marginBottom: "15px" }}>
-            <label>Mã giảm giá (Code)</label>
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Tự chọn mã code (VD: CHAOMUNG2026) - Để trống nếu áp dụng tự động"
-              style={{ width: "100%", padding: "8px", marginTop: "5px" }}
-              value={formData.code}
-              onChange={(e) =>
-                setFormData({ ...formData, code: e.target.value })
-              }
-            />
-            <small style={{ display: "block", marginTop: "6px", color: "#666", fontStyle: "italic" }}>
-              ℹ️ Mã code phải khớp chính xác (case-sensitive) kể cả chữ hoa, chữ thường. VD: "SUMMER2026" khác "summer2026"
-            </small>
+          <div className="form-group discount-modal__mode-group">
+            <label>Kiểu áp dụng</label>
+            <div className="discount-modal__mode-options">
+              <label className="discount-modal__mode-option">
+                <input
+                  type="radio"
+                  name="discountMode"
+                  value="auto"
+                  checked={discountMode === "auto"}
+                  onChange={() => {
+                    setDiscountMode("auto");
+                    setFormData((prev) => ({ ...prev, code: "" }));
+                  }}
+                />
+                <span>Áp dụng cho toàn bộ</span>
+              </label>
+              <label className="discount-modal__mode-option">
+                <input
+                  type="radio"
+                  name="discountMode"
+                  value="code"
+                  checked={discountMode === "code"}
+                  onChange={() => setDiscountMode("code")}
+                />
+                <span>Tạo code</span>
+              </label>
+            </div>
           </div>
 
-          <div className="form-group" style={{ marginBottom: "15px" }}>
+          {discountMode === "code" && (
+            <div className="form-group discount-modal__code-group">
+              <label>Mã giảm giá (Code)</label>
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Tự chọn mã code (VD: CHAOMUNG2026)"
+                value={formData.code}
+                onChange={(e) =>
+                  setFormData({ ...formData, code: e.target.value })
+                }
+                required={discountMode === "code"}
+              />
+              <small className="discount-modal__hint">
+                ℹ️ Mã code phải khớp chính xác (case-sensitive) kể cả chữ hoa, chữ thường. VD: "SUMMER2026" khác "summer2026"
+              </small>
+            </div>
+          )}
+
+          <div className="form-group discount-modal__users-group">
             <label>Số người tối đa được áp dụng</label>
             <input
               type="number"
               className="form-control"
-              placeholder="Để trống nếu không giới hạn"
-              style={{ width: "100%", padding: "8px", marginTop: "5px" }}
+              placeholder="Mặc định: 1"
               value={formData.maxUsers}
               onChange={(e) =>
                 setFormData({ ...formData, maxUsers: e.target.value })
@@ -136,13 +163,12 @@ const DiscountModal = ({ discount, onSave, onClose }) => {
             />
           </div>
 
-          <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
-            <div className="form-group" style={{ flex: 1 }}>
+          <div className="discount-modal__dates">
+            <div className="form-group discount-modal__date-field">
               <label>Ngày bắt đầu</label>
               <input
                 type="date"
                 className="form-control"
-                style={{ width: "100%", padding: "8px", marginTop: "5px" }}
                 value={formData.startDate}
                 onChange={(e) =>
                   setFormData({ ...formData, startDate: e.target.value })
@@ -150,12 +176,11 @@ const DiscountModal = ({ discount, onSave, onClose }) => {
                 required
               />
             </div>
-            <div className="form-group" style={{ flex: 1 }}>
+            <div className="form-group">
               <label>Ngày kết thúc</label>
               <input
                 type="date"
                 className="form-control"
-                style={{ width: "100%", padding: "8px", marginTop: "5px" }}
                 value={formData.endDate}
                 onChange={(e) =>
                   setFormData({ ...formData, endDate: e.target.value })

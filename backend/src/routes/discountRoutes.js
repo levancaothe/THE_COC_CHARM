@@ -82,14 +82,21 @@ router.post("/validate", async (req, res) => {
     
     // Tìm khuyến mãi tự động (không có code) nếu code rỗng
     if (!code || code.trim() === "") {
-      const autoDiscount = await DiscountEvent.findOne({
+      const autoDiscounts = await DiscountEvent.find({
         $or: [{ code: { $exists: false } }, { code: null }, { code: "" }],
         isActive: true,
         startDate: { $lte: now },
         endDate: { $gte: now }
-      }).sort({ discountPercent: -1 });
+      }).sort({ discountPercent: -1, createdAt: -1 });
 
-      if (autoDiscount && (autoDiscount.maxUsers === undefined || autoDiscount.maxUsers === null || autoDiscount.usedUsers < autoDiscount.maxUsers)) {
+      const autoDiscount = autoDiscounts.find(
+        (discount) =>
+          discount.maxUsers === undefined ||
+          discount.maxUsers === null ||
+          discount.usedUsers < discount.maxUsers,
+      );
+
+      if (autoDiscount) {
         const discountAmount = Math.round((subtotal || 0) * (autoDiscount.discountPercent / 100));
         return res.status(200).json({
           valid: true,
