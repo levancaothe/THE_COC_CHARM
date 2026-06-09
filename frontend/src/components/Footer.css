@@ -16,6 +16,9 @@
 }
 
 .footer-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
 }
 
@@ -35,6 +38,7 @@
 .footer-brand p {
   margin: 18px auto 0;
   max-width: 265px;
+  text-align: center;
 }
 
 .footer-column h3 {
@@ -56,7 +60,7 @@
   white-space: nowrap;
 }
 
-.footer-column p + p {
+.footer-column p+p {
   margin-top: 16px;
 }
 
