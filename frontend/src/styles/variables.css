@@ -9,7 +9,10 @@
   --white: #FFFFFF;
   --text-main: #0A2E4F;
   --text-muted: #4B647C;
-  
+  --text: #0A2E4F;
+  --text-h: #0A2E4F;
+  --border: rgba(10, 46, 79, 0.15);
+
   /* Gradients */
   --gold-gradient: linear-gradient(135deg, #0A2E4F 0%, #D95C14 100%);
   --dark-gradient: linear-gradient(135deg, #0A2E4F 0%, #082847 100%);
