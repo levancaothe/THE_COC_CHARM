@@ -11,6 +11,14 @@ const formatVND = (value) =>
     maximumFractionDigits: 0,
   }).format(Number(value) || 0)} VND`;
 
+const ORDER_STATUS_MAP = {
+  Pending: "Chờ xử lý",
+  Processing: "Đang xử lý",
+  Shipped: "Đang giao hàng",
+  Delivered: "Đã giao hàng",
+  Cancelled: "Đã hủy",
+};
+
 function StatCard({ title, value, icon, tone }) {
   return (
     <div className={`stat-card stat-card-${tone}`}>
@@ -472,7 +480,7 @@ export default function AdminDashboard() {
         Email: order.customerInfo?.email || "N/A",
         "Địa chỉ": order.customerInfo?.address || "N/A",
         "Tổng tiền (VND)": formatVND(order.totalPrice),
-        "Trạng thái": order.status,
+        "Trạng thái": ORDER_STATUS_MAP[order.status] || order.status || "Chờ xử lý",
         "Ngày đặt": new Date(order.createdAt).toLocaleString("vi-VN"),
       }));
 
@@ -867,11 +875,11 @@ export default function AdminDashboard() {
                       }
                     >
                       <option value="">Tất Cả</option>
-                      <option value="Pending">Pending</option>
-                      <option value="Processing">Processing</option>
-                      <option value="Shipped">Shipped</option>
-                      <option value="Delivered">Delivered</option>
-                      <option value="Cancelled">Cancelled</option>
+                      <option value="Pending">Chờ xử lý</option>
+                      <option value="Processing">Đang xử lý</option>
+                      <option value="Shipped">Đang giao hàng</option>
+                      <option value="Delivered">Đã giao hàng</option>
+                      <option value="Cancelled">Đã hủy</option>
                     </select>
                   </div>
                   <div className="filter-group">
@@ -960,7 +968,7 @@ export default function AdminDashboard() {
                                     <span
                                       className={`badge badge-${normalizedStatus}`}
                                     >
-                                      {orderStatus}
+                                      {ORDER_STATUS_MAP[orderStatus] || orderStatus}
                                     </span>
                                   </td>
                                   <td>{formatDate(order.createdAt)}</td>

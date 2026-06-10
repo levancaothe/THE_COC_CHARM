@@ -2,6 +2,14 @@ import { useState } from 'react';
 import api from '../services/api';
 import './OrdersPage.css';
 
+const ORDER_STATUS_MAP = {
+  Pending: 'Chờ xử lý',
+  Processing: 'Đang xử lý',
+  Shipped: 'Đang giao hàng',
+  Delivered: 'Đã giao hàng',
+  Cancelled: 'Đã hủy',
+};
+
 const formatVnd = (value) => `${new Intl.NumberFormat('vi-VN').format(value || 0)} VND`;
 
 const getDesignCharms = (item) => {
@@ -140,7 +148,7 @@ const OrdersPage = () => {
                     <h2>Mã đơn: #{order._id.slice(-6).toUpperCase()}</h2>
                     <p>Ngày đặt: {new Date(order.createdAt).toLocaleString('vi-VN')}</p>
                   </div>
-                  <span>{order.status || 'Pending'}</span>
+                  <span>{ORDER_STATUS_MAP[order.status] || order.status || 'Chờ xử lý'}</span>
                 </div>
 
                  <div className="lookup-order-items">
