@@ -9,6 +9,14 @@ const STATUS_OPTIONS = [
   "Cancelled",
 ];
 
+const ORDER_STATUS_MAP = {
+  Pending: "Chờ xử lý",
+  Processing: "Đang xử lý",
+  Shipped: "Đang giao hàng",
+  Delivered: "Đã giao hàng",
+  Cancelled: "Đã hủy",
+};
+
 const formatVND = (value) =>
   `${new Intl.NumberFormat("vi-VN", {
     maximumFractionDigits: 0,
@@ -208,7 +216,7 @@ export default function OrderDetailModal({
                 >
                   {STATUS_OPTIONS.map((option) => (
                     <option key={option} value={option}>
-                      {option}
+                      {ORDER_STATUS_MAP[option] || option}
                     </option>
                   ))}
                 </select>
