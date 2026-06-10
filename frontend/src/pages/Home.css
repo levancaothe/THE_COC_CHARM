@@ -228,7 +228,7 @@
 
 .home-hero__actions {
   display: flex;
-  gap: 28px;
+  gap: 12px;
   margin-top: 48px;
   flex-wrap: wrap;
 }
@@ -237,10 +237,10 @@
   align-items: center;
   display: inline-flex;
   gap: 10px;
-  min-height: 30px;
-  padding: 0 22px;
+  min-height: 36px;
+  padding: 0 14px;
   color: #fff;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 800;
   line-height: 1;
   text-transform: uppercase;
@@ -252,6 +252,30 @@
 
 .home-btn--accent {
   background: var(--coc-orange);
+}
+
+.home-btn--video {
+  background: transparent;
+  color: var(--coc-navy);
+  border: 2px solid var(--coc-navy);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.home-btn--video:hover {
+  background: var(--coc-navy);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(10, 46, 79, 0.15);
+}
+
+.home-btn--video span {
+  font-size: 0.8rem;
+  color: var(--coc-orange);
+  transition: color 0.3s ease;
+}
+
+.home-btn--video:hover span {
+  color: #fff;
 }
 
 .home-hero__visual {
