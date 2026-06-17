@@ -27,7 +27,7 @@ const Navbar = () => {
             <NavLink to="/collections">Bộ Sưu Tập</NavLink>
           </li>
           <li>
-            <NavLink to="/about-us">About us</NavLink>
+            <NavLink to="/about-us">Về Chúng Tôi</NavLink>
           </li>
           <li>
             <NavLink to="/policy">Chính sách</NavLink>
