@@ -89,16 +89,6 @@ const AboutUsPage = () => {
         </div>
       </section>
 
-      {/* <section className="about-showcase" aria-label="Không gian thương hiệu">
-        <div className="about-showcase__panel">
-          <div className="about-showcase__content">
-            <span>Crafted with care</span>
-            <strong>The Cóc Charm</strong>
-            <p>Trang sức cá nhân hóa được chế tác để kể câu chuyện của bạn.</p>
-          </div>
-        </div>
-      </section> */}
-
       <section id="about-video-section" className="about-video-section" aria-labelledby="about-video-title">
         <h2 id="about-video-title">Hành Trình Sáng Tạo</h2>
         <p className="about-video-subtitle">
