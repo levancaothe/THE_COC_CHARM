@@ -605,7 +605,7 @@ const DesignerPage = () => {
             />
 
             <label htmlFor="bracelet-material">
-              Chất liệu dây (từ bộ charm cơ bản):
+              Chất liệu dây:
             </label>
             <select
               id="bracelet-material"
@@ -658,7 +658,7 @@ const DesignerPage = () => {
               WebkitTextFillColor: "transparent",
             }}
           >
-            Trình Thiết Kế Vòng Tây
+            Trình Thiết Kế Vòng Tay
           </h1>
           <div
             style={{
