@@ -1,14 +1,21 @@
+const mongoose = require('mongoose');
 const Charm = require('../models/Charm');
 const Category = require('../models/Category');
 const { uploadImageToCloudinary } = require('../utils/cloudinary');
 
 exports.getCharms = async (req, res, next) => {
   try {
-    const { limit = 10, page = 1, search = '' } = req.query;
+    const { limit = 10, page = 1, search = '', category = '' } = req.query;
     const perPage = Math.max(1, parseInt(limit, 10));
     const skip = (Math.max(1, parseInt(page, 10)) - 1) * perPage;
 
-    const filter = search ? { name: { $regex: search, $options: 'i' } } : {};
+    const filter = {};
+    if (search) {
+      filter.name = { $regex: search, $options: 'i' };
+    }
+    if (category && mongoose.Types.ObjectId.isValid(category)) {
+      filter.category = new mongoose.Types.ObjectId(category);
+    }
 
     const [charms, total] = await Promise.all([
       Charm.find(filter).populate('category', 'name').sort({ createdAt: -1 }).skip(skip).limit(perPage).lean(),

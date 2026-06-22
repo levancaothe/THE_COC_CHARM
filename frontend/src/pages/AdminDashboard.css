@@ -482,6 +482,13 @@
   flex-wrap: wrap;
 }
 
+.table-loading-hint {
+  margin: 0 0 12px;
+  color: var(--admin-muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
 .btn-export {
   min-width: 160px;
   min-height: 42px;

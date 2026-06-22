@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import OrderDetailModal from "../components/OrderDetailModal";
 import CollectionModal from "../components/CollectionModal";
 import api from "../services/api";
@@ -226,11 +226,14 @@ export default function AdminDashboard() {
   // Charms state
   const [charms, setCharms] = useState([]);
   const [totalCharms, setTotalCharms] = useState(0);
+  const [charmsLoading, setCharmsLoading] = useState(false);
   const [charmFilters, setCharmFilters] = useState({
     search: "",
+    category: "",
     limit: 50,
     page: 1,
   });
+  const [charmSearchInput, setCharmSearchInput] = useState("");
   const [editingCharm, setEditingCharm] = useState(null);
   const [showCharmModal, setShowCharmModal] = useState(false);
 
@@ -256,6 +259,9 @@ export default function AdminDashboard() {
   const [editingDiscount, setEditingDiscount] = useState(null);
   const [selectedDiscountForUsage, setSelectedDiscountForUsage] = useState(null);
   const [showDiscountUsageModal, setShowDiscountUsageModal] = useState(false);
+  const charmFetchRequestIdRef = useRef(0);
+  const charmFetchDebounceRef = useRef(null);
+  const charmSearchDebounceRef = charmFetchDebounceRef;
 
   const handleScroll = useCallback(() => {
     setShowScrollTop(window.scrollY > 300);
@@ -268,6 +274,25 @@ export default function AdminDashboard() {
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const clearCharmSearchDebounce = () => {
+    if (charmSearchDebounceRef.current) {
+      window.clearTimeout(charmSearchDebounceRef.current);
+      charmSearchDebounceRef.current = null;
+    }
+  };
+
+  const refreshCharms = (page = 1, overrides = {}) => {
+    clearCharmSearchDebounce();
+    const nextFilters = {
+      ...charmFilters,
+      search: charmSearchInput,
+      ...overrides,
+      page,
+    };
+    setCharmFilters(nextFilters);
+    fetchCharms(page, nextFilters);
   };
 
   function logout() {
@@ -310,21 +335,29 @@ export default function AdminDashboard() {
   }
 
   async function fetchCharms(page = 1, nextFilters = charmFilters) {
-    setLoading(true);
+    const requestId = ++charmFetchRequestIdRef.current;
+    setCharmsLoading(true);
     try {
       const params = { ...nextFilters, page };
       const res = await api.get("/admin/charms", {
         headers: { Authorization: `Bearer ${token}` },
         params,
       });
+      if (charmFetchRequestIdRef.current !== requestId) {
+        return;
+      }
       setCharms(res.data.charms || []);
       setTotalCharms(res.data.total || 0);
-      setCharmFilters((prev) => ({ ...prev, ...nextFilters, page }));
     } catch (err) {
+      if (charmFetchRequestIdRef.current !== requestId) {
+        return;
+      }
       console.error("Error fetching charms:", err);
       alert(err.response?.data?.message || "Failed to fetch charms");
     } finally {
-      setLoading(false);
+      if (charmFetchRequestIdRef.current === requestId) {
+        setCharmsLoading(false);
+      }
     }
   }
 
@@ -361,11 +394,30 @@ export default function AdminDashboard() {
   }, [token]);
 
   useEffect(() => {
+    clearCharmSearchDebounce();
     if (token && activeTab === "orders") fetchOrders(1);
-    if (token && activeTab === "charms") fetchCharms(1);
+    if (token && activeTab === "charms") refreshCharms(1);
     if (token && activeTab === "collections") fetchCollections();
     if (token && activeTab === "discounts") fetchDiscounts();
   }, [activeTab, token]);
+
+  useEffect(
+    () => () => {
+      clearCharmSearchDebounce();
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (!token || activeTab !== "charms") return;
+
+    clearCharmSearchDebounce();
+    charmSearchDebounceRef.current = window.setTimeout(() => {
+      refreshCharms(1, { search: charmSearchInput });
+    }, 300);
+
+    return () => clearCharmSearchDebounce();
+  }, [charmSearchInput, token, activeTab]);
 
   const handleLogin = async () => {
     if (!username || !password) {
@@ -400,7 +452,7 @@ export default function AdminDashboard() {
       }
       setShowCharmModal(false);
       setEditingCharm(null);
-      fetchCharms(charmFilters.page);
+      refreshCharms(charmFilters.page);
       fetchStats();
     } catch (err) {
       console.error("Error saving charm:", err);
@@ -415,7 +467,7 @@ export default function AdminDashboard() {
         headers: { Authorization: `Bearer ${token}` },
       });
       alert("Charm đã được xóa");
-      fetchCharms(charmFilters.page);
+      refreshCharms(charmFilters.page);
       fetchStats();
     } catch (err) {
       alert(err.response?.data?.message || "Failed to delete charm");
@@ -423,18 +475,21 @@ export default function AdminDashboard() {
   };
 
   const handleCharmSearchChange = (e) => {
-    const nextFilters = { ...charmFilters, search: e.target.value };
-    setCharmFilters(nextFilters);
-    fetchCharms(1, nextFilters);
+    const search = e.target.value;
+    setCharmSearchInput(search);
+    setCharmFilters((prev) => ({ ...prev, search, page: 1 }));
   };
 
   const handleCharmLimitChange = (e) => {
-    const nextFilters = {
-      ...charmFilters,
+    refreshCharms(1, {
       limit: Math.max(1, parseInt(e.target.value, 10) || 10),
-    };
-    setCharmFilters(nextFilters);
-    fetchCharms(1, nextFilters);
+    });
+  };
+
+  const handleCharmCategoryChange = (e) => {
+    refreshCharms(1, {
+      category: e.target.value,
+    });
   };
 
   const handleCategoryLimitChange = (e) => {
@@ -1047,9 +1102,23 @@ export default function AdminDashboard() {
                       <input
                         type="text"
                         placeholder="Tìm kiếm charm..."
-                        value={charmFilters.search}
+                        value={charmSearchInput}
                         onChange={handleCharmSearchChange}
                       />
+                    </div>
+                    <div className="filter-group compact">
+                      <label>Danh Mục</label>
+                      <select
+                        value={charmFilters.category}
+                        onChange={handleCharmCategoryChange}
+                      >
+                        <option value="">Tất cả danh mục</option>
+                        {categories.map((cat) => (
+                          <option key={cat._id} value={cat._id}>
+                            {cat.name}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                     <div className="filter-group compact">
                       <label>Số Hàng/Trang</label>
@@ -1075,10 +1144,15 @@ export default function AdminDashboard() {
                   </button>
                 </div>
 
-                {loading ? (
+                {charmsLoading && charms.length === 0 ? (
                   <div className="loading">Đang tải...</div>
                 ) : (
                   <>
+                    {charmsLoading && charms.length > 0 && (
+                      <div className="table-loading-hint">
+                        Đang cập nhật kết quả...
+                      </div>
+                    )}
                     <div className="table-container">
                       <table className="data-table">
                         <thead>
@@ -1128,7 +1202,7 @@ export default function AdminDashboard() {
                                   </button>
                                   <button
                                     className="btn-icon btn-delete"
-                                    onClick={() => handleDeleteCharm(col._id)}
+                                    onClick={() => handleDeleteCharm(charm._id)}
                                     title="Xóa"
                                   >
                                     🗑️
@@ -1161,7 +1235,7 @@ export default function AdminDashboard() {
                       <button
                         className="btn btn-small"
                         disabled={charmFilters.page === 1}
-                        onClick={() => fetchCharms(charmFilters.page - 1)}
+                        onClick={() => refreshCharms(charmFilters.page - 1)}
                       >
                         ← Trước
                       </button>
@@ -1171,7 +1245,7 @@ export default function AdminDashboard() {
                       <button
                         className="btn btn-small"
                         disabled={charmFilters.page >= charmTotalPages}
-                        onClick={() => fetchCharms(charmFilters.page + 1)}
+                        onClick={() => refreshCharms(charmFilters.page + 1)}
                       >
                         Tiếp →
                       </button>
