@@ -2,13 +2,13 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import html2canvas from "html2canvas";
-import api from "../services/api"; // Adjust path if needed
-import CharmSidebar from "./CharmSidebar"; // Adjust path to where these components are
+import api from "../services/api";
+import CharmSidebar from "./CharmSidebar";
 import BraceletCanvas from "./BraceletCanvas";
 import { usePriceCalculator } from "../hooks/usePriceCalculator";
+import { createInstanceId, isBaseCharm } from "../utils/imageProxy";
 
 export default function CollectionModal({ collection, onSave, onClose }) {
-  // --- 1. FORM STATE ---
   const [formData, setFormData] = useState({
     name: collection?.name || "",
     image: collection?.image || "",
@@ -17,7 +17,6 @@ export default function CollectionModal({ collection, onSave, onClose }) {
     status: collection?.status || "available",
   });
 
-  // --- 2. DESIGNER STATE ---
   const [availableCharms, setAvailableCharms] = useState([]);
   const [categories, setCategories] = useState([]);
 
@@ -26,7 +25,7 @@ export default function CollectionModal({ collection, onSave, onClose }) {
     if (!charm) return null;
     return {
       ...charm,
-      instanceId: Math.random().toString(36).substr(2, 9),
+      instanceId: createInstanceId(),
       isDefault: false,
     };
   };
@@ -39,7 +38,6 @@ export default function CollectionModal({ collection, onSave, onClose }) {
 
   const [selectedCharms, setSelectedCharms] = useState(initialEditCharms);
 
-  // Setup logic: If editing, skip setup. If new, start at null.
   const [capacity, setCapacity] = useState(
     collection?.charms ? initialEditCharms.length : null,
   );
@@ -54,45 +52,8 @@ export default function CollectionModal({ collection, onSave, onClose }) {
 
   const calculatedPrice = usePriceCalculator(selectedCharms);
 
-  const baseCharmKeywords = [
-    "cơ bản",
-    "co ban",
-    "basic",
-    "base",
-    "mặc định",
-    "mac dinh",
-    "default",
-  ];
-  const normalizeText = (value = "") =>
-    value
-      .toString()
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "");
-  const getCategoryName = (charm) => {
-    if (typeof charm?.category === "object" && charm?.category?.name) {
-      return charm.category.name;
-    }
-
-    const categoryId = charm?.category?._id || charm?.category;
-    return (
-      categories.find((category) => category._id === categoryId)?.name || ""
-    );
-  };
-  const isBaseCharm = (charm) => {
-    const charmName = normalizeText(charm?.name);
-    const categoryName = normalizeText(getCategoryName(charm));
-    return baseCharmKeywords.some((keyword) => {
-      const normalizedKeyword = normalizeText(keyword);
-      return (
-        charmName.includes(normalizedKeyword) ||
-        categoryName.includes(normalizedKeyword)
-      );
-    });
-  };
-
   const baseCharmOptions = useMemo(
-    () => availableCharms.filter(isBaseCharm),
+    () => availableCharms.filter((charm) => isBaseCharm(charm, categories)),
     [availableCharms, categories],
   );
   const selectedBaseCharm = useMemo(
@@ -191,7 +152,7 @@ export default function CollectionModal({ collection, onSave, onClose }) {
 
       const initialCharms = Array.from({ length: safeCapacity }).map(() => ({
         ...defaultCharm,
-        instanceId: Math.random().toString(36).substr(2, 9),
+        instanceId: createInstanceId(),
         isDefault: true,
       }));
       setSelectedCharms(initialCharms);
@@ -247,7 +208,7 @@ export default function CollectionModal({ collection, onSave, onClose }) {
       ...prevCharms,
       ...Array.from({ length: additionalNeeded }).map(() => ({
         ...defaultCharm,
-        instanceId: Math.random().toString(36).substr(2, 9),
+        instanceId: createInstanceId(),
         isDefault: true,
       })),
     ]);
@@ -275,7 +236,7 @@ export default function CollectionModal({ collection, onSave, onClose }) {
     setSelectedCharms((prevCharms) => {
       const newCharmInstance = {
         ...charm,
-        instanceId: Math.random().toString(36).substr(2, 9),
+        instanceId: createInstanceId(),
       };
 
       if (!canAddCharm(charm, prevCharms)) {
@@ -320,7 +281,7 @@ export default function CollectionModal({ collection, onSave, onClose }) {
       if (defaultCharm) {
         newCharms[index] = {
           ...defaultCharm,
-          instanceId: Math.random().toString(36).substr(2, 9),
+          instanceId: createInstanceId(),
           isDefault: true,
         };
       } else {
@@ -336,7 +297,7 @@ export default function CollectionModal({ collection, onSave, onClose }) {
       const updatedCharms = [...prevCharms];
       updatedCharms[index] = {
         ...newCharm,
-        instanceId: Math.random().toString(36).substr(2, 9),
+        instanceId: createInstanceId(),
       };
       return updatedCharms;
     });

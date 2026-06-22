@@ -128,6 +128,38 @@
     background 0.18s ease;
 }
 
+.form-group--toggle {
+  margin-top: -2px;
+}
+
+.form-group--toggle .toggle-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  color: var(--admin-text);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  line-height: 1.4;
+}
+
+.form-group--toggle .toggle-checkbox input[type="checkbox"] {
+  width: 16px;
+  min-width: 16px;
+  height: 16px;
+  min-height: 16px;
+  margin: 0;
+  padding: 0;
+  flex: 0 0 auto;
+  accent-color: var(--admin-primary);
+}
+
+.form-group--toggle .toggle-checkbox span {
+  text-transform: none;
+}
+
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus,
@@ -488,7 +520,7 @@
 
 .data-table {
   width: 100%;
-  min-width: 860px;
+  min-width: 980px;
   border-collapse: separate;
   border-spacing: 0;
   font-size: 14px;
@@ -559,6 +591,28 @@
 .actions-cell {
   width: 92px;
   text-align: center;
+}
+
+.order-preview-cell {
+  display: grid;
+  gap: 6px;
+  max-width: 260px;
+}
+
+.order-preview-cell .order-bracelet-preview-content {
+  min-width: 0;
+}
+
+.order-preview-count {
+  color: var(--admin-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.order-preview-empty {
+  color: var(--admin-muted);
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .btn-icon {
@@ -645,6 +699,11 @@
   border: 1px solid var(--admin-border);
   border-radius: 8px;
   background: #f8fafc;
+}
+
+.charm-thumb--pendant {
+  object-fit: contain;
+  background: #fff;
 }
 
 .design-name-cell {

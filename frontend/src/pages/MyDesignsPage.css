@@ -110,6 +110,30 @@
   border-radius: 4px;
 }
 
+.collection-charm-preview {
+  overflow: visible !important;
+}
+
+.collection-charm-preview .my-design-band {
+  overflow: visible;
+}
+
+.collection-charm-preview--card .my-design-slot {
+  width: 36px !important;
+  height: 32px !important;
+}
+
+.collection-charm-preview--card .my-design-slot img.my-design-charm-img {
+  width: 36px !important;
+  height: 32px !important;
+}
+
+.collection-charm-preview--card img.my-design-pendant-preview {
+  width: 78px !important;
+  height: 102px !important;
+  transform: translate(-50%, -34px) !important;
+}
+
 .my-design-band {
   align-items: center;
   display: flex;
@@ -119,20 +143,50 @@
   justify-content: center;
 }
 
-.my-design-band img {
+.my-design-slot {
+  position: relative !important;
+  width: 36px;
+  height: 32px;
+  margin-left: -1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.my-design-slot:first-child {
+  margin-left: 0;
+}
+
+.my-design-slot--pendant {
+  overflow: visible !important;
+}
+
+.my-design-slot img.my-design-charm-img {
   background: linear-gradient(to bottom, #fbfbfb 0%, #e4e4e4 52%, #c9c9c9 100%);
   border: 1px solid rgba(10, 46, 79, 0.34);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
   display: block;
   height: 32px;
-  margin-left: -1px;
   object-fit: cover;
   width: 36px;
   border-radius: 2px;
 }
 
-.my-design-band img:first-child {
-  margin-left: 0;
+img.my-design-pendant-preview {
+  position: absolute !important;
+  left: 50% !important;
+  top: 100% !important;
+  transform: translate(-50%, -35px) !important;
+  width: 120px !important;
+  height: 156px !important;
+  max-width: none !important;
+  object-fit: fill !important;
+  pointer-events: none !important;
+  z-index: 10 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 .my-design-card__foot {

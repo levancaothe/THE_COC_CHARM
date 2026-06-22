@@ -138,12 +138,13 @@ exports.getOrders = async (req, res, next) => {
         : Promise.resolve([]),
       productIds.size > 0
         ? BraceletDesign.find({ _id: { $in: [...productIds] } })
-            .populate("charms.charm", "name image price category")
+            .populate("charms.charm", "name image price category isPendant")
             .select("_id name totalPrice charms createdAt")
             .lean()
         : Promise.resolve([]),
       collectionIds.size > 0
         ? Collection.find({ _id: { $in: [...collectionIds] } })
+            .populate("charms", "name image price stock category isPendant")
             .lean()
         : Promise.resolve([]),
     ]);

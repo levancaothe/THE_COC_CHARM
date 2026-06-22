@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import api from '../services/api';
+import { isPendantCharm } from '../utils/imageProxy';
+import CollectionCharmPreview from '../components/CollectionCharmPreview';
 import './OrdersPage.css';
 
 const ORDER_STATUS_MAP = {
@@ -12,65 +14,84 @@ const ORDER_STATUS_MAP = {
 
 const formatVnd = (value) => `${new Intl.NumberFormat('vi-VN').format(value || 0)} VND`;
 
-const getDesignCharms = (item) => {
-  const snapshotCharms = Array.isArray(item.designCharmDetails) ? item.designCharmDetails : [];
-  if (snapshotCharms.length > 0) return snapshotCharms;
-
-  return Array.isArray(item.designCharms)
-    ? item.designCharms.map((charm) => ({
-        _id: charm,
-        name: 'Charm',
-        image: '',
-      }))
-    : [];
-};
-
-const getCharmImage = (charm) => charm?.image || charm?.thumbnail || charm?.photo || '';
-
-const getCharmName = (charm) => charm?.name || charm?.title || charm?.charmName || 'Charm';
-
 const OrdersPage = () => {
   const [phone, setPhone] = useState('');
   const [orders, setOrders] = useState([]);
+  const [charmCatalog, setCharmCatalog] = useState([]);
   const [hasSearched, setHasSearched] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const charmMap = new Map(
+    charmCatalog.map((charm) => [String(charm?._id || ''), charm]),
+  );
+
+  const resolveLookupCharms = (item) => {
+    const snapshotEntries = Array.isArray(item?.designCharmDetails)
+      ? item.designCharmDetails
+      : Array.isArray(item?.charmDetails)
+        ? item.charmDetails
+        : [];
+
+    const normalizeEntry = (entry) => {
+      const rawCharm = entry?.charm || entry;
+      const resolved = charmMap.get(String(rawCharm?._id || ""));
+
+      return resolved
+        ? {
+            ...resolved,
+            ...rawCharm,
+            isPendant: Boolean(resolved.isPendant ?? rawCharm.isPendant),
+          }
+        : rawCharm;
+    };
+
+    if (snapshotEntries.length > 0) {
+      return snapshotEntries.map(normalizeEntry).filter(Boolean);
+    }
+
+    if (Array.isArray(item?.designCharms) && item.designCharms.length > 0) {
+      return item.designCharms
+        .map((charmId) =>
+          normalizeEntry(charmMap.get(String(charmId)) || { _id: String(charmId) }),
+        )
+        .filter(Boolean);
+    }
+
+    if (Array.isArray(item?.productDetail?.charms) && item.productDetail.charms.length > 0) {
+      return item.productDetail.charms
+        .map((entry) => normalizeEntry(entry))
+        .filter(Boolean);
+    }
+
+    return [];
+  };
+
   const renderBraceletPreview = (item) => {
-    const charms = getDesignCharms(item);
+    const charms = resolveLookupCharms(item);
+    const hasPendantCharm = charms.some(isPendantCharm);
 
     return (
-      <div className="lookup-design-preview">
+      <div
+        className="lookup-design-preview"
+        style={{
+          overflow: 'visible',
+          paddingBottom: hasPendantCharm ? '180px' : '18px',
+        }}
+      >
         <div className="lookup-design-preview__title">
           <strong>Vòng charm</strong>
           <span>{charms.length} hạt</span>
         </div>
-        <div className="lookup-design-strip" role="list" aria-label="Danh sách charm trong vòng">
-          {charms.length > 0 ? (
-            charms.map((charm, index) => {
-              const charmName = getCharmName(charm);
-              const charmImage = getCharmImage(charm);
-
-              return (
-                <div
-                  key={`${charm?._id || charmName || 'charm'}-${index}`}
-                  className="lookup-design-chip"
-                  role="listitem"
-                  title={charmName}
-                >
-                  {charmImage ? (
-                    <img src={charmImage} alt={charmName} className="lookup-design-chip__image" />
-                  ) : (
-                    <span className="lookup-design-chip__image lookup-design-chip__image--empty">?</span>
-                  )}
-                  <span className="lookup-design-chip__name">{charmName}</span>
-                </div>
-              );
-            })
-          ) : (
-            <div className="lookup-design-empty">Không có dữ liệu hạt charm.</div>
-          )}
-        </div>
+        {charms.length > 0 ? (
+          <CollectionCharmPreview
+            charms={charms}
+            ariaLabel="Danh sách charm trong vòng"
+            variant="card"
+          />
+        ) : (
+          <div className="lookup-design-empty">Không có dữ liệu hạt charm.</div>
+        )}
       </div>
     );
   };
@@ -91,14 +112,25 @@ const OrdersPage = () => {
     setHasSearched(true);
 
     try {
-      const { data } = await api.get('/orders', {
-        params: { phone: normalizedPhone },
-      });
-      setOrders(data.data || []);
+      const [ordersResponse, charmsResponse] = await Promise.all([
+        api.get('/orders', {
+          params: { phone: normalizedPhone },
+        }),
+        api.get('/charms', {
+          params: {
+            limit: 'all',
+            select: '_id,name,image,isPendant',
+          },
+        }),
+      ]);
+
+      setOrders(ordersResponse.data.data || []);
+      setCharmCatalog(charmsResponse.data.data || []);
     } catch (fetchError) {
       console.error('Error fetching orders:', fetchError);
       setError('Không thể tra cứu đơn hàng. Vui lòng thử lại sau.');
       setOrders([]);
+      setCharmCatalog([]);
     } finally {
       setLoading(false);
     }
@@ -171,7 +203,7 @@ const OrdersPage = () => {
                       </div>
                       {(item.productType === 'BraceletDesign' || item.productType === 'Collection') && (
                         <p className="lookup-design-summary">
-                          Vòng tay được ghép từ {(getDesignCharms(item)).length} hạt charm
+                          Vòng tay được ghép từ {resolveLookupCharms(item).length} hạt charm
                         </p>
                       )}
                     </div>

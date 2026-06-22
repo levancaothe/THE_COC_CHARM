@@ -23,7 +23,7 @@ exports.getCharms = async (req, res, next) => {
 
 exports.createCharm = async (req, res, next) => {
   try {
-    const { name, image, price, stock, category } = req.body;
+    const { name, image, price, stock, category, isPendant } = req.body;
 
     if (!name || !image || price === undefined || !category) {
       return res.status(400).json({ message: 'Missing required fields: name, image, price, category' });
@@ -35,7 +35,8 @@ exports.createCharm = async (req, res, next) => {
       image: uploadedImage,
       price,
       stock: stock ?? 0,
-      category
+      category,
+      isPendant: isPendant ?? false
     });
     await charm.populate('category', 'name');
 
@@ -48,7 +49,7 @@ exports.createCharm = async (req, res, next) => {
 exports.updateCharm = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { name, image, price, stock, category } = req.body;
+    const { name, image, price, stock, category, isPendant } = req.body;
 
     let nextImage = image;
     if (image) {
@@ -61,6 +62,7 @@ exports.updateCharm = async (req, res, next) => {
     if (price !== undefined) updateData.price = price;
     if (stock !== undefined) updateData.stock = stock;
     if (category !== undefined) updateData.category = category;
+    if (isPendant !== undefined) updateData.isPendant = isPendant;
 
     const charm = await Charm.findByIdAndUpdate(
       id,
