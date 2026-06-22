@@ -9,8 +9,7 @@
 
 .designer-start-card {
   background:
-    linear-gradient(90deg, #d95c14 0 33%, #b75a1c 33% 66%, #0a2e4f 66% 100%) top
-      left / 100% 6px no-repeat,
+    linear-gradient(90deg, #d95c14 0 33%, #b75a1c 33% 66%, #0a2e4f 66% 100%) top left / 100% 6px no-repeat,
     #fff;
   border: 1.5px solid #d95c14;
   color: #0a2e4f;
@@ -162,10 +161,8 @@
   align-items: center;
   display: grid;
   gap: 22px;
-  grid-template-columns: minmax(220px, 1.6fr) minmax(90px, 0.6fr) minmax(
-      120px,
-      0.7fr
-    ) minmax(140px, 0.8fr);
+  grid-template-columns: minmax(220px, 1.6fr) minmax(90px, 0.6fr) minmax(120px,
+      0.7fr) minmax(140px, 0.8fr);
   line-height: 1.35;
   text-align: center;
 }
@@ -338,4 +335,39 @@
   .designer-summary {
     position: relative;
   }
+}
+
+/* ==========================================
+   PENDANT CHARM (CHARM RƠI) STYLING
+   ========================================== */
+
+/* Slot contains Pendant Charm: allow content to overflow below */
+.placed-charm.mm-pendant-slot {
+  position: relative !important;
+  overflow: visible !important;
+}
+
+/* Pendant preview clone hanging below */
+.mm-pendant-preview {
+  position: absolute !important;
+  left: -6.5px !important;                      /* centered (45px container, 58px image -> (45 - 58) / 2 = -6.5px) */
+  top: 2px !important;                          /* small top gap from the bracelet line */
+  transform: none !important;
+  width: 58px !important;
+  height: 100px !important;                    /* slightly increased size */
+  max-width: none !important;
+  pointer-events: none !important;             /* let drag and drop pass through */
+  z-index: 9999 !important;
+}
+
+.mm-pendant-preview.export-mode {
+  display: block !important;
+  transform-origin: top center !important;
+  transform: none !important;
+  /* avoid html2canvas transform translate bug */
+  transition: none !important;
+  z-index: 20 !important;
+  pointer-events: none !important;
+  left: -6.5px !important;
+  top: 2px !important;
 }

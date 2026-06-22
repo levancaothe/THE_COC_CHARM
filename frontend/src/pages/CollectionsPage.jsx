@@ -6,6 +6,7 @@ import "./MyDesignsPage.css";
 import comingSoonImg from "../assets/coming_soon.jpg";
 import CollectionInfoModal from "../components/CollectionInfoModal";
 import LoadingSpinner from "../components/LoadingSpinner";
+import CollectionCharmPreview from "../components/CollectionCharmPreview";
 
 const CollectionsPage = () => {
   const [collections, setCollections] = useState([]);
@@ -157,20 +158,10 @@ const CollectionsPage = () => {
                       <span>{item.charms?.length || 0} hạt</span>
                     </div>
 
-                    <div className="my-design-preview" aria-label={`Preview ${item.name}`}>
-                      <div className="my-design-band">
-                        {(item.charms || []).map((c, index) => {
-                          const charmObj = c.charm || c;
-                          return (
-                            <img
-                              key={`${charmObj?._id || index}`}
-                              src={charmObj?.image}
-                              alt=""
-                            />
-                          );
-                        })}
-                      </div>
-                    </div>
+                    <CollectionCharmPreview
+                      charms={item.charms || []}
+                      ariaLabel={`Preview ${item.name}`}
+                    />
 
                     <div className="my-design-card__foot">
                       <strong>{formatVND(item.price)}</strong>

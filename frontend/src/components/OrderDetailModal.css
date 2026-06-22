@@ -235,6 +235,12 @@
   justify-items: stretch;
 }
 
+.order-bracelet-preview-wrap {
+  width: 100%;
+  display: grid;
+  gap: 10px;
+}
+
 .order-design-summary {
   margin: 10px 0 0;
   font-size: 12px;
@@ -309,6 +315,17 @@
 .order-bracelet-summary strong {
   color: #0f172a;
   font-size: 13px;
+}
+
+.order-bracelet-actions {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.btn-export-bracelet {
+  min-height: 36px;
+  padding: 0 14px;
+  font-size: 12px;
 }
 
 .order-notes {

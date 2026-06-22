@@ -307,6 +307,7 @@ router.get("/", async (req, res) => {
     }
 
     const orders = await Order.find(filter).sort("-createdAt");
+
     res.status(200).json({
       success: true,
       count: orders.length,

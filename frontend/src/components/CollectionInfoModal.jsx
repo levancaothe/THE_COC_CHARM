@@ -1,5 +1,6 @@
 import infoIcon from '../assets/ic.png';
 import './SuccessModal.css';
+import CollectionCharmPreview from './CollectionCharmPreview';
 
 export default function CollectionInfoModal({ isOpen, onClose, collection }) {
   if (!isOpen || !collection) return null;
@@ -16,6 +17,8 @@ export default function CollectionInfoModal({ isOpen, onClose, collection }) {
           borderBottom: 'none',
           borderRadius: '12px',
           padding: '40px 30px',
+          maxHeight: '88vh',
+          overflowY: 'auto',
         }}
       >
         <div
@@ -42,6 +45,16 @@ export default function CollectionInfoModal({ isOpen, onClose, collection }) {
         </div>
 
         <h2 className="success-title">{collection.name}</h2>
+
+        {Array.isArray(collection.charms) && collection.charms.length > 0 && (
+          <div style={{ width: '100%', marginBottom: '18px' }}>
+            <CollectionCharmPreview
+              charms={collection.charms}
+              ariaLabel={`Preview ${collection.name}`}
+              variant="detail"
+            />
+          </div>
+        )}
 
         <p
           className="success-message"

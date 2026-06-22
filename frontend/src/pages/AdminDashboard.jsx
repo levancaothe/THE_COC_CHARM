@@ -6,6 +6,8 @@ import "./AdminDashboard.css";
 import "./MyDesignsPage.css";
 import DiscountModal from "../components/DiscountModal";
 import DiscountUsageModal from "../components/DiscountUsageModal";
+import CollectionCharmPreview from "../components/CollectionCharmPreview";
+import { isPendantCharm } from "../utils/imageProxy";
 const formatVND = (value) =>
   `${new Intl.NumberFormat("vi-VN", {
     maximumFractionDigits: 0,
@@ -40,6 +42,7 @@ function CharmModal({ charm, categories, onSave, onClose }) {
     price: charm?.price || "",
     stock: charm?.stock || 0,
     category: charm?.category?._id || charm?.category || "",
+    isPendant: charm?.isPendant || false,
   });
 
   const handleSubmit = (e) => {
@@ -118,6 +121,18 @@ function CharmModal({ charm, categories, onSave, onClose }) {
                 </option>
               ))}
             </select>
+          </div>
+          <div className="form-group form-group--toggle">
+            <label className="toggle-checkbox">
+              <input
+                type="checkbox"
+                checked={Boolean(formData.isPendant)}
+                onChange={(e) =>
+                  setFormData({ ...formData, isPendant: e.target.checked })
+                }
+              />
+              <span>Charm rơi / charm đặc biệt</span>
+            </label>
           </div>
           <div className="modal-actions">
             <button
@@ -1091,7 +1106,7 @@ export default function AdminDashboard() {
                                   <img
                                     src={charm.image}
                                     alt={charm.name}
-                                    className="charm-thumb"
+                                    className={`charm-thumb ${isPendantCharm(charm) ? "charm-thumb--pendant" : ""}`}
                                   />
                                 </td>
                                 <td>{charm.name}</td>
@@ -1310,7 +1325,8 @@ export default function AdminDashboard() {
                 ) : (
                   <>
                     <div className="my-designs-grid" style={{ marginTop: "20px" }}>
-                      {collections.map((col, idx) => (
+                      {collections.map((col, idx) => {
+                        return (
                         <article key={col._id || idx} className="my-design-card">
                           <div className="my-design-card__head">
                             <div>
@@ -1333,20 +1349,7 @@ export default function AdminDashboard() {
                             <span>{col.charms?.length || 0} hạt</span>
                           </div>
 
-                          <div className="my-design-preview" aria-label={`Preview ${col.name}`}>
-                            <div className="my-design-band">
-                              {(col.charms || []).map((item, index) => {
-                                const charmObj = item.charm || item;
-                                return (
-                                  <img
-                                    key={`${charmObj?._id || index}`}
-                                    src={charmObj?.image}
-                                    alt=""
-                                  />
-                                );
-                              })}
-                            </div>
-                          </div>
+                          <CollectionCharmPreview charms={col.charms || []} ariaLabel={`Preview ${col.name}`} />
 
                           <div className="my-design-card__foot">
                             <strong style={{ color: "#d95c14", fontSize: "1.15rem" }}>
@@ -1373,7 +1376,8 @@ export default function AdminDashboard() {
                             </div>
                           </div>
                         </article>
-                      ))}
+                        );
+                      })}
                     </div>
 
                     {collections.length === 0 && (

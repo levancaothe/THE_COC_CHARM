@@ -9,6 +9,7 @@ import BraceletCanvas from "../components/BraceletCanvas";
 import { PriceSummary, DesignerToolbar } from "../components/DesignerTools";
 import { usePriceCalculator } from "../hooks/usePriceCalculator";
 import { useCart } from "../context/CartContext";
+import { createInstanceId, stripCharmMeta, isBaseCharm } from "../utils/imageProxy";
 import "./DesignerPage.css";
 
 const SAVED_DESIGNS_KEY = "charmify_saved_designs";
@@ -35,14 +36,6 @@ const writeSavedDesigns = (designs) => {
   }
 };
 
-const stripCharmMeta = (charm) => {
-  if (!charm) return charm;
-  const cleanCharm = { ...charm };
-  delete cleanCharm.instanceId;
-  delete cleanCharm.isDefault;
-  return cleanCharm;
-};
-
 const buildStoredCharmEntry = (charm) => ({
   charm: stripCharmMeta(charm),
   x: 0,
@@ -64,7 +57,7 @@ const DesignerPage = () => {
     if (!charm) return null;
     return {
       ...charm,
-      instanceId: Math.random().toString(36).substr(2, 9),
+      instanceId: createInstanceId(),
       isDefault: false,
     };
   };
@@ -77,7 +70,6 @@ const DesignerPage = () => {
 
   const [selectedCharms, setSelectedCharms] = useState(initialEditCharms);
 
-  // FIX: Always start with null so the user is forced to choose wrist size / capacity first
   const [capacity, setCapacity] = useState(null);
 
   const [tempCapacity, setTempCapacity] = useState(
@@ -100,48 +92,13 @@ const DesignerPage = () => {
   const navigate = useNavigate();
 
   const totalPrice = usePriceCalculator(selectedCharms);
+
+
   const formatVnd = (value) =>
     `${new Intl.NumberFormat("vi-VN").format(value || 0)} VND`;
 
-  const baseCharmKeywords = [
-    "cơ bản",
-    "co ban",
-    "basic",
-    "base",
-    "mặc định",
-    "mac dinh",
-    "default",
-  ];
-  const normalizeText = (value = "") =>
-    value
-      .toString()
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "");
-  const getCategoryName = (charm) => {
-    if (typeof charm?.category === "object" && charm?.category?.name) {
-      return charm.category.name;
-    }
-
-    const categoryId = charm?.category?._id || charm?.category;
-    return (
-      categories.find((category) => category._id === categoryId)?.name || ""
-    );
-  };
-  const isBaseCharm = (charm) => {
-    const charmName = normalizeText(charm?.name);
-    const categoryName = normalizeText(getCategoryName(charm));
-    return baseCharmKeywords.some((keyword) => {
-      const normalizedKeyword = normalizeText(keyword);
-      return (
-        charmName.includes(normalizedKeyword) ||
-        categoryName.includes(normalizedKeyword)
-      );
-    });
-  };
-
   const baseCharmOptions = useMemo(
-    () => availableCharms.filter(isBaseCharm),
+    () => availableCharms.filter((charm) => isBaseCharm(charm, categories)),
     [availableCharms, categories],
   );
   const selectedBaseCharm = useMemo(
@@ -218,7 +175,6 @@ const DesignerPage = () => {
       window.removeEventListener("inventory-updated", handleInventoryUpdate);
   }, []);
 
-  // FIX: Set values but do NOT touch the `capacity` state here to allow setup view first
   useEffect(() => {
     if (!editDesign) return;
 
@@ -255,7 +211,7 @@ const DesignerPage = () => {
 
       const initialCharms = Array.from({ length: safeCapacity }).map(() => ({
         ...defaultCharm,
-        instanceId: Math.random().toString(36).substr(2, 9),
+        instanceId: createInstanceId(),
         isDefault: true,
       }));
       setSelectedCharms(initialCharms);
@@ -311,7 +267,7 @@ const DesignerPage = () => {
       ...prevCharms,
       ...Array.from({ length: additionalNeeded }).map(() => ({
         ...defaultCharm,
-        instanceId: Math.random().toString(36).substr(2, 9),
+        instanceId: createInstanceId(),
         isDefault: true,
       })),
     ]);
@@ -339,7 +295,7 @@ const DesignerPage = () => {
     setSelectedCharms((prevCharms) => {
       const newCharmInstance = {
         ...charm,
-        instanceId: Math.random().toString(36).substr(2, 9),
+        instanceId: createInstanceId(),
       };
 
       if (!canAddCharm(charm, prevCharms)) {
@@ -384,7 +340,7 @@ const DesignerPage = () => {
       if (defaultCharm) {
         newCharms[index] = {
           ...defaultCharm,
-          instanceId: Math.random().toString(36).substr(2, 9),
+          instanceId: createInstanceId(),
           isDefault: true,
         };
       } else {
@@ -400,7 +356,7 @@ const DesignerPage = () => {
       const updatedCharms = [...prevCharms];
       updatedCharms[index] = {
         ...newCharm,
-        instanceId: Math.random().toString(36).substr(2, 9),
+        instanceId: createInstanceId(),
       };
       return updatedCharms;
     });
@@ -411,19 +367,55 @@ const DesignerPage = () => {
   const handleDownload = async () => {
     if (selectedCharms.length === 0)
       return alert("Hãy thêm ít nhất 1 charm để tải ảnh!");
-    if (!designRef.current) return;
+    if (!designRef.current) {
+      return alert("Không tìm thấy canvas thiết kế! (ref.current is null)");
+    }
 
     try {
       setIsExporting(true);
-      await new Promise((resolve) =>
-        requestAnimationFrame(() => requestAnimationFrame(resolve)),
-      );
+      // Wait for re-render cycle to update exportMode
+      await new Promise((resolve) => setTimeout(resolve, 150));
 
-      const canvas = await html2canvas(designRef.current, {
+      // Pre-load all images inside the canvas first
+      const images = Array.from(designRef.current.getElementsByTagName('img'));
+      const loadPromises = images.map((img) => {
+        if (img.complete) return Promise.resolve();
+        return new Promise((resolve) => {
+          img.onload = resolve;
+          img.onerror = resolve;
+        });
+      });
+      await Promise.all(loadPromises);
+
+      const html2canvasFn = typeof html2canvas === "function"
+        ? html2canvas
+        : (html2canvas.default || html2canvas);
+
+      if (typeof html2canvasFn !== "function") {
+        throw new Error("Thư viện html2canvas chưa được load đúng cách (not a function).");
+      }
+
+      // Override document.fonts.ready descriptor to prevent html2canvas from hanging on Google Fonts loading
+      const originalDescriptor = Object.getOwnPropertyDescriptor(document.fonts, 'ready');
+      Object.defineProperty(document.fonts, 'ready', {
+        value: Promise.resolve(),
+        configurable: true,
+      });
+
+      const canvas = await html2canvasFn(designRef.current, {
         useCORS: true,
         backgroundColor: "#ffffff",
         scale: 2,
+        logging: true,
       });
+
+      // Restore original document.fonts.ready
+      if (originalDescriptor) {
+        Object.defineProperty(document.fonts, 'ready', originalDescriptor);
+      } else {
+        delete document.fonts.ready;
+      }
+
       const image = canvas.toDataURL("image/png");
       const link = document.createElement("a");
       link.href = image;
@@ -431,7 +423,7 @@ const DesignerPage = () => {
       link.click();
     } catch (error) {
       console.error("Lỗi khi tạo ảnh:", error);
-      alert("Không thể tạo ảnh thiết kế. Vui lòng thử lại.");
+      alert(`Không thể tạo ảnh thiết kế. Chi tiết lỗi: ${error.message || error}`);
     } finally {
       setIsExporting(false);
     }
@@ -461,8 +453,8 @@ const DesignerPage = () => {
 
     const nextDesigns = savedDesigns.some((item) => item._id === nextDesign._id)
       ? savedDesigns.map((item) =>
-          item._id === nextDesign._id ? nextDesign : item,
-        )
+        item._id === nextDesign._id ? nextDesign : item,
+      )
       : [nextDesign, ...savedDesigns];
 
     writeSavedDesigns(nextDesigns);
@@ -488,11 +480,11 @@ const DesignerPage = () => {
       const designRecord = isSaved
         ? saveDesignToLibrary(designData, existingId)
         : {
-            ...designData,
-            _id: existingId || createDesignId(),
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          };
+          ...designData,
+          _id: existingId || createDesignId(),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
 
       const cartDesign = {
         _id: designRecord._id,

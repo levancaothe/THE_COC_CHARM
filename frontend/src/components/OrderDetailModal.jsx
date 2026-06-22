@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import html2canvas from "html2canvas";
 import "./OrderDetailModal.css";
 
 const STATUS_OPTIONS = [
@@ -30,6 +31,8 @@ export default function OrderDetailModal({
 }) {
   // This state is just for the Order Status dropdown editor
   const [status, setStatus] = useState(() => order?.status || "Pending");
+  const [isExporting, setIsExporting] = useState(false);
+  const braceletPreviewRefs = useRef({});
 
   const formatDate = (dateString) =>
     new Date(dateString).toLocaleDateString("vi-VN", {
@@ -54,6 +57,62 @@ export default function OrderDetailModal({
     onUpdateStatus?.(order._id, status);
   };
 
+  const handleSaveBraceletImage = async (idx, item) => {
+    const target = braceletPreviewRefs.current[idx];
+    if (!target || isExporting) return;
+
+    try {
+      setIsExporting(true);
+
+      const canvas = await html2canvas(target, {
+        useCORS: true,
+        backgroundColor: "#ffffff",
+        scale: 2,
+        onclone: (clonedDocument) => {
+          const clonedTarget = clonedDocument.querySelector(
+            `[data-bracelet-preview="${idx}"]`,
+          );
+          if (clonedTarget) {
+            const clonedStrip = clonedTarget.querySelector(".order-bracelet-strip");
+            const stripWidth = clonedStrip
+              ? Math.max(
+                  clonedStrip.scrollWidth || 0,
+                  clonedStrip.getBoundingClientRect().width || 0,
+                )
+              : Math.max(
+                  clonedTarget.scrollWidth || 0,
+                  clonedTarget.getBoundingClientRect().width || 0,
+                );
+
+            clonedTarget.style.width = `${stripWidth}px`;
+            clonedTarget.style.maxWidth = "none";
+            clonedTarget.style.minWidth = "0";
+            clonedTarget.style.overflow = "visible";
+            clonedTarget.style.display = "inline-grid";
+
+            if (clonedStrip) {
+              clonedStrip.style.width = `${stripWidth}px`;
+              clonedStrip.style.minWidth = "0";
+              clonedStrip.style.overflow = "visible";
+              clonedStrip.style.flexWrap = "nowrap";
+            }
+          }
+        },
+      });
+
+      const image = canvas.toDataURL("image/png");
+      const link = document.createElement("a");
+      link.href = image;
+      link.download = `${item?.productDetail?.name || item?.name || "bracelet"}.png`;
+      link.click();
+    } catch (error) {
+      console.error("Error saving bracelet image:", error);
+      alert("Không thể lưu ảnh vòng charm. Vui lòng thử lại.");
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   const renderBraceletPreview = (item, idx) => {
     const snapshotCharms = Array.isArray(item.designCharmDetails)
       ? item.designCharmDetails
@@ -68,39 +127,61 @@ export default function OrderDetailModal({
           ? item.charmDetails
           : fallbackCharms;
     return (
-      <div className="order-bracelet-preview">
+      <div className="order-bracelet-preview-wrap">
         <div
-          className="order-bracelet-strip"
-          role="list"
-          aria-label="Danh sách charm trong vòng"
+          className="order-bracelet-preview"
+          data-bracelet-preview={idx}
+          ref={(node) => {
+            if (node) {
+              braceletPreviewRefs.current[idx] = node;
+            } else {
+              delete braceletPreviewRefs.current[idx];
+            }
+          }}
         >
-          {charms.map((charm, charmIndex) => (
-            <div
-              key={`${idx}-${charm?._id || charmIndex}`}
-              className="order-bracelet-chip"
-              role="listitem"
-              title={charm?.name || "Charm đã bị xóa"}
-            >
-              {charm?.image ? (
-                <img
-                  src={charm.image}
-                  alt={charm.name || "Charm"}
-                  className="order-bracelet-chip__image"
-                />
-              ) : (
-                <span className="order-bracelet-chip__image order-bracelet-chip__image--empty">
-                  ?
+          <div
+            className="order-bracelet-strip"
+            role="list"
+            aria-label="Danh sách charm trong vòng"
+          >
+            {charms.map((charm, charmIndex) => (
+              <div
+                key={`${idx}-${charm?._id || charmIndex}`}
+                className="order-bracelet-chip"
+                role="listitem"
+                title={charm?.name || "Charm đã bị xóa"}
+              >
+                {charm?.image ? (
+                  <img
+                    src={charm.image}
+                    alt={charm.name || "Charm"}
+                    className="order-bracelet-chip__image"
+                  />
+                ) : (
+                  <span className="order-bracelet-chip__image order-bracelet-chip__image--empty">
+                    ?
+                  </span>
+                )}
+                <span className="order-bracelet-chip__name">
+                  {charm?.name || "Charm đã bị xóa"}
                 </span>
-              )}
-              <span className="order-bracelet-chip__name">
-                {charm?.name || "Charm đã bị xóa"}
-              </span>
-            </div>
-          ))}
+              </div>
+            ))}
+          </div>
         </div>
         <div className="order-bracelet-summary">
           <strong>{item.productDetail?.name || "Vòng tay thiết kế"}</strong>
           <span>{charms.length || 0} hạt charm</span>
+        </div>
+        <div className="order-bracelet-actions">
+          <button
+            className="btn btn-success btn-export-bracelet"
+            onClick={() => handleSaveBraceletImage(idx, item)}
+            type="button"
+            disabled={isExporting}
+          >
+            {isExporting ? "Đang lưu..." : "Lưu ảnh vòng charm"}
+          </button>
         </div>
       </div>
     );

@@ -27,6 +27,10 @@ const charmSchema = new mongoose.Schema({
         type: mongoose.Schema.ObjectId,
         ref: 'Category',
         required: [true, 'Please assign a category to this charm']
+    },
+    isPendant: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true

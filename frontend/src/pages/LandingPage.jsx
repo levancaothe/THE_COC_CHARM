@@ -2,30 +2,10 @@ import React, { useState, useEffect } from "react";
 import "./LandingPage.css";
 import logo from "../assets/logo.png"; // 👈 put your frog logo here
 import { Link } from "react-router-dom";
+import api from "../services/api";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const formatCurrency = (n) => n.toLocaleString("vi-VN") + "đ";
-
-const BRACELETS = [
-  {
-    id: "happy-birthday",
-    name: "Happy Birthday",
-    desc: "Món quà nhỏ gửi trọn yêu thương và lời chúc sinh nhật ý nghĩa.",
-    price: 250000,
-  },
-  {
-    id: "my-love",
-    name: "My Love",
-    desc: "Vòng tay nhỏ thay lời yêu thương ngọt ngào dành cho người đặc biệt.",
-    price: 250000,
-  },
-  {
-    id: "graduation",
-    name: "Graduation",
-    desc: "Món quà ý nghĩa lưu giữ dấu mốc trưởng thành và chúc cho hành trình mới luôn thành công.",
-    price: 250000,
-  },
-];
 
 const SIZES = ["15 Charm / 18cm", "17 Charm / 20cm", "19 Charm / 22cm"];
 const GIFT_PRICE = 50000;
@@ -35,6 +15,10 @@ const SHIPPING_PRICE = 30000;
 export default function LandingPage() {
   // Countdown (starting at 2h 45m 30s — swap with real deadline)
   const [timeLeft, setTimeLeft] = useState(2 * 3600 + 45 * 60 + 30);
+  const [collections, setCollections] = useState([]);
+  const [loadingCollections, setLoadingCollections] = useState(true);
+  const [collectionsError, setCollectionsError] = useState("");
+  const [selected, setSelected] = useState("");
   useEffect(() => {
     if (timeLeft <= 0) return;
     const id = setInterval(() => setTimeLeft((t) => t - 1), 1000);
@@ -44,8 +28,6 @@ export default function LandingPage() {
   const mm = String(Math.floor((timeLeft % 3600) / 60)).padStart(2, "0");
   const ss = String(timeLeft % 60).padStart(2, "0");
 
-  // Order form state
-  const [selected, setSelected] = useState("happy-birthday");
   const [size, setSize] = useState("17 Charm / 20cm");
   const [giftAddon, setGiftAddon] = useState(true);
   const [form, setForm] = useState({
@@ -55,8 +37,52 @@ export default function LandingPage() {
     notes: "",
   });
 
-  const braceletPrice =
-    BRACELETS.find((b) => b.id === selected)?.price ?? 250000;
+  useEffect(() => {
+    let active = true;
+
+    const fetchCollections = async () => {
+      setLoadingCollections(true);
+      setCollectionsError("");
+
+      try {
+        const response = await api.get("/collections?status=available");
+        const nextCollections = Array.isArray(response.data?.collections)
+          ? response.data.collections
+          : [];
+
+        if (!active) return;
+
+        setCollections(nextCollections.slice(0, 3));
+        setSelected((current) => {
+          if (current && nextCollections.some((collection) => collection._id === current)) {
+            return current;
+          }
+          return nextCollections[0]?._id || "";
+        });
+      } catch (error) {
+        if (!active) return;
+        console.error("Error fetching collections:", error);
+        setCollections([]);
+        setSelected("");
+        setCollectionsError("Không thể tải dữ liệu bộ sưu tập từ database.");
+      } finally {
+        if (active) setLoadingCollections(false);
+      }
+    };
+
+    fetchCollections();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const selectedCollection =
+    collections.find((collection) => collection._id === selected) ||
+    collections[0] ||
+    null;
+
+  const braceletPrice = selectedCollection?.price ?? 0;
   const total = braceletPrice + (giftAddon ? GIFT_PRICE : 0) + SHIPPING_PRICE;
 
   const handleFormChange = (e) =>
@@ -113,34 +139,50 @@ export default function LandingPage() {
         <p className="lp-section-sub">Mỗi hạt Charm chứa đựng một câu chuyện</p>
 
         <div className="lp-products__grid">
-          {BRACELETS.map((b, i) => (
-            <div
-              key={b.id}
-              className={`lp-card ${i === 0 ? "lp-card--featured" : ""}`}
-            >
-              {i === 0 && <span className="lp-card__badge">BÁN CHẠY NHẤT</span>}
-              <div className="lp-card__img-placeholder" />
-              <div className="lp-card__body">
-                <h3 className="lp-card__name">{b.name}</h3>
-                <p className="lp-card__desc">{b.desc}</p>
-                <div className="lp-card__pricing">
-                  <span className="lp-card__old-price">350.000đ</span>
-                  <span className="lp-card__new-price">
-                    {formatCurrency(b.price)}
-                  </span>
-                </div>
-                <button
-                  className="lp-btn lp-btn--outline"
-                  onClick={() => {
-                    setSelected(b.id);
-                    scrollToOrder();
-                  }}
-                >
-                  CHỌN MẪU NÀY
-                </button>
-              </div>
+          {loadingCollections ? (
+            <div className="lp-products__loading">
+              Đang tải bộ sưu tập từ database...
             </div>
-          ))}
+          ) : collections.length > 0 ? (
+            collections.map((collection, index) => (
+              <div
+                key={collection._id}
+                className={`lp-card ${index === 0 ? "lp-card--featured" : ""}`}
+              >
+                {index === 0 && <span className="lp-card__badge">NỔI BẬT</span>}
+                <div className="lp-card__img-placeholder">
+                  {collection.image ? (
+                    <img src={collection.image} alt={collection.name} />
+                  ) : null}
+                </div>
+                <div className="lp-card__body">
+                  <h3 className="lp-card__name">{collection.name}</h3>
+                  <p className="lp-card__desc">
+                    {collection.description || "Bộ sưu tập được lưu trong database."}
+                  </p>
+                  <div className="lp-card__pricing">
+                    <span className="lp-card__old-price">Giá gốc</span>
+                    <span className="lp-card__new-price">
+                      {formatCurrency(collection.price || 0)}
+                    </span>
+                  </div>
+                  <button
+                    className="lp-btn lp-btn--outline"
+                    onClick={() => {
+                      setSelected(collection._id);
+                      scrollToOrder();
+                    }}
+                  >
+                    CHỌN MẪU NÀY
+                  </button>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="lp-products__loading">
+              {collectionsError || "Chưa có bộ sưu tập nào trong database."}
+            </div>
+          )}
         </div>
 
         {/* Custom design strip */}
@@ -228,21 +270,21 @@ export default function LandingPage() {
 
               <label className="lp-order__field-label">Chọn mẫu vòng</label>
               <div className="lp-order__radios">
-                {BRACELETS.map((b) => (
+                {collections.map((collection) => (
                   <label
-                    key={b.id}
-                    className={`lp-order__radio-row ${selected === b.id ? "lp-order__radio-row--active" : ""}`}
+                    key={collection._id}
+                    className={`lp-order__radio-row ${selected === collection._id ? "lp-order__radio-row--active" : ""}`}
                   >
                     <input
                       type="radio"
                       name="bracelet"
-                      value={b.id}
-                      checked={selected === b.id}
-                      onChange={() => setSelected(b.id)}
+                      value={collection._id}
+                      checked={selected === collection._id}
+                      onChange={() => setSelected(collection._id)}
                     />
-                    <span className="lp-order__radio-name">{b.name}</span>
+                    <span className="lp-order__radio-name">{collection.name}</span>
                     <span className="lp-order__radio-price">
-                      {formatCurrency(b.price)}
+                      {formatCurrency(collection.price || 0)}
                     </span>
                   </label>
                 ))}

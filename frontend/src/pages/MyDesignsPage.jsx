@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import ConfirmModal from '../components/ConfirmModal';
 import LoadingSpinner from '../components/LoadingSpinner';
+import CollectionCharmPreview from '../components/CollectionCharmPreview';
 import './MyDesignsPage.css';
 
 const SAVED_DESIGNS_KEY = 'charmify_saved_designs';
@@ -94,17 +95,10 @@ const MyDesignsPage = () => {
                   <span>{design.charms?.length || 0} hạt</span>
                 </div>
 
-                <div className="my-design-preview" aria-label={`Preview ${design.name}`}>
-                  <div className="my-design-band">
-                    {(design.charms || []).map((item, index) => (
-                      <img
-                        key={`${item.charm?._id || item.charm?.name || 'charm'}-${index}`}
-                        src={item.charm?.image}
-                        alt=""
-                      />
-                    ))}
-                  </div>
-                </div>
+                <CollectionCharmPreview
+                  charms={design.charms || []}
+                  ariaLabel={`Preview ${design.name}`}
+                />
 
                 <div className="my-design-card__foot">
                   <strong>{formatVnd(design.totalPrice)}</strong>

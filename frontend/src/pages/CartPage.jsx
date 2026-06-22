@@ -232,6 +232,7 @@ const CartPage = () => {
           price: Number(charm?.price ?? charm?.charm?.price) || 0,
           stock: Number(charm?.stock ?? charm?.charm?.stock) || 0,
           category: charm?.category || charm?.charm?.category || null,
+          isPendant: Boolean(charm?.isPendant ?? charm?.charm?.isPendant),
         }));
 
       const orderPayload = {

@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useDrop, useDrag } from 'react-dnd';
-import { getProxyImageUrl } from '../utils/imageProxy';
+import { getProxyImageUrl, isPendantCharm } from '../utils/imageProxy';
 
-const PlacedCharm = ({ charm, index, onRemove, onReplace, moveCharmInSequence }) => {
+const PlacedCharm = ({ charm, index, onRemove, onReplace, moveCharmInSequence, exportMode }) => {
+  const charmImageUrl = getProxyImageUrl(charm.image);
   const [{ isDragging }, drag] = useDrag(() => ({
     type: 'SORTABLE_CHARM',
     item: { index },
@@ -29,44 +30,88 @@ const PlacedCharm = ({ charm, index, onRemove, onReplace, moveCharmInSequence })
     }),
   }), [index, moveCharmInSequence, onReplace]);
 
+  const isPendant = isPendantCharm(charm);
+  const pendantPreviewStyle = {
+    position: 'absolute',
+    left: '-6.5px',
+    top: '2px',
+    width: '58px',
+    height: '100px',
+    overflow: 'hidden',
+    pointerEvents: 'none',
+    zIndex: 9999,
+  };
+
   return (
-    <div 
+    <div
       ref={(node) => drag(drop(node))}
-      className={`placed-charm ${isOverCharm ? 'is-replacing' : ''}`}
+      className={`placed-charm ${isOverCharm ? 'is-replacing' : ''} ${isPendant ? 'mm-pendant-slot' : ''}`}
       onDoubleClick={() => onRemove(index)}
       title="Double click to remove charm"
-      style={{ 
-        position: 'relative', 
+      style={{
+        position: 'relative',
+        width: '45px',
+        height: '45px',
         opacity: isDragging ? 0.3 : 1,
         cursor: 'grab',
         padding: '0',
-        margin: '0 -1px',
-        transition: 'all 0.2s ease',
-        transform: isOverCharm ? 'scale(1.1) translateY(-5px)' : 'scale(1)',
-        zIndex: isOverCharm ? 10 : 2
+        margin: isPendant ? '0 1px' : '0 -1px',
+        transition: exportMode ? 'none' : 'all 0.2s ease',
+        transform: exportMode
+          ? 'none'
+          : (isOverCharm
+            ? 'scale(1.1) translateY(-5px)'
+            : 'scale(1)'),
+        zIndex: isOverCharm ? 10 : 2,
+        overflow: isPendant ? 'visible' : 'hidden'
       }}
     >
       <div style={{
-        width: '45px',
-        height: '45px',
+        width: '100%',
+        height: '100%',
         background: 'transparent',
-        display: 'flex',
+        display: isPendant ? 'block' : 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        overflow: 'hidden',
+        overflow: isPendant ? 'visible' : 'hidden',
         position: 'relative'
       }}>
-        <img 
-          src={getProxyImageUrl(charm.image)}
-          alt={charm.name} 
-          crossOrigin="anonymous"
-          style={{ 
-            width: '100%', 
-            height: '100%', 
-            objectFit: 'contain',
-            display: 'block'
-          }} 
-        />
+        {isPendant ? (
+          <div
+            className={`mm-pendant-preview ${exportMode ? 'export-mode' : ''}`}
+            style={pendantPreviewStyle}
+          >
+            <img
+              src={charmImageUrl}
+              alt={charm.name}
+              crossOrigin="anonymous"
+              loading="eager"
+              decoding="async"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'center top',
+                display: 'block'
+              }}
+            />
+          </div>
+        ) : (
+          <img
+            src={charmImageUrl}
+            alt={charm.name}
+            crossOrigin="anonymous"
+            loading="eager"
+            decoding="async"
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'contain',
+              objectPosition: 'center',
+              display: 'block'
+            }}
+          />
+        )}
       </div>
     </div>
   );
@@ -101,9 +146,10 @@ const BraceletCanvas = React.forwardRef(({ selectedCharms, onAddCharm, onRemoveC
   }, [isOver, exportMode]);
 
   const showDropHighlight = !exportMode && stableIsOver;
+  const hasPendant = selectedCharms.some(isPendantCharm);
 
   return (
-    <div 
+    <div
       ref={(node) => {
         drop(node);
         if (ref) {
@@ -112,8 +158,8 @@ const BraceletCanvas = React.forwardRef(({ selectedCharms, onAddCharm, onRemoveC
         }
       }}
       className="bracelet-canvas"
-      style={{ 
-        minHeight: '200px', 
+      style={{
+        minHeight: '200px',
         width: '100%',
         display: 'flex',
         alignItems: 'center',
@@ -121,6 +167,7 @@ const BraceletCanvas = React.forwardRef(({ selectedCharms, onAddCharm, onRemoveC
         position: 'relative',
         background: '#fdfdfd',
         padding: '40px',
+        paddingBottom: hasPendant ? '150px' : '40px',
         overflowX: 'auto',
         borderRadius: '24px',
         border: exportMode ? 'none' : '1px solid rgba(10, 46, 79, 0.12)',
@@ -143,20 +190,20 @@ const BraceletCanvas = React.forwardRef(({ selectedCharms, onAddCharm, onRemoveC
         />
       )}
 
-      <div className="modular-bracelet-band" style={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        gap: '0px', 
+      <div className="modular-bracelet-band" style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0px',
         zIndex: 2,
         boxShadow: selectedCharms.length > 0 ? '0 10px 30px rgba(74, 63, 53, 0.15)' : 'none',
         borderRadius: '4px',
         overflow: 'visible'
       }}>
         {selectedCharms.map((charm, index) => (
-          <PlacedCharm 
-            key={charm.instanceId} 
-            charm={charm} 
-            index={index} 
+          <PlacedCharm
+            key={charm.instanceId}
+            charm={charm}
+            index={index}
             onRemove={onRemoveCharm}
             onReplace={onReplaceCharm}
             moveCharmInSequence={moveCharmInSequence}
@@ -166,14 +213,14 @@ const BraceletCanvas = React.forwardRef(({ selectedCharms, onAddCharm, onRemoveC
       </div>
 
       {selectedCharms.length === 0 && !showDropHighlight && (
-        <div style={{ 
-          position: 'absolute', 
-          top: '50%', 
-          left: '50%', 
+        <div style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
           transform: 'translate(-50%, -50%)',
-          color: 'var(--text)', 
-          opacity: 0.4, 
-          fontSize: '1rem', 
+          color: 'var(--text)',
+          opacity: 0.4,
+          fontSize: '1rem',
           fontWeight: 600,
           pointerEvents: 'none',
           textAlign: 'center'
