@@ -1,0 +1,26 @@
+.product-theme-charm-card {
+  min-width: 120px;
+}
+
+.product-theme-charm-img {
+  width: 80px;
+  height: 80px;
+}
+
+@media (max-width: 768px) {
+  .product-theme-charm-card {
+    min-width: 90px !important;
+    padding: 6px !important;
+  }
+
+  .product-theme-charm-img {
+    width: 50px !important;
+    height: 50px !important;
+  }
+
+  .product-theme-charm-card p {
+    font-size: 0.75rem !important;
+    min-height: auto !important;
+    margin-top: 6px !important;
+  }
+}

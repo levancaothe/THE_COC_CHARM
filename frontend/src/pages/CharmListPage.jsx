@@ -3,6 +3,7 @@ import api from "../services/api";
 import CategoryCard from "../components/CategoryCard";
 import { getProxyImageUrl } from "../utils/imageProxy";
 import LoadingSpinner from "../components/LoadingSpinner";
+import "./CharmListPage.css";
 
 const CharmListPage = () => {
   const [charms, setCharms] = useState([]);
@@ -201,9 +202,8 @@ const CharmListPage = () => {
             {getCharmsByCategory(selectedCategory).map((charm) => (
               <div
                 key={charm._id}
-                className="glass"
+                className="glass product-theme-charm-card"
                 style={{
-                  minWidth: "120px",
                   padding: "10px",
                   borderRadius: "var(--radius-md)",
                   textAlign: "center",
@@ -214,9 +214,8 @@ const CharmListPage = () => {
                   src={getProxyImageUrl(charm.image)}
                   alt={charm.name}
                   crossOrigin="anonymous"
+                  className="product-theme-charm-img"
                   style={{
-                    width: "80px",
-                    height: "80px",
                     objectFit: "contain",
                     margin: "0 auto",
                   }}
