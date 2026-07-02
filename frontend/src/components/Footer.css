@@ -117,11 +117,16 @@
   .footer-main {
     grid-template-columns: 1fr;
     text-align: center;
+    gap: 28px;
+    padding: 36px 20px 40px;
   }
 
   .footer-social-head {
     flex-direction: column;
     gap: 14px;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
   }
 
   .footer-column ul {
@@ -131,5 +136,32 @@
 
   .footer-socials {
     justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-main {
+    padding: 28px 16px 32px;
+    gap: 22px;
+  }
+
+  .footer-brand img {
+    height: 64px;
+    width: 64px;
+  }
+
+  .footer p,
+  .footer li {
+    font-size: 0.74rem;
+  }
+
+  .footer-column h3 {
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+  }
+
+  .footer-bottom {
+    font-size: 0.68rem;
+    padding: 14px 16px;
   }
 }

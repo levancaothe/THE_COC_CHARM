@@ -89,7 +89,7 @@ const MyDesignsPage = () => {
                   <div>
                     <h2>{design.name}</h2>
                     <p>
-                      Ngày lưu: {new Date(design.createdAt || design.updatedAt || Date.now()).toLocaleDateString('vi-VN')}
+                      Ngày lưu: {design.createdAt || design.updatedAt ? new Date(design.createdAt || design.updatedAt).toLocaleDateString('vi-VN') : new Date().toLocaleDateString('vi-VN')}
                     </p>
                   </div>
                   <span>{design.charms?.length || 0} hạt</span>

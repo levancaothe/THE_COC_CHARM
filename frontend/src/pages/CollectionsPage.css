@@ -95,3 +95,79 @@
 .btn-add-cart:hover {
   background-color: #2a4a7f;
 }
+
+@media (max-width: 768px) {
+  .collections-page {
+    padding: 28px 16px;
+  }
+
+  .collections-header {
+    margin-bottom: 28px;
+  }
+
+  .collections-header h1 {
+    font-size: 1.6rem;
+  }
+
+  .collections-header p {
+    font-size: 0.95rem;
+  }
+
+  .collections-grid {
+    gap: 20px;
+  }
+
+  .card-image {
+    height: 220px;
+  }
+}
+
+@media (max-width: 480px) {
+  .collections-page {
+    padding: 22px 12px;
+  }
+
+  .collections-header {
+    margin-bottom: 22px;
+  }
+
+  .collections-header h1 {
+    font-size: 1.4rem;
+  }
+
+  .collections-header p {
+    font-size: 0.88rem;
+  }
+
+  .collections-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .card-image {
+    height: 200px;
+  }
+
+  .card-info {
+    padding: 14px;
+  }
+
+  .card-info h3 {
+    font-size: 1.1rem;
+  }
+
+  .card-info .description {
+    font-size: 0.88rem;
+    margin-bottom: 12px;
+  }
+
+  .card-info .price {
+    font-size: 1.05rem;
+    margin-bottom: 12px;
+  }
+
+  .btn-add-cart {
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+}

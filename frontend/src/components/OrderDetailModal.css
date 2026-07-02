@@ -374,6 +374,7 @@
   font: inherit;
 }
 
+
 @media (max-width: 768px) {
   .modal-large {
     max-width: 95%;
@@ -408,5 +409,122 @@
   .status-editor-row {
     flex-direction: column;
     align-items: stretch;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-large {
+    max-width: 98%;
+    width: 98%;
+  }
+
+  .order-detail-content {
+    padding: 12px 14px;
+    max-height: 70vh;
+  }
+
+  .order-detail-section {
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+  }
+
+  .order-detail-section h4 {
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+
+  .detail-grid {
+    gap: 10px;
+  }
+
+  .detail-label {
+    font-size: 10px;
+  }
+
+  .detail-value {
+    font-size: 13px;
+  }
+
+  .detail-value.price {
+    font-size: 15px;
+  }
+
+  .status-editor {
+    padding: 12px;
+    margin-top: 14px;
+  }
+
+  .status-editor label {
+    font-size: 10px;
+    margin-bottom: 8px;
+  }
+
+  .status-editor-row select {
+    min-height: 36px;
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+
+  .status-editor-row button {
+    height: 36px;
+    font-size: 13px;
+  }
+
+  .order-item-card {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .order-item-info h5 {
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+
+  .order-item-info p {
+    font-size: 12px;
+  }
+
+  .order-item-info .item-price {
+    font-size: 14px;
+    margin-top: 6px;
+  }
+
+  .order-bracelet-strip {
+    padding: 4px;
+    gap: 2px;
+  }
+
+  .order-bracelet-chip {
+    width: 54px;
+  }
+
+  .order-bracelet-chip__image {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+  }
+
+  .order-bracelet-chip__name {
+    font-size: 9px;
+  }
+
+  .order-bracelet-summary {
+    font-size: 11px;
+  }
+
+  .order-bracelet-summary strong {
+    font-size: 12px;
+  }
+
+  .btn-export-bracelet {
+    min-height: 32px;
+    padding: 0 10px;
+    font-size: 11px;
+    width: 100%;
+  }
+
+  .order-notes {
+    padding: 12px;
+    font-size: 12px;
   }
 }

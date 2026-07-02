@@ -419,3 +419,79 @@
     text-align: left;
   }
 }
+
+@media (max-width: 480px) {
+  .lookup-page {
+    padding: 24px 10px 34px;
+  }
+
+  .lookup-shell {
+    padding: 10px;
+  }
+
+  .lookup-panel {
+    padding: 24px 14px 30px;
+  }
+
+  .lookup-icon {
+    height: 90px;
+    width: 90px;
+    margin-bottom: 20px;
+  }
+
+  .lookup-icon svg {
+    height: 46px;
+    width: 46px;
+  }
+
+  .lookup-panel h1 {
+    font-size: 1.5rem;
+    margin-bottom: 14px;
+  }
+
+  .lookup-intro {
+    font-size: 0.92rem;
+    margin-bottom: 20px;
+  }
+
+  .lookup-form input {
+    height: 42px;
+    font-size: 0.88rem;
+    padding: 0 14px;
+  }
+
+  .lookup-form button {
+    font-size: 0.82rem;
+    height: 32px;
+    margin-top: 20px;
+    min-width: 150px;
+  }
+
+  .lookup-order-card,
+  .lookup-empty {
+    padding: 16px 14px;
+  }
+
+  .lookup-order-head h2 {
+    font-size: 0.95rem;
+  }
+
+  .lookup-order-head > span {
+    font-size: 0.7rem;
+    padding: 4px 10px;
+  }
+
+  .lookup-order-head p,
+  .lookup-order-foot p,
+  .lookup-order-item {
+    font-size: 0.82rem;
+  }
+
+  .lookup-design-preview {
+    padding: 6px;
+  }
+
+  .lookup-design-preview__title strong {
+    font-size: 0.82rem;
+  }
+}

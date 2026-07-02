@@ -703,3 +703,167 @@ select {
     padding: 1.25rem;
   }
 }
+
+@media (max-width: 480px) {
+  .lp-nav {
+    padding: 0.5rem 1rem;
+  }
+
+  .lp-nav__img {
+    width: 36px;
+    height: 36px;
+  }
+
+  .lp-nav__name {
+    font-size: 1.1rem;
+  }
+
+  .lp-hero {
+    padding: 2rem 1rem;
+  }
+
+  .lp-hero__countdown {
+    font-size: 0.75rem;
+    padding: 0.4rem 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .lp-hero__heading--navy,
+  .lp-hero__heading--orange {
+    font-size: 1.6rem;
+  }
+
+  .lp-hero__sub {
+    font-size: 0.88rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .lp-btn {
+    font-size: 0.72rem;
+    padding: 0.65rem 1.5rem;
+  }
+
+  .lp-section-title {
+    font-size: 1.5rem;
+  }
+
+  .lp-section-sub {
+    font-size: 0.88rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .lp-products {
+    padding: 2.5rem 1rem;
+  }
+
+  .lp-card__body {
+    padding: 1rem;
+  }
+
+  .lp-card__name {
+    font-size: 1rem;
+  }
+
+  .lp-card__desc {
+    font-size: 0.8rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .lp-card__new-price {
+    font-size: 1rem;
+  }
+
+  .lp-products__custom-text {
+    font-size: 1rem;
+  }
+
+  .lp-why {
+    padding: 3rem 1rem;
+  }
+
+  .lp-why__title {
+    font-size: 1.35rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .lp-why__icon {
+    width: 2rem;
+    height: 2rem;
+    font-size: 1.1rem;
+  }
+
+  .lp-why__feature h4 {
+    font-size: 0.9rem;
+  }
+
+  .lp-why__feature p {
+    font-size: 0.82rem;
+  }
+
+  .lp-order {
+    padding: 3rem 1rem;
+  }
+
+  .lp-order__card {
+    padding: 1rem;
+  }
+
+  .lp-order__col-title {
+    font-size: 0.72rem;
+  }
+
+  .lp-order__field-label {
+    font-size: 0.8rem;
+  }
+
+  .lp-order__radio-row {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .lp-order__radio-name {
+    font-size: 0.82rem;
+  }
+
+  .lp-order__radio-price {
+    font-size: 0.82rem;
+  }
+
+  .lp-order__input {
+    font-size: 0.82rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .lp-order__summary-row {
+    font-size: 0.82rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .lp-footer__main {
+    padding: 2.5rem 1rem 2rem;
+    gap: 1.5rem;
+  }
+
+  .lp-footer__logo {
+    width: 44px;
+    height: 44px;
+  }
+
+  .lp-footer__tagline {
+    font-size: 0.76rem;
+  }
+
+  .lp-footer__col h4 {
+    font-size: 0.82rem;
+  }
+
+  .lp-footer__col p,
+  .lp-footer__col ul,
+  .lp-footer__col li {
+    font-size: 0.76rem;
+  }
+
+  .lp-footer__bar {
+    font-size: 0.72rem;
+    padding: 0.75rem 1rem;
+  }
+}

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import logo from "../assets/ic.png";
@@ -6,44 +7,60 @@ import "./Navbar.css";
 const Navbar = () => {
   const { totalItems } = useCart();
   const navigate = useNavigate();
+  const [isOpen, setIsOpen] = useState(false);
+
+  const toggleMenu = () => setIsOpen(!isOpen);
+  const closeMenu = () => setIsOpen(false);
 
   return (
     <nav className="navbar glass">
       <div className="container nav-container">
-        <Link to="/" className="logo-container">
+        <button
+          className={`menu-toggle ${isOpen ? "active" : ""}`}
+          onClick={toggleMenu}
+          aria-label="Toggle navigation"
+          aria-expanded={isOpen}
+        >
+          <span className="bar"></span>
+          <span className="bar"></span>
+          <span className="bar"></span>
+        </button>
+
+        <Link to="/" className="logo-container" onClick={closeMenu}>
           <img src={logo} alt="The Cóc Charm" className="navbar-logo" />
           <span className="logo-text">The Cóc Charm</span>
         </Link>
-        <ul className="nav-links">
+
+        <ul className={`nav-links ${isOpen ? "open" : ""}`}>
           <li>
-            <NavLink to="/" end>
+            <NavLink to="/" end onClick={closeMenu}>
               Trang chủ
             </NavLink>
           </li>
           <li>
-            <NavLink to="/charms">Sản phẩm</NavLink>
+            <NavLink to="/charms" onClick={closeMenu}>Sản phẩm</NavLink>
           </li>
           <li>
-            <NavLink to="/collections">Bộ Sưu Tập</NavLink>
+            <NavLink to="/collections" onClick={closeMenu}>Bộ Sưu Tập</NavLink>
           </li>
           <li>
-            <NavLink to="/about-us">Về Chúng Tôi</NavLink>
+            <NavLink to="/about-us" onClick={closeMenu}>Về Chúng Tôi</NavLink>
           </li>
           <li>
-            <NavLink to="/policy">Chính sách</NavLink>
+            <NavLink to="/policy" onClick={closeMenu}>Chính sách</NavLink>
           </li>
           <li>
-            <NavLink to="/orders">Tra cứu</NavLink>
+            <NavLink to="/orders" onClick={closeMenu}>Tra cứu</NavLink>
           </li>
           <li>
-            <NavLink to="/designer">Thiết kế ngay</NavLink>
+            <NavLink to="/designer" onClick={closeMenu}>Thiết kế ngay</NavLink>
           </li>
           <li>
-            <NavLink to="/my-designs">Mẫu của tôi</NavLink>
+            <NavLink to="/my-designs" onClick={closeMenu}>Mẫu của tôi</NavLink>
           </li>
         </ul>
         <div className="nav-actions">
-          <button className="cart-icon-btn" onClick={() => navigate("/cart")}>
+          <button className="cart-icon-btn" onClick={() => { closeMenu(); navigate("/cart"); }}>
             <svg
               viewBox="0 0 24 24"
               fill="none"

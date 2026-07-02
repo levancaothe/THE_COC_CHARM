@@ -1,3 +1,13 @@
+.designer-page {
+  padding: 40px 0;
+}
+
+@media (max-width: 768px) {
+  .designer-page {
+    padding: 24px 0 !important;
+  }
+}
+
 .designer-start {
   align-items: flex-start;
   background: #fff;
@@ -312,6 +322,73 @@
 
   .designer-checkout-panel {
     position: static;
+  }
+}
+
+@media (max-width: 480px) {
+  .designer-start {
+    padding: 28px 12px 40px;
+  }
+
+  .designer-start-card {
+    padding: 26px 16px 36px;
+  }
+
+  .designer-start-card h1 {
+    font-size: 1.5rem;
+    margin-bottom: 14px;
+  }
+
+  .designer-start-intro {
+    font-size: 0.9rem;
+  }
+
+  .designer-start-form label {
+    font-size: 0.82rem;
+  }
+
+  .designer-start-form input,
+  .designer-start-form select {
+    height: 34px;
+    font-size: 0.88rem;
+  }
+
+  .designer-hint {
+    font-size: 0.76rem;
+  }
+
+  .designer-start-button {
+    font-size: 0.82rem;
+    height: 38px;
+    margin-top: 24px;
+  }
+
+  .designer-canvas-sticky {
+    top: 74px;
+    padding: 8px 0 14px;
+  }
+
+  .designer-summary {
+    padding: 12px;
+    font-size: 0.82rem;
+  }
+
+  .designer-action {
+    font-size: 0.78rem;
+    min-height: 38px;
+  }
+
+  .designer-action--outline {
+    padding: 0 12px;
+  }
+
+  .designer-action--primary {
+    padding: 0 20px;
+    height: 38px;
+  }
+
+  .designer-checkout-panel {
+    margin-bottom: 24px;
   }
 }
 

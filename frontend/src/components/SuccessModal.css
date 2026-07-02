@@ -142,3 +142,31 @@
     padding: 14px 32px;
   }
 }
+
+@media (max-width: 480px) {
+  .success-modal-content {
+    padding: 30px 16px;
+    border-width: 3px;
+  }
+
+  .success-icon {
+    width: 56px;
+    height: 56px;
+    margin-bottom: 16px;
+  }
+
+  .success-title {
+    font-size: 20px;
+    margin-bottom: 12px;
+  }
+
+  .success-message {
+    font-size: 13px;
+    margin-bottom: 24px;
+  }
+
+  .success-btn {
+    padding: 12px 24px;
+    font-size: 13px;
+  }
+}

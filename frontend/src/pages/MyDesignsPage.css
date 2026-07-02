@@ -111,11 +111,29 @@
 }
 
 .collection-charm-preview {
-  overflow: visible !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch;
+  padding-left: 24px !important;
+  padding-right: 24px !important;
+}
+
+.collection-charm-preview--detail {
+  padding-left: 44px !important;
+  padding-right: 44px !important;
+}
+
+.collection-charm-preview::-webkit-scrollbar {
+  height: 6px;
+}
+
+.collection-charm-preview::-webkit-scrollbar-thumb {
+  background: rgba(10, 46, 79, 0.22);
+  border-radius: 999px;
 }
 
 .collection-charm-preview .my-design-band {
-  overflow: visible;
+  justify-content: safe center;
 }
 
 .collection-charm-preview--card .my-design-slot {
@@ -355,5 +373,61 @@ img.my-design-pendant-preview {
   .my-design-band img {
     height: 28px;
     width: 32px;
+  }
+}
+
+@media (max-width: 480px) {
+  .my-designs-page {
+    padding: 28px 12px 40px;
+  }
+
+  .my-designs-header {
+    margin-bottom: 24px;
+  }
+
+  .my-designs-header p {
+    font-size: 0.78rem;
+  }
+
+  .my-designs-header h1 {
+    font-size: 1.6rem;
+  }
+
+  .my-design-card {
+    padding: 14px;
+    gap: 14px;
+  }
+
+  .my-design-card__head h2 {
+    font-size: 1.1rem;
+  }
+
+  .my-design-card__head p {
+    font-size: 0.76rem;
+  }
+
+  .my-design-card__head > span {
+    font-size: 0.68rem;
+    padding: 4px 10px;
+  }
+
+  .my-design-preview {
+    padding: 10px 8px;
+  }
+
+  .my-design-card__foot > strong {
+    font-size: 1.1rem;
+  }
+
+  .my-design-add,
+  .my-design-edit,
+  .my-design-delete {
+    font-size: 0.72rem;
+    height: 34px;
+    padding: 0 12px;
+  }
+
+  .my-design-empty {
+    padding: 32px 16px;
   }
 }
