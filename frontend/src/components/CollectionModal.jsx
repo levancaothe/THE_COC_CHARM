@@ -319,6 +319,34 @@ export default function CollectionModal({ collection, onSave, onClose }) {
           useCORS: true,
           backgroundColor: "#ffffff",
           scale: 2,
+          onclone: (clonedDocument) => {
+            const clonedTarget = clonedDocument.querySelector(".bracelet-canvas");
+            if (clonedTarget) {
+              const clonedBand = clonedTarget.querySelector(".modular-bracelet-band");
+              const bandWidth = clonedBand
+                ? Math.max(
+                    clonedBand.scrollWidth || 0,
+                    clonedBand.getBoundingClientRect().width || 0,
+                  )
+                : Math.max(
+                    clonedTarget.scrollWidth || 0,
+                    clonedTarget.getBoundingClientRect().width || 0,
+                  );
+
+              clonedTarget.style.width = `${bandWidth + 80}px`;
+              clonedTarget.style.maxWidth = "none";
+              clonedTarget.style.minWidth = "0";
+              clonedTarget.style.overflow = "visible";
+              clonedTarget.style.display = "flex";
+
+              if (clonedBand) {
+                clonedBand.style.width = `${bandWidth}px`;
+                clonedBand.style.minWidth = "0";
+                clonedBand.style.overflow = "visible";
+                clonedBand.style.flexWrap = "nowrap";
+              }
+            }
+          },
         });
         finalImage = canvas.toDataURL("image/png"); // The Base64 string for your backend
       }

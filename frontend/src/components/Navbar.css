@@ -142,13 +142,14 @@
     justify-content: space-between;
     align-items: center;
     padding: 0 24px;
+    min-height: 72px;
   }
 
   .nav-links {
     display: flex;
     flex-direction: column;
     position: absolute;
-    top: 86px;
+    top: 72px;
     left: 0;
     width: 100%;
     background: #fff;
@@ -180,5 +181,44 @@
     display: block;
     width: 100%;
     padding: 8px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-container {
+    padding: 0 14px;
+    min-height: 60px;
+  }
+
+  .navbar-logo {
+    height: 46px;
+    width: 46px;
+  }
+
+  .nav-links {
+    top: 60px;
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .nav-links a {
+    font-size: 0.88rem;
+    padding: 6px 0;
+  }
+
+  .cart-icon-btn {
+    height: 34px;
+    width: 34px;
+  }
+
+  .cart-svg {
+    height: 20px;
+    width: 20px;
+  }
+
+  .cart-badge {
+    font-size: 0.6rem;
+    height: 15px;
+    min-width: 15px;
   }
 }

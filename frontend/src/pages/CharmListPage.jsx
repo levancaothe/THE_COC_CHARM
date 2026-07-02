@@ -11,11 +11,6 @@ const CharmListPage = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
 
-  useEffect(() => {
-    fetchCategories();
-    fetchCharms();
-  }, []);
-
   const fetchCategories = async () => {
     try {
       const { data } = await api.get("/categories");
@@ -36,6 +31,11 @@ const CharmListPage = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchCategories();
+    fetchCharms();
+  }, []);
 
   useEffect(() => {
     const handleInventoryUpdate = () => {

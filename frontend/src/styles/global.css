@@ -121,6 +121,51 @@ button {
 }
 
 @media (max-width: 768px) {
-  h1 { font-size: 2.5rem !important; }
+  h1 { font-size: 2rem !important; }
+  h2 { font-size: 1.5rem !important; }
   .grid-2 { grid-template-columns: 1fr !important; }
+
+  .container {
+    padding: 0 1rem;
+  }
+
+  .btn-premium {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 0.9rem;
+  }
+
+  .empty-state {
+    padding: 2.5rem 1.5rem;
+  }
+
+  .empty-state i {
+    font-size: 2.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  h1 { font-size: 1.6rem !important; }
+  h2 { font-size: 1.3rem !important; }
+  h3 { font-size: 1.1rem !important; }
+
+  body {
+    font-size: 0.92rem;
+  }
+
+  .container {
+    padding: 0 0.75rem;
+  }
+
+  .btn-premium {
+    padding: 6px 16px;
+    font-size: 0.85rem;
+  }
+
+  .empty-state {
+    padding: 2rem 1rem;
+  }
+
+  .empty-state i {
+    font-size: 2rem;
+  }
 }

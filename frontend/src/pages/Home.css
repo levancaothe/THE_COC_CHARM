@@ -452,16 +452,17 @@
 .product-card__image {
   aspect-ratio: 1 / 1;
   background: linear-gradient(180deg, rgba(10, 46, 79, 0.06), rgba(217, 92, 20, 0.08));
-  display: grid;
-  place-items: center;
-  margin: 54px 18px 18px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 54px auto 18px;
   overflow: hidden;
 }
 
 .product-card__image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
   display: block;
 }
 
@@ -714,7 +715,7 @@
   }
 
   .home-hero__visual {
-    min-height: 390px;
+    min-height: 560px;
   }
 
   .process-grid,
@@ -758,6 +759,14 @@
     width: 76%;
   }
 
+  .home-hero__visual {
+    min-height: 480px;
+  }
+
+  .hero-frame--blue {
+    top: 170px;
+  }
+
   .home-section {
     padding-left: 18px;
     padding-right: 18px;
@@ -771,5 +780,202 @@
   .chat-panel {
     bottom: 82px;
     right: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .home-hero {
+    padding: 32px 16px;
+    gap: 32px;
+  }
+
+  .home-hero h1 {
+    font-size: 2rem;
+    margin-bottom: 14px;
+  }
+
+  .home-hero p {
+    font-size: 0.9rem;
+  }
+
+  .home-hero__content {
+    padding-top: 14px;
+  }
+
+  .home-hero__visual {
+    min-height: 420px;
+  }
+
+  .hero-frame--blue {
+    top: 170px;
+  }
+
+  .home-hero__actions {
+    margin-top: 28px;
+  }
+
+  .home-btn {
+    font-size: 0.64rem;
+    min-height: 32px;
+    padding: 0 12px;
+  }
+
+  .home-kicker {
+    font-size: 0.78rem;
+  }
+
+  .home-section h2,
+  .craft-section h2 {
+    font-size: 1.5rem;
+  }
+
+  .home-section {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .section-intro {
+    font-size: 0.88rem;
+    margin-bottom: 28px;
+  }
+
+  .process-card {
+    min-height: 200px;
+    padding: 28px 18px 24px;
+  }
+
+  .process-card__number {
+    height: 56px;
+    width: 56px;
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+  }
+
+  .process-card h3 {
+    font-size: 0.98rem;
+  }
+
+  .process-card p {
+    font-size: 0.88rem;
+  }
+
+  .product-card {
+    min-height: 280px;
+  }
+
+  .product-card__image {
+    height: 180px;
+  }
+
+  .product-card__body {
+    padding: 14px 18px 16px;
+  }
+
+  .product-card p {
+    font-size: 0.74rem;
+  }
+
+  .craft-section {
+    padding: 32px 18px;
+    gap: 40px;
+    margin: 40px 12px 36px;
+    min-height: auto;
+  }
+
+  .craft-emblem__rings {
+    height: 200px;
+    width: 200px;
+    box-shadow:
+      0 0 0 12px #09385d,
+      0 0 0 14px rgba(255, 255, 255, 0.65),
+      0 0 0 22px var(--coc-navy),
+      0 0 0 24px var(--coc-orange),
+      0 0 0 28px var(--coc-navy),
+      0 0 0 29px rgba(255, 255, 255, 0.9);
+  }
+
+  .craft-emblem img {
+    height: 50px;
+    width: 50px;
+    margin-bottom: 20px;
+  }
+
+  .craft-emblem strong {
+    font-size: 1.3rem;
+  }
+
+  .craft-emblem em {
+    font-size: 1.4rem;
+  }
+
+  .craft-item {
+    grid-template-columns: 38px 1fr;
+    gap: 14px;
+  }
+
+  .craft-item > span {
+    height: 34px;
+    width: 34px;
+    font-size: 1rem;
+  }
+
+  .craft-item h3 {
+    font-size: 0.95rem;
+  }
+
+  .craft-item p {
+    font-size: 0.74rem;
+  }
+
+  .outline-link {
+    font-size: 0.78rem;
+    padding: 10px 22px;
+  }
+
+  .testimonial-card {
+    grid-template-columns: 38px 1fr;
+    min-height: auto;
+    padding: 18px 20px;
+  }
+
+  .testimonial-card h3 {
+    font-size: 0.68rem;
+  }
+
+  .testimonial-card p {
+    font-size: 0.62rem;
+  }
+
+  .chat-launcher {
+    padding: 8px 12px 8px 8px;
+    gap: 8px;
+    bottom: 12px;
+    right: 12px;
+  }
+
+  .chat-launcher img {
+    height: 28px;
+    width: 28px;
+  }
+
+  .chat-launcher span {
+    font-size: 0.7rem;
+  }
+
+  .chat-panel {
+    width: min(340px, calc(100vw - 24px));
+    bottom: 72px;
+    right: 12px;
+  }
+
+  .chat-panel__messages {
+    max-height: 220px;
+    min-height: 160px;
+    padding: 10px;
+  }
+
+  .chat-bubble {
+    font-size: 0.82rem;
+    padding: 8px 10px;
   }
 }

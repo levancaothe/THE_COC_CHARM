@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import "./LandingPage.css";
 import logo from "../assets/logo.png"; // 👈 put your frog logo here
 import { Link } from "react-router-dom";
@@ -20,8 +20,9 @@ export default function LandingPage() {
   const [collectionsError, setCollectionsError] = useState("");
   const [selected, setSelected] = useState("");
   useEffect(() => {
-    if (timeLeft <= 0) return;
-    const id = setInterval(() => setTimeLeft((t) => t - 1), 1000);
+    const id = setInterval(() => {
+      setTimeLeft((t) => (t <= 0 ? 0 : t - 1));
+    }, 1000);
     return () => clearInterval(id);
   }, []);
   const hh = String(Math.floor(timeLeft / 3600)).padStart(2, "0");

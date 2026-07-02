@@ -482,6 +482,14 @@
   .checkout-section {
     grid-template-columns: 1fr;
   }
+
+  .checkout-summary-card {
+    order: 1;
+  }
+
+  .checkout-form-card {
+    order: 2;
+  }
 }
 
 @media (max-width: 760px) {
@@ -539,5 +547,163 @@
   .checkout-summary-line span:nth-child(2),
   .checkout-summary-line strong {
     text-align: left;
+  }
+}
+
+@media (max-width: 480px) {
+  .cart-page {
+    padding: 24px 12px 40px;
+  }
+
+  .cart-wrap > h1 {
+    font-size: 1.5rem;
+    margin-bottom: 22px;
+  }
+
+  .cart-item {
+    grid-template-columns: 28px 64px 1fr 44px;
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .item-image img,
+  .design-preview {
+    width: 64px;
+    height: 64px;
+  }
+
+  .design-charm-mini {
+    height: 22px !important;
+    width: 22px !important;
+  }
+
+  .item-type {
+    font-size: 0.68rem;
+  }
+
+  .item-details h3 {
+    font-size: 1rem;
+  }
+
+  .item-price-unit {
+    font-size: 0.82rem;
+  }
+
+  .item-quantity {
+    height: 34px;
+    grid-template-columns: 30px 1fr 30px;
+  }
+
+  .item-quantity button {
+    font-size: 1rem;
+  }
+
+  .item-total {
+    font-size: 0.9rem;
+  }
+
+  .item-actions .btn-edit,
+  .item-actions .btn-remove {
+    height: 24px;
+    width: 24px;
+  }
+
+  .item-actions .btn-remove {
+    font-size: 1.5rem;
+  }
+
+  .continue-shopping {
+    font-size: 0.82rem;
+  }
+
+  .btn-clear {
+    min-height: 30px;
+    padding: 0 14px;
+    font-size: 0.82rem;
+  }
+
+  .checkout-form-card {
+    padding: 22px 14px 28px;
+    gap: 22px;
+  }
+
+  .checkout-form-card h2 {
+    font-size: 1.35rem;
+  }
+
+  .checkout-form-card legend {
+    font-size: 0.82rem;
+  }
+
+  .checkout-form-card input {
+    font-size: 0.8rem;
+    height: 30px;
+  }
+
+  .payment-box {
+    padding: 16px 14px 22px;
+  }
+
+  .bank-card {
+    padding: 12px 14px;
+    gap: 12px;
+  }
+
+  .qr-placeholder {
+    height: 68px;
+    width: 68px;
+  }
+
+  .bank-card h3 {
+    font-size: 0.74rem;
+  }
+
+  .bank-card dt,
+  .bank-card dd {
+    font-size: 0.72rem;
+  }
+
+  .confirm-transfer-btn {
+    height: 40px;
+    font-size: 0.74rem;
+  }
+
+  .checkout-summary-card {
+    padding: 24px 20px 22px;
+  }
+
+  .checkout-summary-card h2 {
+    font-size: 1rem;
+  }
+
+  .checkout-summary-total span,
+  .checkout-summary-total strong {
+    font-size: 0.9rem;
+  }
+
+  .checkout-summary-total strong {
+    font-size: 1.05rem;
+  }
+
+  .checkout-note {
+    font-size: 0.68rem;
+    padding: 10px 14px;
+  }
+
+  .cart-empty-card {
+    padding: 32px 20px;
+  }
+
+  .cart-empty-card h2 {
+    font-size: 1.3rem;
+  }
+
+  .cart-empty-card p {
+    font-size: 0.88rem;
+  }
+
+  .cart-empty-card a {
+    padding: 10px 20px;
+    font-size: 0.82rem;
   }
 }

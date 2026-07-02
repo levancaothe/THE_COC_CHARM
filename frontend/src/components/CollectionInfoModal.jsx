@@ -46,7 +46,7 @@ export default function CollectionInfoModal({ isOpen, onClose, collection }) {
 
         <h2 className="success-title">{collection.name}</h2>
 
-        {Array.isArray(collection.charms) && collection.charms.length > 0 && (
+        {collection.status !== 'coming soon' && Array.isArray(collection.charms) && collection.charms.length > 0 && (
           <div style={{ width: '100%', marginBottom: '18px' }}>
             <CollectionCharmPreview
               charms={collection.charms}

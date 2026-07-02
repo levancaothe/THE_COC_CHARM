@@ -1,9 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { useDrop, useDrag } from 'react-dnd';
 import { getProxyImageUrl, isPendantCharm } from '../utils/imageProxy';
+import './BraceletCanvas.css';
 
 const PlacedCharm = ({ charm, index, onRemove, onReplace, moveCharmInSequence, exportMode }) => {
   const charmImageUrl = getProxyImageUrl(charm.image);
+  const [lastTap, setLastTap] = useState(0);
+
+  const handleTap = (e) => {
+    const now = Date.now();
+    const DOUBLE_PRESS_DELAY = 300;
+    if (now - lastTap < DOUBLE_PRESS_DELAY) {
+      onRemove(index);
+      setLastTap(0);
+    } else {
+      setLastTap(now);
+    }
+  };
+
   const [{ isDragging }, drag] = useDrag(() => ({
     type: 'SORTABLE_CHARM',
     item: { index },
@@ -66,7 +80,10 @@ const PlacedCharm = ({ charm, index, onRemove, onReplace, moveCharmInSequence, e
         overflow: isPendant ? 'visible' : 'hidden'
       }}
     >
-      <div style={{
+      <div 
+        onDoubleClick={() => onRemove(index)}
+        onClick={handleTap}
+        style={{
         width: '100%',
         height: '100%',
         background: 'transparent',
@@ -92,7 +109,8 @@ const PlacedCharm = ({ charm, index, onRemove, onReplace, moveCharmInSequence, e
                 height: '100%',
                 objectFit: 'cover',
                 objectPosition: 'center top',
-                display: 'block'
+                display: 'block',
+                pointerEvents: 'none'
               }}
             />
           </div>
@@ -108,7 +126,8 @@ const PlacedCharm = ({ charm, index, onRemove, onReplace, moveCharmInSequence, e
               height: '100%',
               objectFit: 'contain',
               objectPosition: 'center',
-              display: 'block'
+              display: 'block',
+              pointerEvents: 'none'
             }}
           />
         )}
@@ -157,22 +176,7 @@ const BraceletCanvas = React.forwardRef(({ selectedCharms, onAddCharm, onRemoveC
           else ref.current = node;
         }
       }}
-      className="bracelet-canvas"
-      style={{
-        minHeight: '200px',
-        width: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        position: 'relative',
-        background: '#fdfdfd',
-        padding: '40px',
-        paddingBottom: hasPendant ? '150px' : '40px',
-        overflowX: 'auto',
-        borderRadius: '24px',
-        border: exportMode ? 'none' : '1px solid rgba(10, 46, 79, 0.12)',
-        boxShadow: exportMode ? 'none' : 'inset 0 4px 15px rgba(10,46,79,0.02)'
-      }}
+      className={`bracelet-canvas ${exportMode ? 'export-mode' : ''} ${hasPendant ? 'has-pendant' : ''}`}
     >
       {!exportMode && (
         <div
@@ -180,7 +184,7 @@ const BraceletCanvas = React.forwardRef(({ selectedCharms, onAddCharm, onRemoveC
           style={{
             position: 'absolute',
             inset: 0,
-            borderRadius: '24px',
+            borderRadius: 'inherit',
             pointerEvents: 'none',
             background: 'rgba(217, 92, 20, 0.03)',
             boxShadow: 'inset 0 0 0 1px rgba(217, 92, 20, 0.35)',

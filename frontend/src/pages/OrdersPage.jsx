@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import api from '../services/api';
-import { isPendantCharm } from '../utils/imageProxy';
 import CollectionCharmPreview from '../components/CollectionCharmPreview';
 import './OrdersPage.css';
 
@@ -69,16 +68,9 @@ const OrdersPage = () => {
 
   const renderBraceletPreview = (item) => {
     const charms = resolveLookupCharms(item);
-    const hasPendantCharm = charms.some(isPendantCharm);
 
     return (
-      <div
-        className="lookup-design-preview"
-        style={{
-          overflow: 'visible',
-          paddingBottom: hasPendantCharm ? '180px' : '18px',
-        }}
-      >
+      <div className="lookup-design-preview">
         <div className="lookup-design-preview__title">
           <strong>Vòng charm</strong>
           <span>{charms.length} hạt</span>

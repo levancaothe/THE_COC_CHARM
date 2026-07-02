@@ -220,3 +220,94 @@
   display: block;
 }
 
+@media (max-width: 480px) {
+  .about-page {
+    padding: 28px 14px 0;
+  }
+
+  .about-kicker {
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+  }
+
+  .about-hero h1 {
+    font-size: 1.7rem;
+  }
+
+  .about-intro {
+    font-size: 0.88rem;
+    line-height: 1.6;
+  }
+
+  .about-section {
+    padding-top: 32px;
+  }
+
+  .about-section h2 {
+    font-size: 1.3rem;
+    margin-bottom: 20px;
+  }
+
+  .about-pillar {
+    padding: 8px 10px;
+    gap: 10px;
+  }
+
+  .about-pillar__icon {
+    height: 44px;
+    width: 44px;
+    font-size: 1.1rem;
+  }
+
+  .about-pillar h3 {
+    font-size: 0.9rem;
+  }
+
+  .about-pillar p {
+    font-size: 0.84rem;
+  }
+
+  .about-commitment__body {
+    font-size: 0.88rem;
+    line-height: 1.6;
+  }
+
+  .about-showcase {
+    margin-top: 28px;
+    padding-bottom: 36px;
+  }
+
+  .about-showcase__panel {
+    min-height: 200px;
+  }
+
+  .about-showcase__content span {
+    font-size: 0.7rem;
+  }
+
+  .about-showcase__content strong {
+    font-size: 1.3rem;
+  }
+
+  .about-showcase__content p {
+    font-size: 0.82rem;
+  }
+
+  .about-video-section {
+    margin-top: 36px;
+    padding-bottom: 36px;
+  }
+
+  .about-video-section h2 {
+    font-size: 1.3rem;
+  }
+
+  .about-video-subtitle {
+    font-size: 0.88rem;
+    margin-bottom: 22px;
+  }
+
+  .about-video-wrapper {
+    border-radius: 10px;
+  }
+}
