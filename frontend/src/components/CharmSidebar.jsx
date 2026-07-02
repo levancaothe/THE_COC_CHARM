@@ -19,7 +19,7 @@ const DraggableCharm = ({ charm, selectedCount = 0, onClick }) => {
   return (
     <div
       ref={drag}
-      className="draggable-charm glass"
+      className="draggable-charm glass sidebar-theme-charm-card"
       onClick={() => {
         if (!isAvailable) return;
         onClick(charm);
@@ -32,7 +32,6 @@ const DraggableCharm = ({ charm, selectedCount = 0, onClick }) => {
         cursor: isAvailable ? "pointer" : "not-allowed",
         transition: "transform 0.2s ease",
         border: "1px solid transparent",
-        width: "100px",
         filter: isAvailable ? "none" : "grayscale(1) opacity(0.55)",
       }}
       onMouseEnter={(e) => {
@@ -45,9 +44,8 @@ const DraggableCharm = ({ charm, selectedCount = 0, onClick }) => {
         src={getProxyImageUrl(charm.image)}
         alt={charm.name}
         crossOrigin="anonymous"
+        className="sidebar-theme-charm-img"
         style={{
-          width: "60px",
-          height: "60px",
           objectFit: "contain",
           margin: "0 auto",
         }}

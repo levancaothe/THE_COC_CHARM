@@ -448,3 +448,28 @@
   left: -6.5px !important;
   top: 2px !important;
 }
+
+.sidebar-theme-charm-card {
+  width: 100px;
+}
+
+.sidebar-theme-charm-img {
+  width: 60px;
+  height: 60px;
+}
+
+@media (max-width: 768px) {
+  .sidebar-theme-charm-card {
+    width: 80px !important;
+    padding: 6px !important;
+  }
+  .sidebar-theme-charm-img {
+    width: 40px !important;
+    height: 40px !important;
+  }
+  .sidebar-theme-charm-card p {
+    font-size: 0.72rem !important;
+    min-height: auto !important;
+    margin-top: 6px !important;
+  }
+}

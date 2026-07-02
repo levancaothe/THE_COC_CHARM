@@ -979,3 +979,40 @@
     padding: 8px 10px;
   }
 }
+
+@media (max-width: 768px) {
+  .home-hero__visual {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 12px !important;
+    min-height: auto !important;
+    justify-content: center !important;
+  }
+  .hero-frame {
+    position: static !important;
+    width: 48% !important;
+    max-width: 180px !important;
+    margin: 0 !important;
+    box-shadow: 0 5px 8px rgba(10, 46, 79, 0.23) !important;
+  }
+  .hero-frame--orange {
+    aspect-ratio: 1 / 0.94 !important;
+  }
+  .hero-frame--blue {
+    aspect-ratio: 1 / 0.88 !important;
+  }
+
+  /* Shrink popular charms on home page */
+  .product-card__image {
+    height: 150px !important;
+    margin: 24px auto 12px !important;
+  }
+  .product-card__image img {
+    max-width: 55% !important;
+    max-height: 55% !important;
+  }
+  .product-card {
+    min-height: auto !important;
+  }
+}
+
